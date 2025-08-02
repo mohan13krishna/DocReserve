@@ -1,0 +1,90 @@
+/* Super Admin Dashboard specific styles */
+/* Inherits common dashboard styles from style.css */
+
+/* Sidebar - Inherited from style.css */
+
+/* Main Content Area - Inherited from style.css */
+
+/* Summary Cards Section - Inherited from style.css */
+/* No specific overrides needed here beyond what's in style.css */
+
+
+/* Pending Approvals Section (for Hospital Admins) */
+.pending-approvals-section {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.pending-approvals-section h3 {
+    font-size: 1.4em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Search and Filter Controls - Inherited from style.css */
+
+/* Table styles - Inherited from style.css */
+
+.admin-profile-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-profile-cell .initials {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #e0f2f7;
+    color: #007bff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+.admin-profile-cell h4 {
+    margin: 0;
+    font-size: 1em;
+    color: #333;
+}
+
+/* Action Buttons - Inherited from style.css */
+/* Status Badges - Inherited from style.css */
+/* Pagination - Inherited from style.css */
+
+
+/* Analytics Section (for super-admin-analytics.html) */
+.analytics-section .analytics-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.analytics-section .analytics-card {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    flex: 1; /* Default flex behavior */
+    min-width: 300px;
+}
+.analytics-section .analytics-card.large {
+    flex: 2;
+    min-width: 450px;
+}
+.analytics-section .analytics-card h3 {
+    font-size: 1.4em;
+    color: #333;
+    margin-bottom: 20px;
+}
+.analytics-section canvas {
+    max-height: 300px;
+    width: 100% !important;
+    height: 300px !important;
+}
+
+/* Super Admin Profile */
+/* Inherits common profile styles from style.css */

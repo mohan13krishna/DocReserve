@@ -1,0 +1,217 @@
+/* Hospital Admin Dashboard specific styles */
+/* Inherits common styles from style.css */
+
+.admin-dashboard-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f0f2f5;
+}
+
+/* Sidebar - Shared with Doctor Dashboard structure */
+/* Inherited from style.css */
+
+/* Main Content Area */
+/* Inherited from style.css */
+
+/* Summary Cards Section */
+/* Inherited from style.css */
+
+
+/* Doctor Management Section */
+.doctor-management-section {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.tabs {
+    display: flex;
+    margin-bottom: 25px;
+    border-bottom: 1px solid #eee;
+}
+
+.tab-button {
+    background-color: transparent;
+    border: none;
+    padding: 10px 20px;
+    font-size: 1.1em;
+    color: #777;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.3s ease;
+    margin-bottom: -1px; /* To prevent border overlap */
+}
+
+.tab-button.active {
+    color: #007bff;
+    border-bottom-color: #007bff;
+    font-weight: bold;
+}
+
+.tab-button:hover:not(.active) {
+    color: #333;
+}
+
+.tab-button span {
+    font-weight: normal;
+    font-size: 0.9em;
+    margin-left: 5px;
+}
+
+/* Search and Filter Controls - Inherited from style.css */
+.filter-select.hidden {
+    display: none;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.tab-content h3 {
+    font-size: 1.4em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Tables - Inherited from style.css */
+
+.doctor-profile-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.doctor-profile-cell .initials {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #e0f2f7;
+    color: #007bff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+}
+
+.doctor-profile-cell h4 {
+    margin: 0;
+    font-size: 1em;
+    color: #333;
+}
+
+.doctor-profile-cell span {
+    display: block;
+    font-size: 0.85em;
+    color: #777;
+}
+
+.action-buttons .button {
+    margin-right: 8px;
+    padding: 8px 15px;
+    font-size: 0.9em;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.action-buttons .button.approve-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+}
+.action-buttons .button.approve-btn:hover { background-color: #218838; }
+
+.action-buttons .button.reject-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+}
+.action-buttons .button.reject-btn:hover { background-color: #c82333; }
+
+.action-buttons .button.view-profile-btn,
+.action-buttons .button.tertiary {
+    background-color: #f0f0f0;
+    color: #555;
+    border: 1px solid #ddd;
+}
+.action-buttons .button.view-profile-btn:hover,
+.action-buttons .button.tertiary:hover { background-color: #e0e0e0; }
+
+/* Status Badges - Inherited from style.css */
+
+/* Pagination - Inherited from style.css */
+
+/* Analytics Section (for hospital-admin-analytics.html) */
+.analytics-section .analytics-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.analytics-section .analytics-card {
+    background-color: #fff;
+    padding: 25px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    flex: 1; /* Default flex behavior */
+    min-width: 300px;
+}
+.analytics-section .analytics-card.large {
+    flex: 2;
+    min-width: 450px;
+}
+.analytics-section .analytics-card.full-width {
+    flex: 0 0 100%;
+}
+.analytics-section .analytics-card h3 {
+    font-size: 1.4em;
+    color: #333;
+    margin-bottom: 20px;
+}
+.analytics-section .chart-controls {
+    text-align: right;
+    margin-bottom: 15px;
+}
+.analytics-section .chart-controls .button {
+    margin-left: 10px;
+    padding: 6px 12px;
+}
+.analytics-section .chart-controls .button.active {
+    background-color: #007bff;
+    color: white;
+}
+.analytics-section canvas {
+    max-height: 300px;
+    width: 100% !important; /* Override Chart.js default inline style */
+    height: 300px !important; /* Override Chart.js default inline style */
+}
+.analytics-section .big-metric {
+    font-size: 3em;
+    font-weight: bold;
+    color: #007bff;
+    margin: 10px 0;
+}
+.analytics-section .small-info {
+    font-size: 0.9em;
+    color: #777;
+    margin-top: 5px;
+}
+.analytics-section .date-range-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.analytics-section .date-range-filter input[type="date"] {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Hospital Admin Profile */
+/* Inherits common profile styles from style.css */
