@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Appointments - DocReserve</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/patient-dashboard.css">
+</head>
+<body>
+    <div class="patient-dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">DocReserve</div>
+            <nav class="sidebar-nav">
+                <a href="/patient-dashboard.html" class="nav-item">Dashboard</a>
+                <a href="/patient-doctors.html" class="nav-item">Doctors</a>
+                <a href="/patient-appointments.html" class="nav-item active">Appointments</a>
+                <a href="/patient-profile.html" class="nav-item">Profile</a>
+            </nav>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </aside>
+        <main class="main-content">
+            <header class="main-header-dashboard">
+                <div class="user-profile-info">
+                    <span id="patient-full-name">John Doe</span>
+                    <div class="user-profile-icon" id="patient-initials">JD</div>
+                </div>
+            </header>
+            <section class="appointments-management-section">
+                <h2>Manage your upcoming and past appointments</h2>
+                <div class="appointments-tabs">
+                    <button class="tab-button active" data-tab="upcoming">Upcoming</button>
+                    <button class="tab-button" data-tab="past">Past Appointments</button>
+                    <button class="tab-button" data-tab="cancelled">Cancelled</button>
+                </div>
+
+                <div id="upcoming-appointments-tab-content" class="appointments-tab-content active">
+                    <div class="appointment-card">
+                        <div class="doctor-initials">MA</div>
+                        <div class="appointment-details">
+                            <h4>Dr. Michael Anderson</h4>
+                            <p>Cardiologist</p>
+                            <p class="appointment-date">Tomorrow, January 1, 2025 at 10:30 AM</p>
+                            <p class="reason">Regular Checkup</p>
+                            <span class="status-badge confirmed">Confirmed</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="button secondary small">Reschedule</button>
+                            <button class="button secondary small">Cancel</button>
+                        </div>
+                    </div>
+                    <div class="appointment-card">
+                        <div class="doctor-initials">SJ</div>
+                        <div class="appointment-details">
+                            <h4>Dr. Sarah Johnson</h4>
+                            <p>Dermatologist</p>
+                            <p class="appointment-date">December 28, 2024 at 2:00 PM</p>
+                            <p class="reason">Skin Consultation</p>
+                            <span class="status-badge pending">Pending</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="button secondary small">Reschedule</button>
+                            <button class="button secondary small">Cancel</button>
+                        </div>
+                    </div>
+                    <div class="appointment-card">
+                        <div class="doctor-initials">RW</div>
+                        <div class="appointment-details">
+                            <h4>Dr. Robert Wilson</h4>
+                            <p>Neurologist</p>
+                            <p class="appointment-date">January 5, 2025 at 11:15 AM</p>
+                            <p class="reason">Follow-up Visit</p>
+                            <span class="status-badge confirmed">Confirmed</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="button secondary small">Reschedule</button>
+                            <button class="button secondary small">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="past-appointments-tab-content" class="appointments-tab-content">
+                    <p>No past appointments to display yet.</p>
+                </div>
+
+                <div id="cancelled-appointments-tab-content" class="appointments-tab-content">
+                    <p>No cancelled appointments to display yet.</p>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/patient-dashboard.js"></script> <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            const userRole = localStorage.getItem('userRole');
+
+            if (!token || userRole !== 'user') {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Update patient info in header
+            const decodedToken = JSON.parse(atob(token.split('.')[1]));
+            document.getElementById('patient-full-name').textContent = `${decodedToken.first_name || ''} ${decodedToken.last_name || ''}`;
+            document.getElementById('patient-initials').textContent = `${(decodedToken.first_name || '').charAt(0)}${(decodedToken.last_name || '').charAt(0)}`.toUpperCase();
+
+            const tabs = document.querySelectorAll('.appointments-tabs .tab-button');
+            const contents = document.querySelectorAll('.appointments-tab-content');
+            const upcomingContent = document.getElementById('upcoming-appointments-tab-content');
+            const pastContent = document.getElementById('past-appointments-tab-content');
+            const cancelledContent = document.getElementById('cancelled-appointments-tab-content');
+
+            const fetchAppointments = async () => {
+                try {
+                    const response = await fetch('/api/patient/appointments', {
+                        method: 'GET',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) throw new Error('Failed to fetch appointments.');
+                    const data = await response.json();
+
+                    // Function to render appointments for a given tab
+                    const renderAppointments = (container, appointments) => {
+                        container.innerHTML = ''; // Clear existing content
+                        if (appointments.length === 0) {
+                            container.innerHTML = `<p>No ${container.id.replace('-appointments-tab-content', '').replace('-', ' ')} appointments to display.</p>`;
+                            return;
+                        }
+                        appointments.forEach(app => {
+                            const doctorInitials = (app.doctorName.match(/\b(\w)/g) || []).join('').toUpperCase();
+                            const statusClass = app.status.toLowerCase().replace(' ', '-');
+                            let actionButtons = '';
+                            if (app.status === 'Upcoming' || app.status === 'Confirmed' || app.status === 'Pending') {
+                                actionButtons = `<button class="button secondary small">Reschedule</button>
+                                                <button class="button secondary small">Cancel</button>`;
+                            }
+                            // For Past/Cancelled, maybe a "View Details" button
+
+                            const card = `
+                                <div class="appointment-card">
+                                    <div class="doctor-initials">${doctorInitials}</div>
+                                    <div class="appointment-details">
+                                        <h4>${app.doctorName}</h4>
+                                        <p>${app.specialization}</p>
+                                        <p class="appointment-date">${app.dateTime}</p>
+                                        <p class="reason">${app.reason}</p>
+                                        <span class="status-badge ${statusClass}">${app.status}</span>
+                                    </div>
+                                    <div class="card-actions">
+                                        ${actionButtons}
+                                    </div>
+                                </div>
+                            `;
+                            container.insertAdjacentHTML('beforeend', card);
+                        });
+                    };
+
+                    renderAppointments(upcomingContent, data.upcoming);
+                    renderAppointments(pastContent, data.past);
+                    renderAppointments(cancelledContent, data.cancelled);
+
+                } catch (error) {
+                    console.error('Error fetching appointments:', error);
+                    upcomingContent.innerHTML = '<p style="color:red;">Failed to load appointments.</p>';
+                    pastContent.innerHTML = ''; // Clear if error
+                    cancelledContent.innerHTML = ''; // Clear if error
+                }
+            };
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(item => item.classList.remove('active'));
+                    contents.forEach(content => content.classList.remove('active'));
+
+                    tab.classList.add('active');
+                    const targetTab = tab.dataset.tab;
+                    document.getElementById(`${targetTab}-appointments-tab-content`).classList.add('active');
+                });
+            });
+
+            // Initial fetch
+            fetchAppointments();
+        });
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+        }
+    </script>
+</body>
+</html>

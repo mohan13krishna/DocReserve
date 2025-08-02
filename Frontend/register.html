@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - DocReserve</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo">DocReserve</div>
+        <nav class="main-nav">
+            <a href="/">Home</a>
+            <a href="/doctors.html">Doctors</a>
+            <a href="/services.html">Services</a>
+            <a href="/about.html">About</a>
+        </nav>
+        <div class="auth-buttons">
+            <a href="/login.html" class="button primary">Login</a>
+        </div>
+    </header>
+
+    <div class="register-container">
+        <div class="register-box">
+            <h2>Register for DocReserve</h2>
+            <div id="register-message" class="message hidden"></div>
+            <form id="register-form">
+                <label for="first_name">First Name:</label>
+                <input type="text" id="first_name" name="first_name" required>
+
+                <label for="last_name">Last Name:</label>
+                <input type="text" id="last_name" name="last_name" required>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" required>
+
+                <label for="role">Register as:</label>
+                <select id="role" name="role" required>
+                    <option value="user">Patient</option>
+                    <option value="doctor">Doctor</option>
+                    <option value="hospital_admin">Hospital Admin</option>
+                </select>
+
+                <div id="doctor-fields" class="hidden">
+                    <label for="doctor_registration_id">Doctor Registration ID:</label>
+                    <input type="text" id="doctor_registration_id" name="doctor_registration_id">
+                    <label for="doctor_hospital_id">Hospital ID (Optional, can be set by Admin):</label>
+                    <input type="text" id="doctor_hospital_id" name="doctor_hospital_id">
+                </div>
+
+                <div id="hospital-admin-fields" class="hidden">
+                    <label for="hospital_id">Hospital ID:</label>
+                    <input type="text" id="hospital_id" name="hospital_id">
+                </div>
+
+                <button type="submit">Register</button>
+            </form>
+            <p>Already have an account? <a href="/login.html">Login here</a></p>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="copyright">
+            &copy; 2024 DocReserve. All rights reserved.
+        </div>
+    </footer>
+
+    <script src="js/register.js"></script>
+</body>
+</html>

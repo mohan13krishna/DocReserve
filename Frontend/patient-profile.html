@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Profile - DocReserve</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/patient-dashboard.css">
+</head>
+<body>
+    <div class="patient-dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">DocReserve</div>
+            <nav class="sidebar-nav">
+                <a href="/patient-dashboard.html" class="nav-item">Dashboard</a>
+                <a href="/patient-doctors.html" class="nav-item">Doctors</a>
+                <a href="/patient-appointments.html" class="nav-item">Appointments</a>
+                <a href="/patient-profile.html" class="nav-item active">Profile</a>
+            </nav>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </aside>
+        <main class="main-content">
+            <header class="main-header-dashboard">
+                <div class="user-profile-info">
+                    <span id="patient-full-name">John Doe</span>
+                    <div class="user-profile-icon" id="patient-initials">JD</div>
+                </div>
+            </header>
+            <section class="profile-section profile-section-patient">
+                <h2>Manage your personal information and preferences</h2>
+
+                <div class="profile-card profile-details-card">
+                    <h3>Personal Information</h3>
+                    <div class="profile-picture-upload">
+                        <img src="/images/doctor-male-placeholder.png" alt="Profile Picture" id="profile-pic"> <button class="button secondary" id="change-photo-btn">Change Photo</button>
+                    </div>
+                    <form id="personal-info-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="first-name">First Name</label>
+                                <input type="text" id="first-name" name="first_name">
+                            </div>
+                            <div class="form-group">
+                                <label for="last-name">Last Name</label>
+                                <input type="text" id="last-name" name="last_name">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input type="email" id="email" name="email" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone</label>
+                                <input type="text" id="phone" name="phone_number">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="date-of-birth">Date of Birth</label>
+                                <input type="date" id="date-of-birth" name="date_of_birth">
+                            </div>
+                            <div class="form-group">
+                                <label for="gender">Gender</label>
+                                <select id="gender" name="gender">
+                                    <option value="">Select Gender</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="address">Address</label>
+                                <textarea id="address" name="address"></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="button primary">Save Changes</button>
+                        <button type="button" class="button secondary">Cancel</button>
+                    </form>
+                </div>
+
+                <div class="profile-card">
+                    <h3 class="section-title">Medical Information</h3>
+                    <form id="medical-info-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="blood-type">Blood Type</label>
+                                <input type="text" id="blood-type" name="blood_type">
+                            </div>
+                            <div class="form-group">
+                                <label for="allergies">Allergies</label>
+                                <textarea id="allergies" name="allergies"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="current-medications">Current Medications</label>
+                                <textarea id="current-medications" name="current_medications"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="medical-conditions">Medical Conditions</label>
+                                <textarea id="medical-conditions" name="medical_conditions"></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="button primary">Save Changes</button>
+                    </form>
+                </div>
+
+                <div class="profile-card">
+                    <h3 class="section-title">Emergency Contact</h3>
+                    <form id="emergency-contact-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="emergency-name">Name</label>
+                                <input type="text" id="emergency-name" name="emergency_contact_name">
+                            </div>
+                            <div class="form-group">
+                                <label for="emergency-relationship">Relationship</label>
+                                <input type="text" id="emergency-relationship" name="emergency_contact_relationship">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="emergency-phone">Phone</label>
+                                <input type="text" id="emergency-phone" name="emergency_contact_phone">
+                            </div>
+                        </div>
+                        <button type="submit" class="button primary">Save Changes</button>
+                    </form>
+                </div>
+
+                <div class="profile-card">
+                    <h3 class="section-title">Insurance Information</h3>
+                    <form id="insurance-info-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="insurance-provider">Insurance Provider</label>
+                                <input type="text" id="insurance-provider" name="insurance_provider">
+                            </div>
+                            <div class="form-group">
+                                <label for="policy-number">Policy Number</label>
+                                <input type="text" id="policy-number" name="policy_number">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="group-number">Group Number</label>
+                                <input type="text" id="group-number" name="group_number">
+                            </div>
+                            <div class="form-group">
+                                <label for="member-id">Member ID</label>
+                                <input type="text" id="member-id" name="member_id">
+                            </div>
+                        </div>
+                        <button type="submit" class="button primary">Save Changes</button>
+                    </form>
+                </div>
+
+                <div class="profile-card">
+                    <h3 class="section-title">Notification Preferences</h3>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <input type="checkbox" id="email-notifications" checked>
+                            <span class="slider round"></span>
+                        </label>
+                        <div class="setting-details">
+                            <h4>Email Notifications</h4>
+                            <p>Appointment reminders and updates</p>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <input type="checkbox" id="sms-notifications" checked>
+                            <span class="slider round"></span>
+                        </label>
+                        <div class="setting-details">
+                            <h4>SMS Notifications</h4>
+                            <p>Text message reminders</p>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <input type="checkbox" id="marketing-emails">
+                            <span class="slider round"></span>
+                        </label>
+                        <div class="setting-details">
+                            <h4>Marketing Emails</h4>
+                            <p>Health tips and promotions</p>
+                        </div>
+                    </div>
+                    <button type="button" class="button primary">Save Notification Preferences</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/patient-dashboard.js"></script> <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            const userRole = localStorage.getItem('userRole');
+
+            if (!token || userRole !== 'user') {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Update patient info in header
+            const decodedToken = JSON.parse(atob(token.split('.')[1]));
+            document.getElementById('patient-full-name').textContent = `${decodedToken.first_name || ''} ${decodedToken.last_name || ''}`;
+            document.getElementById('patient-initials').textContent = `${(decodedToken.first_name || '').charAt(0)}${(decodedToken.last_name || '').charAt(0)}`.toUpperCase();
+
+
+            // Elements for forms
+            const firstNameInput = document.getElementById('first-name');
+            const lastNameInput = document.getElementById('last-name');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
+            const dobInput = document.getElementById('date-of-birth');
+            const addressInput = document.getElementById('address');
+            const bloodTypeInput = document.getElementById('blood-type');
+            const genderSelect = document.getElementById('gender');
+            const allergiesInput = document.getElementById('allergies');
+            const currentMedicationsInput = document.getElementById('current-medications');
+            const medicalConditionsInput = document.getElementById('medical-conditions');
+            const emergencyNameInput = document.getElementById('emergency-name');
+            const emergencyRelationshipInput = document.getElementById('emergency-relationship');
+            const emergencyPhoneInput = document.getElementById('emergency-phone');
+            const insuranceProviderInput = document.getElementById('insurance-provider');
+            const policyNumberInput = document.getElementById('policy-number');
+            const groupNumberInput = document.getElementById('group-number');
+            const memberIdInput = document.getElementById('member-id');
+
+            // --- Fetch Profile Data ---
+            const fetchProfile = async () => {
+                try {
+                    const response = await fetch('/api/patient/profile', {
+                        method: 'GET',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) throw new Error('Failed to fetch profile data.');
+                    const data = await response.json();
+                    console.log('Patient Profile Data:', data);
+
+                    // Populate Personal Information
+                    firstNameInput.value = data.first_name || '';
+                    lastNameInput.value = data.last_name || '';
+                    emailInput.value = data.email || '';
+                    phoneInput.value = data.phone_number || '';
+                    dobInput.value = data.date_of_birth ? new Date(data.date_of_birth).toISOString().split('T')[0] : '';
+                    addressInput.value = data.address || '';
+                    genderSelect.value = data.gender || '';
+
+                    // Populate Medical Information
+                    bloodTypeInput.value = data.blood_type || '';
+                    allergiesInput.value = data.allergies || '';
+                    currentMedicationsInput.value = data.current_medications || '';
+                    medicalConditionsInput.value = data.medical_conditions || '';
+
+                    // Populate Emergency Contact
+                    emergencyNameInput.value = data.emergency_contact_name || '';
+                    emergencyRelationshipInput.value = data.emergency_contact_relationship || '';
+                    emergencyPhoneInput.value = data.emergency_contact_phone || '';
+
+                    // Populate Insurance Information
+                    insuranceProviderInput.value = data.insurance_provider || '';
+                    policyNumberInput.value = data.policy_number || '';
+                    groupNumberInput.value = data.group_number || '';
+                    memberIdInput.value = data.member_id || '';
+
+                    // Notification preferences would need separate API/logic
+                } catch (error) {
+                    console.error('Error fetching patient profile:', error);
+                    alert('Failed to load patient profile.');
+                }
+            };
+
+            // --- Form Submission Handlers ---
+            document.getElementById('personal-info-form').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const data = {
+                    first_name: firstNameInput.value,
+                    last_name: lastNameInput.value,
+                    phone_number: phoneInput.value,
+                    date_of_birth: dobInput.value,
+                    address: addressInput.value,
+                    gender: genderSelect.value
+                };
+                try {
+                    const response = await fetch('/api/patient/profile', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify(data)
+                    });
+                    if (!response.ok) throw new Error('Failed to update personal info.');
+                    alert('Personal information updated successfully!');
+                } catch (error) {
+                    console.error('Error updating personal info:', error);
+                    alert('Failed to update personal information.');
+                }
+            });
+
+            document.getElementById('medical-info-form').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const data = {
+                    blood_type: bloodTypeInput.value,
+                    allergies: allergiesInput.value,
+                    current_medications: currentMedicationsInput.value,
+                    medical_conditions: medicalConditionsInput.value
+                };
+                try {
+                    const response = await fetch('/api/patient/profile', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify(data)
+                    });
+                    if (!response.ok) throw new Error('Failed to update medical info.');
+                    alert('Medical information updated successfully!');
+                } catch (error) {
+                    console.error('Error updating medical info:', error);
+                    alert('Failed to update medical information.');
+                }
+            });
+
+            document.getElementById('emergency-contact-form').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const data = {
+                    emergency_contact_name: emergencyNameInput.value,
+                    emergency_contact_relationship: emergencyRelationshipInput.value,
+                    emergency_contact_phone: emergencyPhoneInput.value
+                };
+                try {
+                    const response = await fetch('/api/patient/profile', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify(data)
+                    });
+                    if (!response.ok) throw new Error('Failed to update emergency contact.');
+                    alert('Emergency contact updated successfully!');
+                } catch (error) {
+                    console.error('Error updating emergency contact:', error);
+                    alert('Failed to update emergency contact.');
+                }
+            });
+
+            document.getElementById('insurance-info-form').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const data = {
+                    insurance_provider: insuranceProviderInput.value,
+                    policy_number: policyNumberInput.value,
+                    group_number: groupNumberInput.value,
+                    member_id: memberIdInput.value
+                };
+                try {
+                    const response = await fetch('/api/patient/profile', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify(data)
+                    });
+                    if (!response.ok) throw new Error('Failed to update insurance info.');
+                    alert('Insurance information updated successfully!');
+                } catch (error) {
+                    console.error('Error updating insurance info:', error);
+                    alert('Failed to update insurance information.');
+                }
+            });
+
+            // --- Initial Fetch ---
+            fetchProfile();
+
+            // Photo change/upload would require specific file upload logic
+            document.getElementById('change-photo-btn').addEventListener('click', () => {
+                alert('Photo upload functionality is not yet implemented.');
+            });
+
+            // Notification preferences saving (if implemented, would need its own PUT endpoint)
+            document.querySelector('.notification-preferences-card .button.primary').addEventListener('click', () => {
+                alert('Notification preferences save logic not yet implemented.');
+            });
+        });
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+        }
+    </script>
+</body>
+</html>

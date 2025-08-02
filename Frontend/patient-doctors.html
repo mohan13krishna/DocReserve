@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Doctors - DocReserve</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/patient-dashboard.css">
+</head>
+<body>
+    <div class="patient-dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">DocReserve</div>
+            <nav class="sidebar-nav">
+                <a href="/patient-dashboard.html" class="nav-item">Dashboard</a>
+                <a href="/patient-doctors.html" class="nav-item active">Doctors</a>
+                <a href="/patient-appointments.html" class="nav-item">Appointments</a>
+                <a href="/patient-profile.html" class="nav-item">Profile</a>
+            </nav>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </aside>
+        <main class="main-content">
+            <header class="main-header-dashboard">
+                <div class="user-profile-info">
+                    <span id="patient-full-name">John Doe</span>
+                    <div class="user-profile-icon" id="patient-initials">JD</div>
+                </div>
+            </header>
+            <section class="browse-doctors-section">
+                <h2>Browse and book appointments with qualified healthcare professionals</h2>
+                <div class="search-filter-controls">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search doctors by name or specialization" id="doctor-search-input">
+                        <span class="search-icon">Q</span>
+                    </div>
+                    <select id="specialization-filter" class="filter-select">
+                        <option value="">All Specializations</option>
+                        <option value="Cardiologist">Cardiologist</option>
+                        <option value="Dermatologist">Dermatologist</option>
+                        <option value="Neurologist">Neurologist</option>
+                        <option value="Pediatrician">Pediatrician</option>
+                        <option value="Orthopedic Surgeon">Orthopedic Surgeon</option>
+                        <option value="Gynecologist">Gynecologist</option>
+                    </select>
+                    <select id="availability-filter" class="filter-select">
+                        <option value="">Availability</option>
+                        <option value="Today">Today</option>
+                        <option value="Tomorrow">Tomorrow</option>
+                        <option value="This Week">This Week</option>
+                    </select>
+                </div>
+
+                <div class="doctors-list-container" id="doctors-list-container">
+                    <div class="doctor-card-listing">
+                        <h3>Dr. Michael Anderson</h3>
+                        <p class="specialty">Cardiologist</p>
+                        <p class="rating"><span>4.9</span> (127 reviews)</p>
+                        <p class="experience">15 years experience</p>
+                        <p class="availability">Next available: Tomorrow 10:30 AM</p>
+                        <button class="button primary book-button">Book Appointment</button>
+                    </div>
+                    <div class="doctor-card-listing">
+                        <h3>Dr. Sarah Johnson</h3>
+                        <p class="specialty">Dermatologist</p>
+                        <p class="rating"><span>4.8</span> (89 reviews)</p>
+                        <p class="experience">12 years experience</p>
+                        <p class="availability">Next available: Dec 28, 2:00 PM</p>
+                        <button class="button primary book-button">Book Appointment</button>
+                    </div>
+                    <div class="doctor-card-listing">
+                        <h3>Dr. Robert Wilson</h3>
+                        <p class="specialty">Neurologist</p>
+                        <p class="rating"><span>4.7</span> (156 reviews)</p>
+                        <p class="experience">20 years experience</p>
+                        <p class="availability">Next available: Jan 5, 11:15 AM</p>
+                        <button class="button primary book-button">Book Appointment</button>
+                    </div>
+                    <div class="doctor-card-listing">
+                        <h3>Dr. Emily Chen</h3>
+                        <p class="specialty">Pediatrician</p>
+                        <p class="rating"><span>4.9</span> (203 reviews)</p>
+                        <p class="experience">8 years experience</p>
+                        <p class="availability">Next available: Today 4:30 PM</p>
+                        <button class="button primary book-button">Book Appointment</button>
+                    </div>
+                    <div class="doctor-card-listing">
+                        <h3>Dr. David Martinez</h3>
+                        <p class="specialty">Orthopedic Surgeon</p>
+                        <p class="rating"><span>4.6</span> (94 reviews)</p>
+                        <p class="experience">18 years experience</p>
+                        <p class="availability">Next available: Jan 8, 9:00 AM</p>
+                        <button class="button primary book-button">Book Appointment</button>
+                    </div>
+                    <div class="doctor-card-listing">
+                        <h3>Dr. Lisa Thompson</h3>
+                        <p class="specialty">Gynecologist</p>
+                        <p class="rating"><span>4.8</span> (112 reviews)</p>
+                        <p class="experience">14 years experience</p>
+                        <p class="availability">Next available: Jan 3, 1:30 PM</p>
+                        <button class="button primary book-button">Book Appointment</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/patient-dashboard.js"></script> <script>
+        // Placeholder for patient-doctors.js logic
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            const userRole = localStorage.getItem('userRole');
+
+            if (!token || userRole !== 'user') {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Update patient info in header
+            const decodedToken = JSON.parse(atob(token.split('.')[1]));
+            document.getElementById('patient-full-name').textContent = `${decodedToken.first_name || ''} ${decodedToken.last_name || ''}`;
+            document.getElementById('patient-initials').textContent = `${(decodedToken.first_name || '').charAt(0)}${(decodedToken.last_name || '').charAt(0)}`.toUpperCase();
+
+            // Fetch doctors logic (example)
+            const doctorsListContainer = document.getElementById('doctors-list-container');
+            const fetchDoctors = async () => {
+                // In a real app, you'd call an API like /api/doctors
+                // const response = await fetch('/api/doctors?search=...&specialization=...', {
+                //     headers: { 'Authorization': `Bearer ${token}` }
+                // });
+                // const doctors = await response.json();
+                // doctorsListContainer.innerHTML = '';
+                // doctors.forEach(doctor => { /* render doctor card */ });
+                doctorsListContainer.innerHTML = '<p>Doctor list will be loaded dynamically here.</p>'; // Placeholder
+            };
+
+            fetchDoctors();
+            // Add event listeners for search and filter inputs to re-call fetchDoctors
+        });
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Profile - DocReserve</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/super-admin-dashboard.css">
+</head>
+<body>
+    <div class="admin-dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">DocReserve</div>
+            <nav class="sidebar-nav">
+                <a href="/super-admin-dashboard.html" class="nav-item">Dashboard</a>
+                <a href="/super-admin-hospital-management.html" class="nav-item">Hospital Admin Management</a>
+                <a href="/super-admin-analytics.html" class="nav-item">Analytics</a>
+                <a href="/super-admin-profile.html" class="nav-item active">Profile</a>
+            </nav>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header-dashboard">
+                <div class="dashboard-title">
+                    <h2>Admin Profile</h2>
+                    <p>Manage your account settings and preferences</p>
+                </div>
+                <div class="user-profile-info">
+                    <div class="user-profile-icon" id="admin-initials-profile">AD</div>
+                </div>
+            </header>
+
+            <section class="profile-section">
+                <div class="profile-card profile-details-card">
+                    <h3>Personal Information</h3>
+                    <div class="profile-picture-upload">
+                        <img src="/images/admin-placeholder.png" alt="Profile Picture" id="profile-pic">
+                        <button class="button secondary" id="change-photo-btn">Upload New Photo</button>
+                        <p class="upload-info">JPG, PNG or GIF. Max size 2MB</p>
+                    </div>
+                    <form id="personal-info-form">
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="username">Username</label>
+                                <input type="text" id="username" value="admin_user" readonly>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="email-address">Email</label>
+                                <input type="email" id="email-address" value="admin@medicalbooking.com" readonly>
+                            </div>
+                        </div>
+                        <button type="submit" class="button primary">Save Changes</button>
+                        <button type="button" class="button secondary">Cancel</button>
+                    </form>
+                </div>
+
+                <div class="profile-card password-change-card">
+                    <h3>Change Password</h3>
+                    <form id="password-change-form">
+                        <div class="form-group">
+                            <label for="current-password">Current Password</label>
+                            <input type="password" id="current-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">New Password</label>
+                            <input type="password" id="new-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-new-password">Confirm New Password</label>
+                            <input type="password" id="confirm-new-password">
+                        </div>
+                        <button type="submit" class="button primary">Update Password</button>
+                    </form>
+                </div>
+
+                <div class="profile-card quick-stats-card">
+                    <h3>Quick Stats</h3>
+                    <ul>
+                        <li>Account Created: <span id="account-created">Jan 15, 2023</span></li>
+                        <li>Last Login: <span id="last-login">Today, 9:30 AM</span></li>
+                        <li>Total Sessions: <span id="total-sessions">1,247</span></li>
+                        <li>Hospital Admins Approved: <span id="hospital-admins-approved">89</span></li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/super-admin-dashboard.js"></script>
+    <script src="js/super-admin-profile.js"></script>
+    <script>
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('userRole');
+            if (!token || role !== 'super_admin') {
+                window.location.href = '/login.html';
+            }
+        });
+    </script>
+</body>
+</html>

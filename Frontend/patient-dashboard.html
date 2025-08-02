@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard - DocReserve</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/patient-dashboard.css">
+</head>
+<body>
+    <div class="patient-dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">DocReserve</div>
+            <nav class="sidebar-nav">
+                <a href="/patient-dashboard.html" class="nav-item active">Dashboard</a>
+                <a href="/patient-doctors.html" class="nav-item">Doctors</a>
+                <a href="/patient-appointments.html" class="nav-item">Appointments</a>
+                <a href="/patient-profile.html" class="nav-item">Profile</a>
+            </nav>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </aside>
+        <main class="main-content">
+            <header class="main-header-dashboard">
+                <div class="user-profile-info">
+                    <span id="patient-full-name">John Doe</span>
+                    <div class="user-profile-icon" id="patient-initials">JD</div>
+                </div>
+            </header>
+            <section class="dashboard-overview">
+                <h2>Here's your health dashboard overview</h2>
+                <div class="summary-cards-section">
+                    <div class="summary-card">
+                        <h3>Upcoming Appointments</h3>
+                        <p id="total-upcoming-appointments">3</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Total Visits</h3>
+                        <p id="total-visits">24</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Favorite Doctors</h3>
+                        <p id="favorite-doctors">5</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Health Score</h3>
+                        <p id="health-score">85%</p>
+                    </div>
+                </div>
+
+                <div class="dashboard-sections">
+                    <div class="upcoming-appointments-section">
+                        <h3>Upcoming Appointments</h3>
+                        <div id="upcoming-appointments-list" class="appointment-list">
+                            <div class="appointment-card">
+                                <div class="doctor-initials">DM</div>
+                                <div class="appointment-details">
+                                    <h4>Dr. Michael Anderson</h4>
+                                    <p>Cardiologist</p>
+                                    <p class="appointment-date">Tomorrow, 10:30 AM</p>
+                                </div>
+                                <button class="view-details-btn">View Details</button>
+                                <button class="reschedule-btn">Reschedule</button>
+                            </div>
+                            <div class="appointment-card">
+                                <div class="doctor-initials">SJ</div>
+                                <div class="appointment-details">
+                                    <h4>Dr. Sarah Johnson</h4>
+                                    <p>Dermatologist</p>
+                                    <p class="appointment-date">Dec 28, 2:00 PM</p>
+                                </div>
+                                <button class="view-details-btn">View Details</button>
+                                <button class="reschedule-btn">Reschedule</button>
+                            </div>
+                            <div class="appointment-card">
+                                <div class="doctor-initials">RW</div>
+                                <div class="appointment-details">
+                                    <h4>Dr. Robert Wilson</h4>
+                                    <p>Neurologist</p>
+                                    <p class="appointment-date">Jan 5, 11:15 AM</p>
+                                </div>
+                                <button class="view-details-btn">View Details</button>
+                                <button class="reschedule-btn">Reschedule</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-actions-section">
+                        <h3>Quick Actions</h3>
+                        <button class="action-button primary-action">+ Book New Appointment</button>
+                        <button class="action-button">Q Find Doctors</button>
+                        <button class="action-button">Medical Records</button>
+                        <button class="action-button">Emergency Contact</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/patient-dashboard.js"></script>
+    <script>
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+        }
+
+        // Simple auth check on load - for actual app, use server-side redirects too
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('userRole');
+            if (!token || role !== 'user') {
+                window.location.href = '/login.html';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Profile - DocReserve</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/doctor-dashboard.css">
+</head>
+<body>
+    <div class="doctor-dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">DocReserve</div>
+            <nav class="sidebar-nav">
+                <a href="/doctor-dashboard.html" class="nav-item">Schedule Management</a>
+                <a href="/doctor-patient-management.html" class="nav-item">Patient Management</a>
+                <a href="/doctor-profile.html" class="nav-item active">Profile</a>
+            </nav>
+            <div class="availability-toggle-container">
+                <label class="switch">
+                    <input type="checkbox" id="doctor-availability-toggle">
+                    <span class="slider round"></span>
+                </label>
+                <span id="availability-status">Available</span>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header-dashboard">
+                <div class="dashboard-title">
+                    <h2>Doctor Profile</h2>
+                    <p>Manage your personal information and preferences</p>
+                </div>
+                <div class="user-profile-info">
+                    <span id="doctor-full-name">Dr. [Doctor Name]</span>
+                    <div class="user-profile-icon" id="doctor-initials">DR</div>
+                </div>
+            </header>
+
+            <section class="profile-section doctor-profile-section">
+                <div class="profile-card profile-details-card">
+                    <h3>Personal Information</h3>
+                    <div class="profile-picture-upload">
+                        <img src="/images/doctor-male-placeholder.png" alt="Profile Picture" id="profile-pic">
+                        <button class="button secondary" id="change-photo-btn">Change Photo</button>
+                        <p class="upload-info">JPG, PNG or GIF. Max size 2MB</p>
+                    </div>
+                    <form id="personal-info-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="first-name">First Name</label>
+                                <input type="text" id="first-name" name="first_name">
+                            </div>
+                            <div class="form-group">
+                                <label for="last-name">Last Name</label>
+                                <input type="text" id="last-name" name="last_name">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="text" id="phone" name="phone_number">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="specialization">Specialization</label>
+                                <input type="text" id="specialization" name="specialization">
+                            </div>
+                            <div class="form-group">
+                                <label for="experience">Experience (Years)</label>
+                                <input type="number" id="experience" name="experience_years">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="bio">Bio</label>
+                                <textarea id="bio" name="bio"></textarea>
+                            </div>
+                        </div>
+                        <button type="submit" class="button primary">Save Changes</button>
+                        <button type="button" class="button secondary">Cancel</button>
+                    </form>
+                </div>
+
+                <div class="profile-card password-change-card">
+                    <h3>Change Password</h3>
+                    <form id="password-change-form">
+                        <div class="form-group">
+                            <label for="current-password">Current Password</label>
+                            <input type="password" id="current-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">New Password</label>
+                            <input type="password" id="new-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-new-password">Confirm New Password</label>
+                            <input type="password" id="confirm-new-password">
+                        </div>
+                        <button type="submit" class="button primary">Update Password</button>
+                    </form>
+                </div>
+
+                <div class="profile-card quick-stats-card">
+                    <h3>Quick Stats</h3>
+                    <ul>
+                        <li>Account Created: <span id="account-created">Jan 15, 2023</span></li>
+                        <li>Last Login: <span id="last-login">Today, 9:30 AM</span></li>
+                        <li>Total Sessions: <span id="total-sessions">1,247</span></li>
+                        <li>Patients Seen: <span id="patients-seen">89</span></li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/doctor-dashboard.js"></script> <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            const userRole = localStorage.getItem('userRole');
+
+            if (!token || userRole !== 'doctor') {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Update doctor info in header (reusing from main doctor dashboard)
+            const decodedToken = JSON.parse(atob(token.split('.')[1]));
+            document.getElementById('doctor-full-name').textContent = `Dr. ${decodedToken.first_name || ''} ${decodedToken.last_name || ''}`;
+            document.getElementById('doctor-initials').textContent = `${(decodedToken.first_name || '').charAt(0)}${(decodedToken.last_name || '').charAt(0)}`.toUpperCase();
+
+            // Availability toggle (reusing from main doctor dashboard)
+            const doctorAvailabilityToggle = document.getElementById('doctor-availability-toggle');
+            const availabilityStatusEl = document.getElementById('availability-status');
+            // Initial state should be fetched from backend for persistent status
+            doctorAvailabilityToggle.checked = true; // Default
+            availabilityStatusEl.textContent = 'Available';
+
+            doctorAvailabilityToggle.addEventListener('change', async (event) => {
+                const isAvailable = event.target.checked;
+                try {
+                    const updateResponse = await fetch('/api/doctor/availability', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ is_available: isAvailable })
+                    });
+                    if (updateResponse.ok) {
+                        availabilityStatusEl.textContent = isAvailable ? 'Available' : 'Busy';
+                        alert(`Your status has been updated to: ${isAvailable ? 'Available' : 'Busy'}`);
+                    } else {
+                        alert('Failed to update availability.');
+                        event.target.checked = !isAvailable;
+                    }
+                } catch (error) {
+                    console.error('Error updating availability:', error);
+                    alert('An error occurred while updating availability.');
+                    event.target.checked = !isAvailable;
+                }
+            });
+
+
+            // Profile specific logic
+            const firstNameInput = document.getElementById('first-name');
+            const lastNameInput = document.getElementById('last-name');
+            const emailInput = document.getElementById('email');
+            const phoneInput = document.getElementById('phone');
+            const specializationInput = document.getElementById('specialization');
+            const experienceInput = document.getElementById('experience');
+            const bioInput = document.getElementById('bio');
+
+            const accountCreatedEl = document.getElementById('account-created');
+            const lastLoginEl = document.getElementById('last-login');
+            const totalSessionsEl = document.getElementById('total-sessions');
+            const patientsSeenEl = document.getElementById('patients-seen');
+
+            const fetchProfile = async () => {
+                try {
+                    const response = await fetch('/api/doctor/profile', {
+                        method: 'GET',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) throw new Error('Failed to fetch profile data.');
+                    const data = await response.json();
+                    console.log('Doctor Profile Data:', data);
+
+                    firstNameInput.value = data.first_name || '';
+                    lastNameInput.value = data.last_name || '';
+                    emailInput.value = data.email || '';
+                    phoneInput.value = data.phone_number || '';
+                    specializationInput.value = data.specialization || '';
+                    experienceInput.value = data.experience_years || '';
+                    bioInput.value = data.bio || '';
+
+                    // Mock quick stats
+                    accountCreatedEl.textContent = 'Jan 15, 2023';
+                    lastLoginEl.textContent = 'Today, 9:30 AM';
+                    totalSessionsEl.textContent = '1,247';
+                    patientsSeenEl.textContent = '89';
+
+                } catch (error) {
+                    console.error('Error fetching doctor profile:', error);
+                    alert('Failed to load doctor profile.');
+                }
+            };
+
+            // Form submission for personal info
+            document.getElementById('personal-info-form').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const data = {
+                    first_name: firstNameInput.value,
+                    last_name: lastNameInput.value,
+                    phone_number: phoneInput.value,
+                    specialization: specializationInput.value,
+                    experience_years: parseInt(experienceInput.value),
+                    bio: bioInput.value
+                };
+                try {
+                    const response = await fetch('/api/doctor/profile', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify(data)
+                    });
+                    if (!response.ok) throw new Error('Failed to update personal info.');
+                    alert('Profile updated successfully!');
+                } catch (error) {
+                    console.error('Error updating personal info:', error);
+                    alert('Failed to update personal information.');
+                }
+            });
+
+            // Form submission for password change
+            document.getElementById('password-change-form').addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const currentPassword = document.getElementById('current-password').value;
+                const newPassword = document.getElementById('new-password').value;
+                const confirmNewPassword = document.getElementById('confirm-new-password').value;
+
+                if (newPassword !== confirmNewPassword) {
+                    alert('New password and confirm new password do not match.');
+                    return;
+                }
+                // Call password change API endpoint here
+                alert('Password change logic to be implemented!');
+            });
+
+            fetchProfile(); // Load profile data on page load
+        });
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+        }
+    </script>
+</body>
+</html>

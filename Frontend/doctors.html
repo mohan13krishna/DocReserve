@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Doctors - DocReserve</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Basic styling for the Find Doctors page */
+        .find-doctors-container {
+            padding: 50px;
+            background-color: #f4f7f6;
+        }
+        .find-doctors-container h1 {
+            font-size: 2.5em;
+            color: #0056b3;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .find-doctors-container p {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .filters-section {
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .filters-section .search-bar {
+            position: relative;
+            flex-grow: 1;
+            min-width: 250px;
+        }
+        .filters-section .search-bar input {
+            width: calc(100% - 40px);
+            padding: 10px 15px 10px 40px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        .filters-section .search-bar .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        .filters-section select,
+        .filters-section input[type="date"] {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: white;
+            font-size: 1em;
+            cursor: pointer;
+            flex-grow: 1;
+            min-width: 150px;
+        }
+        .filters-section .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .filters-section .filter-buttons button {
+            padding: 8px 15px;
+            font-size: 0.9em;
+            border-radius: 5px;
+        }
+        .results-info {
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: bold;
+        }
+        .doctors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+        .doctor-card-listing {
+            background-color: #ffffff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+        }
+        .doctor-card-listing h3 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        .doctor-card-listing .specialty {
+            color: #007bff;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .doctor-card-listing .rating {
+            font-size: 0.95em;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .doctor-card-listing .rating span {
+            color: #ffc107; /* Star color */
+            font-weight: bold;
+        }
+        .doctor-card-listing .experience,
+        .doctor-card-listing .location {
+            font-size: 0.9em;
+            color: #777;
+            margin-bottom: 5px;
+        }
+        .doctor-card-listing .book-button {
+            margin-top: 20px;
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            text-decoration: none; /* For the anchor tag */
+            text-align: center;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 40px;
+            gap: 10px;
+        }
+        .pagination button {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.2s;
+        }
+        .pagination button.active,
+        .pagination button:hover {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        @media (max-width: 768px) {
+            .find-doctors-container {
+                padding: 20px;
+            }
+            .filters-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .filters-section select,
+            .filters-section input[type="date"],
+            .filters-section .search-bar {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo">DocReserve</div>
+        <nav class="main-nav">
+            <a href="./index.html">Home</a>
+            <a href="./doctors.html">Doctors</a>
+            <a href="./services.html">Services</a>
+            <a href="./about.html">About</a>
+        </nav>
+        <div class="auth-buttons">
+            <a href="./login.html" class="button primary">Login</a>
+        </div>
+    </header>
+
+    <div class="find-doctors-container">
+        <h1>Find Doctors</h1>
+        <p>Discover qualified healthcare professionals near you</p>
+
+        <section class="filters-section">
+            <div class="search-bar">
+                <input type="text" placeholder="Search doctor name..." id="doctor-search-input">
+                <span class="search-icon">Q</span>
+            </div>
+            <select id="specialty-filter">
+                <option value="">All Specialties</option>
+                <option value="Cardiologist">Cardiologist</option>
+                <option value="Pediatrician">Pediatrician</option>
+                <option value="Dermatologist">Dermatologist</option>
+                <option value="Neurologist">Neurologist</option>
+                <option value="Orthopedic Surgeon">Orthopedic Surgeon</option>
+                <option value="Psychiatrist">Psychiatrist</option>
+                <option value="Oncologist">Oncologist</option>
+                <option value="Gynecologist">Gynecologist</option>
+            </select>
+            <select id="location-filter">
+                <option value="">All Locations</option>
+                <option value="Downtown">Downtown Medical Center</option>
+                <option value="Children's Hospital">Children's Hospital</option>
+                <option value="Skin Care Clinic">Skin Care Clinic</option>
+                <option value="Neurology Institute">Neurology Institute</option>
+            </select>
+            <select id="rating-filter">
+                <option value="">All Ratings</option>
+                <option value="4.5+">4.5+ Rating</option>
+                <option value="4.0+">4.0+ Rating</option>
+            </select>
+            <input type="date" id="date-filter">
+            <select id="sort-by-filter">
+                <option value="rating">Sort by Rating</option>
+                <option value="experience">Sort by Experience</option>
+            </select>
+            <div class="filter-buttons">
+                <button class="button secondary" id="clear-filters-btn">Clear All Filters</button>
+            </div>
+        </section>
+
+        <p class="results-info"><span id="doctors-found-count">24</span> doctors found</p>
+
+        <section class="doctors-grid" id="doctors-grid-container">
+            <div class="doctor-card-listing">
+                <h3>Dr. Sarah Johnson</h3>
+                <p class="specialty">Cardiologist</p>
+                <p class="rating"><span>4.9</span> (127 reviews)</p>
+                <p class="experience">15 years experience</p>
+                <p class="location">Downtown Medical Center</p>
+                <a href="./login.html" class="button primary book-button">Book Appointment</a>
+            </div>
+            <div class="doctor-card-listing">
+                <h3>Dr. Michael Chen</h3>
+                <p class="specialty">Pediatrician</p>
+                <p class="rating"><span>4.8</span> (89 reviews)</p>
+                <p class="experience">12 years experience</p>
+                <p class="location">Children's Hospital</p>
+                <a href="./login.html" class="button primary book-button">Book Appointment</a>
+            </div>
+            <div class="doctor-card-listing">
+                <h3>Dr. Emily Rodriguez</h3>
+                <p class="specialty">Dermatologist</p>
+                <p class="rating"><span>4.9</span> (156 reviews)</p>
+                <p class="experience">10 years experience</p>
+                <p class="location">Skin Care Clinic</p>
+                <a href="./login.html" class="button primary book-button">Book Appointment</a>
+            </div>
+            <div class="doctor-card-listing">
+                <h3>Dr. David Thompson</h3>
+                <p class="specialty">Neurologist</p>
+                <p class="rating"><span>4.7</span> (94 reviews)</p>
+                <p class="experience">18 years experience</p>
+                <p class="location">Neurology Institute</p>
+                <a href="./login.html" class="button primary book-button">Book Appointment</a>
+            </div>
+            <div class="doctor-card-listing">
+                <h3>Dr. Lisa Anderson</h3>
+                <p class="specialty">Orthopedic Surgeon</p>
+                <p class="rating"><span>4.9</span> (203 reviews)</p>
+                <p class="experience">14 years experience</p>
+                <p class="location">Sports Medicine Center</p>
+                <a href="./login.html" class="button primary book-button">Book Appointment</a>
+            </div>
+            <div class="doctor-card-listing">
+                <h3>Dr. Robert Martinez</h3>
+                <p class="specialty">Psychiatrist</p>
+                <p class="rating"><span>4.8</span> (76 reviews)</p>
+                <p class="experience">16 years experience</p>
+                <p class="location">Mental Health Clinic</p>
+                <a href="./login.html" class="button primary book-button">Book Appointment</a>
+            </div>
+            <div class="doctor-card-listing">
+                <h3>Dr. Jennifer Kim</h3>
+                <p class="specialty">Oncologist</p>
+                <p class="rating"><span>4.9</span> (142 reviews)</p>
+                <p class="experience">13 years experience</p>
+                <p class="location">Cancer Treatment Center</p>
+                <a href="./login.html" class="button primary book-button">Book Appointment</a>
+            </div>
+            <div class="doctor-card-listing">
+                <h3>Dr. William Brown</h3>
+                <p class="specialty">Cardiologist</p>
+                <p class="rating"><span>4.7</span> (118 reviews)</p>
+                <p class="experience">20 years experience</p>
+                <p class="location">Heart Institute</p>
+                <a href="./login.html" class="button primary book-button">Book Appointment</a>
+            </div>
+            <div class="doctor-card-listing">
+                <h3>Dr. Amanda Davis</h3>
+                <p class="specialty">Pediatrician</p>
+                <p class="rating"><span>4.9</span> (167 reviews)</p>
+                <p class="experience">11 years experience</p>
+                <p class="location">Pediatric Clinic</p>
+                <a href="./login.html" class="button primary book-button">Book Appointment</a>
+            </div>
+        </section>
+
+        <div class="pagination">
+            <span>Items per page:</span>
+            <select>
+                <option>9</option>
+                <option>18</option>
+                <option>27</option>
+            </select>
+            <button>&lt;</button>
+            <button class="active">1</button>
+            <button>2</button>
+            <button>3</button>
+            <span>...</span>
+            <button>8</button>
+            <button>&gt;</button>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="copyright">
+            &copy; 2024 DocReserve. All rights reserved.
+        </div>
+    </footer>
+    </body>
+</html>

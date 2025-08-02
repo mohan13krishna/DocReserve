@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Dashboard - DocReserve</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/doctor-dashboard.css">
+</head>
+<body>
+    <div class="doctor-dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">DocReserve</div>
+            <nav class="sidebar-nav">
+                <a href="/doctor-dashboard.html" class="nav-item active">Schedule Management</a>
+                <a href="/doctor-patient-management.html" class="nav-item">Patient Management</a>
+                <a href="/doctor-profile.html" class="nav-item">Profile</a>
+            </nav>
+            <div class="availability-toggle-container">
+                <label class="switch">
+                    <input type="checkbox" id="doctor-availability-toggle">
+                    <span class="slider round"></span>
+                </label>
+                <span id="availability-status">Available</span>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header-dashboard">
+                <div class="dashboard-title">
+                    <h2>Schedule Management</h2>
+                </div>
+                <div class="user-profile-info">
+                    <span id="doctor-full-name">Dr. [Doctor Name]</span>
+                    <div class="user-profile-icon" id="doctor-initials">DR</div>
+                </div>
+            </header>
+
+            <section class="schedule-management-section">
+                <div class="schedule-header-controls">
+                    <div class="view-toggles">
+                        <button class="button small active">Daily</button>
+                        <button class="button small">Weekly</button>
+                        <button class="button small">Monthly</button>
+                    </div>
+                    <div class="date-navigator">
+                        <button class="button icon-button">&lt;</button>
+                        <span id="calendar-current-date">December 18, 2024</span>
+                        <button class="button icon-button">&gt;</button>
+                        <button class="button primary small">Today</button>
+                    </div>
+                    <div class="actions">
+                         <button class="button secondary small">Back to Dashboard</button>
+                         <button class="button primary small">Block Time</button>
+                         <button class="button primary small">Set Availability</button>
+                    </div>
+                </div>
+
+                <div class="schedule-grid-container">
+                    <div class="legend">
+                        <span class="legend-item available">Available</span>
+                        <span class="legend-item booked">Booked</span>
+                        <span class="legend-item blocked">Blocked</span>
+                    </div>
+                    <div class="schedule-grid">
+                        <div class="grid-header time-header">Time</div>
+                        <div class="grid-header status-header">Status</div>
+                        <div class="grid-header details-header">Details</div>
+                        <div class="grid-header actions-header">Actions</div>
+
+                        <div class="grid-row">
+                            <div class="grid-cell time">8:00 AM</div>
+                            <div class="grid-cell status available">Available</div>
+                            <div class="grid-cell details"></div>
+                            <div class="grid-cell actions">
+                                <button class="button secondary small">Add Slot</button>
+                            </div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell time">9:00 AM</div>
+                            <div class="grid-cell status booked">Booked</div>
+                            <div class="grid-cell details">Emma Wilson - Regular Checkup</div>
+                            <div class="grid-cell actions">
+                                <button class="button secondary small">View Notes</button>
+                            </div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell time">10:00 AM</div>
+                            <div class="grid-cell status available">Available</div>
+                            <div class="grid-cell details"></div>
+                            <div class="grid-cell actions">
+                                <button class="button secondary small">Add Slot</button>
+                            </div>
+                        </div>
+                        <div class="grid-row">
+                            <div class="grid-cell time">11:00 AM</div>
+                            <div class="grid-cell status blocked">Blocked</div>
+                            <div class="grid-cell details">Lunch Break</div>
+                            <div class="grid-cell actions"></div>
+                        </div>
+                        </div>
+                </div>
+            </section>
+
+            <section class="todays-appointments-list-section">
+                <h3>Today's Appointments <span id="current-date-appointments">December 18, 2024</span></h3>
+                <div id="todays-appointments-list" class="appointments-cards-container">
+                    <div class="today-appointment-card">
+                        <div class="patient-initials">EW</div>
+                        <div class="appointment-details">
+                            <h4>Emma Wilson</h4>
+                            <p>9:30 AM - Regular Checkup</p>
+                            <span class="status-badge completed">Completed</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="button secondary small">View Notes</button>
+                        </div>
+                    </div>
+                    <div class="today-appointment-card">
+                        <div class="patient-initials">JM</div>
+                        <div class="appointment-details">
+                            <h4>James Miller</h4>
+                            <p>10:30 AM - Follow-up Visit</p>
+                            <span class="status-badge in-progress">In Progress</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="button secondary small">Complete</button>
+                            <button class="button secondary small">Reschedule</button>
+                        </div>
+                    </div>
+                    <div class="today-appointment-card">
+                        <div class="patient-initials">LA</div>
+                        <div class="appointment-details">
+                            <h4>Lisa Anderson</h4>
+                            <p>12:15 PM - Consultation</p>
+                            <span class="status-badge upcoming">Upcoming</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="button secondary small">Start</button>
+                            <button class="button secondary small">Reschedule</button>
+                        </div>
+                    </div>
+                    <div class="today-appointment-card urgent">
+                        <div class="patient-initials">RD</div>
+                        <div class="appointment-details">
+                            <h4>Robert Davis</h4>
+                            <p>2:30 PM - Emergency</p>
+                            <span class="status-badge priority">Priority</span>
+                            <span class="status-badge urgent-label">Urgent</span>
+                        </div>
+                        <div class="card-actions">
+                            <button class="button primary small">Call Patient</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="quick-settings-section">
+                <h3>Quick Settings</h3>
+                <div class="settings-form">
+                    <div class="form-group">
+                        <label for="default-slot-duration">Default Slot Duration</label>
+                        <select id="default-slot-duration">
+                            <option value="15">15 min</option>
+                            <option value="30" selected>30 min</option>
+                            <option value="45">45 min</option>
+                            <option value="60">60 min</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="break-between-slots">Break Between Slots</label>
+                        <select id="break-between-slots">
+                            <option value="0">0 min</option>
+                            <option value="5">5 min</option>
+                            <option value="10">10 min</option>
+                            <option value="15" selected>15 min</option>
+                        </select>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="auto-confirm-bookings" checked>
+                        <label for="auto-confirm-bookings">Auto-confirm Bookings</label>
+                    </div>
+                    <button class="button primary" id="save-settings-btn">Save Settings</button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/doctor-dashboard.js"></script>
+    <script>
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('userRole');
+            if (!token || role !== 'doctor') {
+                window.location.href = '/login.html';
+            }
+        });
+    </script>
+</body>
+</html>

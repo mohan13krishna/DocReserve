@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Admin Profile - DocReserve</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/hospital-admin-dashboard.css">
+</head>
+<body>
+    <div class="admin-dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">DocReserve</div>
+            <nav class="sidebar-nav">
+                <a href="/hospital-admin-dashboard.html" class="nav-item">Doctor Management</a>
+                <a href="/hospital-admin-analytics.html" class="nav-item">Analytics</a>
+                <a href="/hospital-admin-profile.html" class="nav-item active">Profile</a>
+            </nav>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header-dashboard">
+                <div class="dashboard-title">
+                    <h2>Admin Profile</h2>
+                    <p>Manage your account settings and preferences</p>
+                </div>
+                <div class="user-profile-info">
+                    <div class="user-profile-icon" id="admin-initials-profile">SJ</div>
+                </div>
+            </header>
+
+            <section class="profile-section">
+                <div class="profile-card profile-details-card">
+                    <h3>Personal Information</h3>
+                    <div class="profile-picture-upload">
+                        <img src="/images/doctor-male-placeholder.png" alt="Profile Picture" id="profile-pic">
+                        <button class="button secondary" id="change-photo-btn">Upload New Photo</button>
+                        <p class="upload-info">JPG, PNG or GIF. Max size 2MB</p>
+                    </div>
+                    <form id="personal-info-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="first-name">First Name</label>
+                                <input type="text" id="first-name">
+                            </div>
+                            <div class="form-group">
+                                <label for="last-name">Last Name</label>
+                                <input type="text" id="last-name">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="email-address">Email Address</label>
+                                <input type="email" id="email-address" readonly>
+                            </div>
+                            <div class="form-group">
+                                <label for="phone-number">Phone Number</label>
+                                <input type="text" id="phone-number">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="department">Department</label>
+                                <input type="text" id="department">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group full-width">
+                                <label for="hospital-name">Hospital Name</label>
+                                <input type="text" id="hospital-name" readonly>
+                            </div>
+                        </div>
+                        <button type="submit" class="button primary">Save Changes</button>
+                        <button type="button" class="button secondary">Cancel</button>
+                    </form>
+                </div>
+
+                <div class="profile-card password-change-card">
+                    <h3>Change Password</h3>
+                    <form id="password-change-form">
+                        <div class="form-group">
+                            <label for="current-password">Current Password</label>
+                            <input type="password" id="current-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="new-password">New Password</label>
+                            <input type="password" id="new-password">
+                        </div>
+                        <div class="form-group">
+                            <label for="confirm-new-password">Confirm New Password</label>
+                            <input type="password" id="confirm-new-password">
+                        </div>
+                        <button type="submit" class="button primary">Update Password</button>
+                    </form>
+                </div>
+
+                <div class="profile-card notification-settings-card">
+                    <h3>Notification Settings</h3>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                        <div class="setting-details">
+                            <h4>Email Notifications</h4>
+                            <p>Receive email updates about system activities</p>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <input type="checkbox" checked>
+                            <span class="slider round"></span>
+                        </label>
+                        <div class="setting-details">
+                            <h4>Push Notifications</h4>
+                            <p>Get push notifications for urgent matters</p>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                        <div class="setting-details">
+                            <h4>SMS Alerts</h4>
+                            <p>Receive SMS for critical system alerts</p>
+                        </div>
+                    </div>
+                    <div class="setting-item">
+                        <label class="switch">
+                            <input type="checkbox">
+                            <span class="slider round"></span>
+                        </label>
+                        <div class="setting-details">
+                            <h4>Weekly Reports</h4>
+                            <p>Get weekly performance and analytics reports</p>
+                        </div>
+                    </div>
+                    <button type="button" class="button primary">Save Notification Settings</button>
+                </div>
+
+                 <div class="profile-card quick-stats-card">
+                    <h3>Quick Stats</h3>
+                    <ul>
+                        <li>Account Created: <span id="account-created">Jan 15, 2023</span></li>
+                        <li>Last Login: <span id="last-login">Today, 9:30 AM</span></li>
+                        <li>Total Sessions: <span id="total-sessions">1,247</span></li>
+                        <li>Doctors Approved: <span id="doctors-approved">89</span></li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/hospital-admin-dashboard.js"></script>
+    <script src="js/hospital-admin-profile.js"></script>
+    <script>
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('userRole');
+            if (!token || role !== 'hospital_admin') {
+                window.location.href = '/login.html';
+            }
+        });
+    </script>
+</body>
+</html>

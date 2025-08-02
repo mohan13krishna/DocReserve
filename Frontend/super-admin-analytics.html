@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Analytics - DocReserve</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/super-admin-dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="admin-dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">DocReserve</div>
+            <nav class="sidebar-nav">
+                <a href="/super-admin-dashboard.html" class="nav-item">Dashboard</a>
+                <a href="/super-admin-hospital-management.html" class="nav-item">Hospital Admin Management</a>
+                <a href="/super-admin-analytics.html" class="nav-item active">Analytics</a>
+                <a href="/super-admin-profile.html" class="nav-item">Profile</a>
+            </nav>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header-dashboard">
+                <div class="dashboard-title">
+                    <h2>Analytics</h2>
+                    <p>Home / Analytics</p>
+                </div>
+                <div class="user-profile-info">
+                    <span id="admin-email-display">Admin@DocReserve.com</span>
+                    <div class="user-profile-icon" id="admin-initials">AD</div>
+                </div>
+            </header>
+
+            <section class="analytics-section">
+                <div class="analytics-row">
+                    <div class="analytics-card large">
+                        <h3>User Registration Trends</h3>
+                        <canvas id="user-registration-trends-chart"></canvas>
+                    </div>
+                    <div class="analytics-card large">
+                        <h3>Doctor Onboarding Statistics</h3>
+                        <canvas id="doctor-onboarding-statistics-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="analytics-row">
+                    <div class="analytics-card">
+                        <h3>User Distribution</h3>
+                        <canvas id="user-distribution-chart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Doctor Specialties</h3>
+                        <canvas id="doctor-specialties-chart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Hospital Categories</h3>
+                        <canvas id="hospital-categories-chart"></canvas>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/super-admin-dashboard.js"></script>
+    <script src="js/super-admin-analytics.js"></script>
+    <script>
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('userRole');
+            if (!token || role !== 'super_admin') {
+                window.location.href = '/login.html';
+            }
+        });
+    </script>
+</body>
+</html>

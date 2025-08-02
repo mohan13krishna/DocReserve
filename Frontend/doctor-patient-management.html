@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Patient Management - DocReserve</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/doctor-dashboard.css">
+</head>
+<body>
+    <div class="doctor-dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">DocReserve</div>
+            <nav class="sidebar-nav">
+                <a href="/doctor-dashboard.html" class="nav-item">Schedule Management</a>
+                <a href="/doctor-patient-management.html" class="nav-item active">Patient Management</a>
+                <a href="/doctor-profile.html" class="nav-item">Profile</a>
+            </nav>
+            <div class="availability-toggle-container">
+                <label class="switch">
+                    <input type="checkbox" id="doctor-availability-toggle">
+                    <span class="slider round"></span>
+                </label>
+                <span id="availability-status">Available</span>
+            </div>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header-dashboard">
+                <div class="dashboard-title">
+                    <h2>Patient Management</h2>
+                </div>
+                <div class="user-profile-info">
+                    <span id="doctor-full-name">Dr. [Doctor Name]</span>
+                    <div class="user-profile-icon" id="doctor-initials">DR</div>
+                </div>
+            </header>
+
+            <section class="patient-management-section">
+                <div class="search-filter-controls">
+                    <div class="search-bar">
+                        <input type="text" placeholder="Search patients by name, ID or phone..." id="patient-search-input">
+                        <span class="search-icon">Q</span>
+                    </div>
+                    <div class="patient-grid-list-toggle">
+                        <button class="button secondary small active">Grid</button>
+                        <button class="button secondary small">List</button>
+                    </div>
+                    <select id="sort-by-filter" class="filter-select">
+                        <option value="name">Sort by Name</option>
+                        <option value="last_visit">Sort by Last Visit</option>
+                        <option value="next_appointment">Sort by Next Appointment</option>
+                    </select>
+                    <button class="button secondary small">Filter</button>
+                </div>
+
+                <div class="patient-cards-grid" id="patient-cards-container">
+                    <div class="patient-card">
+                        <div class="initials">EW</div>
+                        <h4>Emma Wilson</h4>
+                        <p>Female, 34 years</p>
+                        <p>+1 (555) 123-4567</p>
+                        <p>emma.wilson@email.com</p>
+                        <p>Last visit: Dec 15, 2024</p>
+                        <p>Next: Dec 22, 2024 at 2:00 PM</p>
+                        <p>Conditions: Hypertension, Regular checkups</p>
+                        <button class="button primary">View Details</button>
+                        <button class="button secondary">Schedule</button>
+                    </div>
+                    <div class="patient-card">
+                        <div class="initials">JM</div>
+                        <h4>James Miller</h4>
+                        <p>Male, 42 years</p>
+                        <p>+1 (555) 234-5678</p>
+                        <p>james.miller@email.com</p>
+                        <p>Last visit: Dec 18, 2024</p>
+                        <p>Next: Dec 25, 2024 at 10:30 AM</p>
+                        <p>Conditions: Diabetes Type 2, Follow-up care</p>
+                        <button class="button primary">View Details</button>
+                        <button class="button secondary">Schedule</button>
+                    </div>
+                     <div class="patient-card">
+                        <div class="initials">LA</div>
+                        <h4>Lisa Anderson</h4>
+                        <p>Female, 28 years</p>
+                        <p>+1 (555) 345-6789</p>
+                        <p>lisa.anderson@email.com</p>
+                        <p>Last visit: Dec 10, 2024</p>
+                        <p>Next: Dec 20, 2024 at 3:15 PM</p>
+                        <p>Conditions: Annual physical, Preventive care</p>
+                        <button class="button primary">View Details</button>
+                        <button class="button secondary">Schedule</button>
+                    </div>
+                     <div class="patient-card">
+                        <div class="initials">RD</div>
+                        <h4>Robert Davis</h4>
+                        <p>Male, 58 years</p>
+                        <p>+1 (555) 456-7890</p>
+                        <p>robert.davis@email.com</p>
+                        <p>Last visit: Dec 18, 2024</p>
+                        <p>Next: Dec 19, 2024 at 11:00 AM</p>
+                        <p>Conditions: Heart disease, High blood pressure</p>
+                        <button class="button primary">View Details</button>
+                        <button class="button secondary">Schedule</button>
+                    </div>
+                    <div class="patient-card">
+                        <div class="initials">MG</div>
+                        <h4>Maria Garcia</h4>
+                        <p>Female, 45 years</p>
+                        <p>+1 (555) 567-8901</p>
+                        <p>maria.garcia@email.com</p>
+                        <p>Last visit: Dec 12, 2024</p>
+                        <p>Next: Dec 26, 2024 at 1:30 PM</p>
+                        <p>Conditions: Routine checkup, Wellness visit</p>
+                        <button class="button primary">View Details</button>
+                        <button class="button secondary">Schedule</button>
+                    </div>
+                    <div class="patient-card">
+                        <div class="initials">DT</div>
+                        <h4>David Thompson</h4>
+                        <p>Male, 37 years</p>
+                        <p>+1 (555) 678-9012</p>
+                        <p>david.thompson@email.com</p>
+                        <p>Last visit: Nov 28, 2024</p>
+                        <p>No upcoming appointments</p>
+                        <p>Conditions: Migraine management, Stress-related</p>
+                        <button class="button primary">View Details</button>
+                        <button class="button secondary">Schedule</button>
+                    </div>
+                </div>
+
+                <div class="pagination">
+                    <span>Showing 1-7 of 247 patients</span>
+                    <div class="pagination-controls">
+                        <button>&lt;</button>
+                        <button class="active">1</button>
+                        <button>2</button>
+                        <button>3</button>
+                        <span>...</span>
+                        <button>25</button>
+                        <button>&gt;</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/doctor-dashboard.js"></script> <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            const userRole = localStorage.getItem('userRole');
+
+            if (!token || userRole !== 'doctor') {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            // Update doctor info in header
+            const decodedToken = JSON.parse(atob(token.split('.')[1]));
+            document.getElementById('doctor-full-name').textContent = `Dr. ${decodedToken.first_name || ''} ${decodedToken.last_name || ''}`;
+            document.getElementById('doctor-initials').textContent = `${(decodedToken.first_name || '').charAt(0)}${(decodedToken.last_name || '').charAt(0)}`.toUpperCase();
+
+            // Availability toggle (reusing from main doctor dashboard)
+            const doctorAvailabilityToggle = document.getElementById('doctor-availability-toggle');
+            const availabilityStatusEl = document.getElementById('availability-status');
+            // Fetch and set initial status here if not already done by common dashboard script
+            // For now, setting based on HTML default
+            doctorAvailabilityToggle.checked = true;
+            availabilityStatusEl.textContent = 'Available';
+
+            doctorAvailabilityToggle.addEventListener('change', async (event) => {
+                const isAvailable = event.target.checked;
+                try {
+                    const updateResponse = await fetch('/api/doctor/availability', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ is_available: isAvailable })
+                    });
+                    if (updateResponse.ok) {
+                        availabilityStatusEl.textContent = isAvailable ? 'Available' : 'Busy';
+                        alert(`Your status has been updated to: ${isAvailable ? 'Available' : 'Busy'}`);
+                    } else {
+                        alert('Failed to update availability.');
+                        event.target.checked = !isAvailable;
+                    }
+                } catch (error) {
+                    console.error('Error updating availability:', error);
+                    alert('An error occurred while updating availability.');
+                    event.target.checked = !isAvailable;
+                }
+            });
+
+
+            // Patient list specific logic
+            const patientCardsContainer = document.getElementById('patient-cards-container');
+            const patientSearchInput = document.getElementById('patient-search-input');
+            const sortByFilter = document.getElementById('sort-by-filter');
+
+            const fetchPatients = async () => {
+                try {
+                    const response = await fetch(`/api/doctor/patients?search=${patientSearchInput.value}&sortBy=${sortByFilter.value}`, {
+                        method: 'GET',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (!response.ok) throw new Error('Failed to fetch patients.');
+                    const data = await response.json();
+                    const patients = data.patients || [];
+                    const totalPatients = data.totalPatients || 0; // Assuming API returns total
+
+                    patientCardsContainer.innerHTML = ''; // Clear existing
+                    if (patients.length > 0) {
+                        patients.forEach(patient => {
+                            const initials = (patient.fullName.charAt(0) + (patient.fullName.split(' ')[1] ? patient.fullName.split(' ')[1].charAt(0) : '')).toUpperCase();
+                            const card = `
+                                <div class="patient-card">
+                                    <div class="initials">${initials}</div>
+                                    <h4>${patient.fullName}</h4>
+                                    <p>${patient.gender}, ${patient.age} years</p>
+                                    <p>${patient.phoneNumber}</p>
+                                    <p>${patient.email}</p>
+                                    <p>Last visit: ${patient.lastVisit}</p>
+                                    <p>Next: ${patient.nextAppointment}</p>
+                                    <p>Conditions: ${patient.conditions.join(', ')}</p>
+                                    <button class="button primary view-details-btn" data-patient-id="${patient.patient_id}">View Details</button>
+                                    <button class="button secondary schedule-btn" data-patient-id="${patient.patient_id}">Schedule</button>
+                                </div>
+                            `;
+                            patientCardsContainer.insertAdjacentHTML('beforeend', card);
+                        });
+                        document.querySelector('.pagination span').textContent = `Showing 1-${patients.length} of ${totalPatients} patients`;
+                    } else {
+                        patientCardsContainer.innerHTML = '<p>No patients found.</p>';
+                        document.querySelector('.pagination span').textContent = 'Showing 0-0 of 0 patients';
+                    }
+                } catch (error) {
+                    console.error('Error fetching patients:', error);
+                    patientCardsContainer.innerHTML = '<p style="color:red;">Failed to load patients.</p>';
+                }
+            };
+
+            fetchPatients();
+            patientSearchInput.addEventListener('input', fetchPatients);
+            sortByFilter.addEventListener('change', fetchPatients);
+            // Add listeners for view toggles (grid/list) if implementing different layouts
+        });
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Admin Analytics - DocReserve</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/hospital-admin-dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="admin-dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">DocReserve</div>
+            <nav class="sidebar-nav">
+                <a href="/hospital-admin-dashboard.html" class="nav-item">Doctor Management</a>
+                <a href="/hospital-admin-analytics.html" class="nav-item active">Analytics</a>
+                <a href="/hospital-admin-profile.html" class="nav-item">Profile</a>
+            </nav>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header-dashboard">
+                <div class="dashboard-title">
+                    <h2>Analytics Dashboard</h2>
+                    <p>Comprehensive insights into hospital operations and doctor performance</p>
+                </div>
+                <div class="user-profile-info">
+                    <span id="admin-full-name">Dr. Sarah Johnson</span>
+                    <div class="user-profile-icon" id="admin-initials">SJ</div>
+                </div>
+            </header>
+
+            <section class="analytics-section">
+                <div class="analytics-row">
+                    <div class="analytics-card large">
+                        <h3>Appointment Statistics</h3>
+                        <div class="chart-controls">
+                            <button class="button small chart-time-filter active" data-time="daily">Daily</button>
+                            <button class="button small chart-time-filter" data-time="weekly">Weekly</button>
+                            <button class="button small chart-time-filter" data-time="monthly">Monthly</button>
+                        </div>
+                        <canvas id="appointment-statistics-chart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Department Distribution</h3>
+                        <canvas id="department-distribution-chart"></canvas>
+                    </div>
+                </div>
+
+                <div class="analytics-row">
+                    <div class="analytics-card">
+                        <h3>Patient Satisfaction</h3>
+                        <p class="big-metric" id="patient-satisfaction-score">4.7</p>
+                        <p class="small-info" id="patient-satisfaction-reviews">Based on 2,847 reviews</p>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Average Wait Time</h3>
+                        <p class="big-metric"><span id="avg-wait-time">18</span> minutes</p>
+                        <p class="small-info" id="avg-wait-time-change">+-12% from last week</p>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>Cancellation Rate</h3>
+                        <p class="big-metric"><span id="cancellation-rate">5.2%</span></p>
+                        <p class="small-info" id="cancellation-rate-change">↑+2.1% from last week</p>
+                    </div>
+                </div>
+
+                <div class="analytics-row">
+                    <div class="analytics-card full-width">
+                        <h3>Top Performing Doctors</h3>
+                        <div class="date-range-filter">
+                            <label for="start-date">From:</label>
+                            <input type="date" id="start-date" value="2025-07-01">
+                            <label for="end-date">To:</label>
+                            <input type="date" id="end-date" value="2025-08-01">
+                        </div>
+                        <div class="table-responsive">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Doctor</th>
+                                        <th>Appointments</th>
+                                        <th>Rating</th>
+                                        <th>Revenue</th>
+                                        <th>Growth</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="top-doctors-table-body">
+                                    <tr>
+                                        <td>Dr. Alex Kumar<br>Cardiology</td>
+                                        <td>342</td>
+                                        <td>4.9</td>
+                                        <td>$68,400</td>
+                                        <td>+18%</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Dr. Jennifer Lee<br>Surgery</td>
+                                        <td>298</td>
+                                        <td>4.8</td>
+                                        <td>$89,600</td>
+                                        <td>+24%</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/hospital-admin-dashboard.js"></script>
+    <script src="js/hospital-admin-analytics.js"></script>
+    <script>
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('userRole');
+            if (!token || role !== 'hospital_admin') {
+                window.location.href = '/login.html';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Dashboard - DocReserve</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/super-admin-dashboard.css">
+</head>
+<body>
+    <div class="admin-dashboard-container">
+        <aside class="sidebar">
+            <div class="logo">DocReserve</div>
+            <nav class="sidebar-nav">
+                <a href="/super-admin-dashboard.html" class="nav-item active">Dashboard</a>
+                <a href="/super-admin-hospital-management.html" class="nav-item">Hospital Admin Management</a>
+                <a href="/super-admin-analytics.html" class="nav-item">Analytics</a>
+                <a href="/super-admin-profile.html" class="nav-item">Profile</a>
+            </nav>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </aside>
+
+        <main class="main-content">
+            <header class="main-header-dashboard">
+                <div class="dashboard-title">
+                    <h2>Dashboard</h2>
+                    <p>Home / Dashboard</p>
+                </div>
+                <div class="user-profile-info">
+                    <span id="admin-email-display">Admin@DocReserve.com</span>
+                    <div class="user-profile-icon" id="admin-initials">AD</div>
+                </div>
+            </header>
+
+            <section class="summary-cards-section">
+                <div class="summary-card">
+                    <h3>Total Pending Approvals</h3>
+                    <p id="total-pending-approvals">24</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Total Hospital Admins</h3>
+                    <p id="total-hospital-admins">156</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Total Doctors</h3>
+                    <p id="total-doctors">892</p>
+                </div>
+                <div class="summary-card">
+                    <h3>Total Users</h3>
+                    <p id="total-users">12,847</p>
+                </div>
+            </section>
+
+            <section class="pending-approvals-section">
+                <h3>Pending Approvals</h3>
+                <div class="search-filter-controls">
+                    <div class="search-bar">
+                        <input type="text" id="admin-search" placeholder="Search hospital admin...">
+                        <span class="search-icon">Q</span>
+                    </div>
+                    <select id="status-filter" class="filter-select">
+                        <option value="">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Approved">Approved</option>
+                    </select>
+                </div>
+                <div class="table-responsive">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Hospital Admin Name</th>
+                                <th>Hospital Name</th>
+                                <th>Email</th>
+                                <th>Registration Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pending-admins-table-body">
+                            <tr>
+                                <td>
+                                    <div class="admin-profile-cell">
+                                        <div class="initials">SJ</div>
+                                        <div>
+                                            <h4>Dr. Sarah Johnson</h4>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>Metropolitan General Hospital</td>
+                                <td>sarah.johnson@metro-hospital.com</td>
+                                <td>2024-01-15</td>
+                                <td><span class="status-badge pending">Pending</span></td>
+                                <td class="action-buttons">
+                                    <button class="button primary small approve-btn" data-id="1">Approve</button>
+                                    <button class="button secondary small reject-btn" data-id="1">Reject</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <span>Showing <span id="current-results-start">1</span> to <span id="current-results-end">3</span> of <span id="total-results">24</span> results</span>
+                    <div class="pagination-controls">
+                        <button>&lt;</button>
+                        <button class="active">1</button>
+                        <button>2</button>
+                        <button>3</button>
+                        <span>...</span>
+                        <button>8</button>
+                        <button>&gt;</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="js/super-admin-dashboard.js"></script>
+    <script>
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('userRole');
+            window.location.href = '/login.html';
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('userRole');
+            if (!token || role !== 'super_admin') {
+                window.location.href = '/login.html';
+            }
+        });
+    </script>
+</body>
+</html>

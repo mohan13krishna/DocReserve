@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Services - DocReserve</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Basic styling for the Services page */
+        .services-page-container {
+            padding: 50px;
+            background-color: #f4f7f6;
+            text-align: center;
+        }
+        .services-page-container h1 {
+            font-size: 2.5em;
+            color: #0056b3;
+            margin-bottom: 10px;
+        }
+        .services-page-container p.intro {
+            font-size: 1.1em;
+            color: #666;
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .service-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+        .service-details-card {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            text-align: left;
+        }
+        .service-details-card h3 {
+            color: #007bff;
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+        }
+        .service-details-card img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            display: block; /* To center it */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .service-details-card ul {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        .service-details-card ul li {
+            background-color: #e0f7fa;
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border-left: 5px solid #007bff;
+            border-radius: 4px;
+            color: #333;
+            font-size: 0.95em;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <div class="logo">DocReserve</div>
+        <nav class="main-nav">
+            <a href="/">Home</a>
+            <a href="/doctors.html">Doctors</a>
+            <a href="/services.html">Services</a>
+            <a href="/about.html">About</a>
+        </nav>
+        <div class="auth-buttons">
+            <a href="/login.html" class="button primary">Login</a>
+        </div>
+    </header>
+
+    <div class="services-page-container">
+        <h1>Our Comprehensive Services</h1>
+        <p class="intro">At DocReserve, we are committed to providing a seamless and efficient healthcare experience for everyone. Our services are designed to put your health needs first.</p>
+
+        <div class="service-details-grid">
+            <div class="service-details-card">
+                <img src="/images/secure-records-icon.png" alt="Easy Booking Icon">
+                <h3>Easy Appointment Booking</h3>
+                <p>Gone are the days of endless phone calls and waiting. With DocReserve, you can:</p>
+                <ul>
+                    <li>Browse available doctor slots in real-time.</li>
+                    <li>Schedule, reschedule, or cancel appointments with a few clicks.</li>
+                    <li>Receive automated reminders for your upcoming visits.</li>
+                    <li>Book appointments 24/7 from any device.</li>
+                </ul>
+            </div>
+            <div class="service-details-card">
+                <img src="/images/secure-records-icon.png" alt="Expert Doctors Icon">
+                <h3>Access to Expert Doctors</h3>
+                <p>We connect you with a network of highly qualified and experienced medical professionals across a wide range of specialties:</p>
+                <ul>
+                    <li>General Practitioners, Specialists (Cardiologists, Pediatricians, etc.).</li>
+                    <li>View doctor profiles, experience, and patient ratings.</li>
+                    <li>Find doctors based on location, availability, and specific needs.</li>
+                    <li>Telemedicine options for remote consultations (if implemented).</li>
+                </ul>
+            </div>
+            <div class="service-details-card">
+                <img src="/images/secure-records-icon.png" alt="Secure Records Icon">
+                <h3>Secure and Accessible Medical Records</h3>
+                <p>Your health information is handled with the highest level of security and privacy. Our platform allows you to:</p>
+                <ul>
+                    <li>Securely store your medical history, allergies, and medications.</li>
+                    <li>Access your records anytime, anywhere, when you need them.</li>
+                    <li>Share relevant information securely with your chosen healthcare providers.</li>
+                    <li>Maintain a comprehensive overview of your health journey.</li>
+                </ul>
+            </div>
+            <div class="service-details-card">
+                <img src="/images/secure-records-icon.png" alt="Reminders Icon">
+                <h3>Personalized Reminders & Notifications</h3>
+                <p>Never miss an appointment or important health update. Our system provides:</p>
+                <ul>
+                    <li>Appointment reminders via email and SMS.</li>
+                    <li>Notifications for prescription refills or follow-up recommendations.</li>
+                    <li>Health tips and preventative care reminders.</li>
+                    <li>Customizable notification preferences.</li>
+                </ul>
+            </div>
+            <div class="service-details-card">
+                <img src="/images/secure-records-icon.png" alt="Support Icon">
+                <h3>Dedicated Support & Help</h3>
+                <p>We are here to help you every step of the way. Our support resources include:</p>
+                <ul>
+                    <li>Comprehensive FAQ section for quick answers.</li>
+                    <li>Responsive customer support via email or phone.</li>
+                    <li>Help guides for navigating the platform.</li>
+                    <li>Emergency contact management for peace of mind.</li>
+                </ul>
+            </div>
+            <div class="service-details-card">
+                <img src="/images/secure-records-icon.png" alt="Emergency Icon">
+                <h3>Emergency Contact Management</h3>
+                <p>In critical situations, having immediate access to emergency contacts is vital. Our platform allows you to:</p>
+                <ul>
+                    <li>Store and manage emergency contact information securely.</li>
+                    <li>Specify relationships and phone numbers for quick access.</li>
+                    <li>Ensure your loved ones can be reached when it matters most.</li>
+                    <li>Update information easily for peace of mind.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="copyright">
+            &copy; 2024 DocReserve. All rights reserved.
+        </div>
+    </footer>
+</body>
+</html>
