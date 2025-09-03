@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Services - DocReserve</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
         /* Basic styling for the Services page */
@@ -25,18 +27,14 @@
             margin-left: auto;
             margin-right: auto;
         }
-        .service-details-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 30px;
-        }
+
         .service-details-card {
             background-color: #fff;
             padding: 30px;
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-            text-align: left;
+            text-align: left; /* Reverted to left alignment */
+            height: auto; /* Allow height to be determined by content */
         }
         .service-details-card h3 {
             color: #007bff;
@@ -45,14 +43,17 @@
             border-bottom: 1px solid #eee;
             padding-bottom: 10px;
         }
-        .service-details-card img {
-            width: 80px;
-            height: 80px;
+        /* Styling for icons within service-details-card (from style.css) */
+        /* Note: icons will now be left-aligned by default due to parent's text-align:left */
+        .service-details-card i {
+            font-size: 3rem;
+            color: #007bff;
             margin-bottom: 20px;
-            display: block; /* To center it */
-            margin-left: auto;
-            margin-right: auto;
+            /* display: block; removed as no longer centering within square */
+            /* margin-left: auto; removed */
+            /* margin-right: auto; removed */
         }
+
         .service-details-card ul {
             list-style: none;
             padding: 0;
@@ -70,16 +71,23 @@
     </style>
 </head>
 <body>
-    <header class="main-header">
-        <div class="logo">DocReserve</div>
-        <nav class="main-nav">
-            <a href="/">Home</a>
-            <a href="/doctors.html">Doctors</a>
-            <a href="/services.html">Services</a>
-            <a href="/about.html">About</a>
-        </nav>
-        <div class="auth-buttons">
-            <a href="/login.html" class="button primary">Login</a>
+    <header class="main-header navbar navbar-expand-lg bg-white shadow-sm py-3">
+        <div class="container-fluid">
+            <a class="navbar-brand logo fs-4 fw-bold text-primary" href="./index.html">DocReserve</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <nav class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <a class="nav-link text-secondary fw-semibold mx-2" href="./index.html">Home</a>
+                    <a class="nav-link text-secondary fw-semibold mx-2" href="./doctors.html">Doctors</a>
+                    <a class="nav-link text-secondary fw-semibold mx-2" href="./services.html">Services</a>
+                    <a class="nav-link text-secondary fw-semibold mx-2" href="./about.html">About</a>
+                </nav>
+                <div class="d-flex auth-buttons">
+                    <a href="./login.html" class="btn btn-primary px-4 fw-semibold">Login</a>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -87,80 +95,109 @@
         <h1>Our Comprehensive Services</h1>
         <p class="intro">At DocReserve, we are committed to providing a seamless and efficient healthcare experience for everyone. Our services are designed to put your health needs first.</p>
 
-        <div class="service-details-grid">
-            <div class="service-details-card">
-                <img src="/images/secure-records-icon.png" alt="Easy Booking Icon">
-                <h3>Easy Appointment Booking</h3>
-                <p>Gone are the days of endless phone calls and waiting. With DocReserve, you can:</p>
-                <ul>
-                    <li>Browse available doctor slots in real-time.</li>
-                    <li>Schedule, reschedule, or cancel appointments with a few clicks.</li>
-                    <li>Receive automated reminders for your upcoming visits.</li>
-                    <li>Book appointments 24/7 from any device.</li>
-                </ul>
+        <div class="row justify-content-center g-4">
+            <div class="col-12 col-md-10 col-lg-8"> <div class="service-details-card card shadow-sm border-0 animate-hover">
+                    <div class="card-body">
+                        <i class="bi bi-calendar-check-fill text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h3 class="card-title text-primary mb-2">Easy Appointment Booking</h3>
+                        <p class="card-text text-secondary">Gone are the days of endless phone calls and waiting. With DocReserve, you can browse available doctor slots in real-time. Schedule, reschedule, or cancel appointments with a few clicks. Receive automated reminders for your upcoming visits. Book appointments 24/7 from any device.</p>
+                        </div>
+                </div>
             </div>
-            <div class="service-details-card">
-                <img src="/images/secure-records-icon.png" alt="Expert Doctors Icon">
-                <h3>Access to Expert Doctors</h3>
-                <p>We connect you with a network of highly qualified and experienced medical professionals across a wide range of specialties:</p>
-                <ul>
-                    <li>General Practitioners, Specialists (Cardiologists, Pediatricians, etc.).</li>
-                    <li>View doctor profiles, experience, and patient ratings.</li>
-                    <li>Find doctors based on location, availability, and specific needs.</li>
-                    <li>Telemedicine options for remote consultations (if implemented).</li>
-                </ul>
+            <div class="col-12 col-md-10 col-lg-8">
+                <div class="service-details-card card shadow-sm border-0 animate-hover">
+                    <div class="card-body">
+                        <i class="bi bi-person-heart text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h3 class="card-title text-primary mb-2">Access to Expert Doctors</h3>
+                        <p class="card-text text-secondary">We connect you with a network of highly qualified and experienced medical professionals across a wide range of specialties: General Practitioners, Specialists (Cardiologists, Pediatricians, etc.). View doctor profiles, experience, and patient ratings. Find doctors based on location, availability, and specific needs. Telemedicine options for remote consultations (if implemented).</p>
+                    </div>
+                </div>
             </div>
-            <div class="service-details-card">
-                <img src="/images/secure-records-icon.png" alt="Secure Records Icon">
-                <h3>Secure and Accessible Medical Records</h3>
-                <p>Your health information is handled with the highest level of security and privacy. Our platform allows you to:</p>
-                <ul>
-                    <li>Securely store your medical history, allergies, and medications.</li>
-                    <li>Access your records anytime, anywhere, when you need them.</li>
-                    <li>Share relevant information securely with your chosen healthcare providers.</li>
-                    <li>Maintain a comprehensive overview of your health journey.</li>
-                </ul>
+            <div class="col-12 col-md-10 col-lg-8">
+                <div class="service-details-card card shadow-sm border-0 animate-hover">
+                    <div class="card-body">
+                        <i class="bi bi-shield-lock-fill text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h3 class="card-title text-primary mb-2">Secure and Accessible Medical Records</h3>
+                        <p class="card-text text-secondary">Your health information is handled with the highest level of security and privacy. Our platform allows you to: Securely store your medical history, allergies, and medications. Access your records anytime, anywhere, when you need them. Share relevant information securely with your chosen healthcare providers. Maintain a comprehensive overview of your health journey.</p>
+                    </div>
+                </div>
             </div>
-            <div class="service-details-card">
-                <img src="/images/secure-records-icon.png" alt="Reminders Icon">
-                <h3>Personalized Reminders & Notifications</h3>
-                <p>Never miss an appointment or important health update. Our system provides:</p>
-                <ul>
-                    <li>Appointment reminders via email and SMS.</li>
-                    <li>Notifications for prescription refills or follow-up recommendations.</li>
-                    <li>Health tips and preventative care reminders.</li>
-                    <li>Customizable notification preferences.</li>
-                </ul>
+            <div class="col-12 col-md-10 col-lg-8">
+                <div class="service-details-card card shadow-sm border-0 animate-hover">
+                    <div class="card-body">
+                        <i class="bi bi-bell-fill text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h3 class="card-title text-primary mb-2">Personalized Reminders & Notifications</h3>
+                        <p class="card-text text-secondary small">Never miss an appointment or important health update. Our system provides: Appointment reminders via email and SMS. Notifications for prescription refills or follow-up recommendations. Health tips and preventative care reminders. Customizable notification preferences.</p>
+                    </div>
+                </div>
             </div>
-            <div class="service-details-card">
-                <img src="/images/secure-records-icon.png" alt="Support Icon">
-                <h3>Dedicated Support & Help</h3>
-                <p>We are here to help you every step of the way. Our support resources include:</p>
-                <ul>
-                    <li>Comprehensive FAQ section for quick answers.</li>
-                    <li>Responsive customer support via email or phone.</li>
-                    <li>Help guides for navigating the platform.</li>
-                    <li>Emergency contact management for peace of mind.</li>
-                </ul>
+            <div class="col-12 col-md-10 col-lg-8">
+                <div class="service-details-card card shadow-sm border-0 animate-hover">
+                    <div class="card-body">
+                        <i class="bi bi-headset text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h3 class="card-title text-primary mb-2">Dedicated Support & Help</h3>
+                        <p class="card-text text-secondary small">We are here to help you every step of the way. Our support resources include: Comprehensive FAQ section for quick answers. Responsive customer support via email or phone. Help guides for navigating the platform. Emergency contact management for peace of mind.</p>
+                    </div>
+                </div>
             </div>
-            <div class="service-details-card">
-                <img src="/images/secure-records-icon.png" alt="Emergency Icon">
-                <h3>Emergency Contact Management</h3>
-                <p>In critical situations, having immediate access to emergency contacts is vital. Our platform allows you to:</p>
-                <ul>
-                    <li>Store and manage emergency contact information securely.</li>
-                    <li>Specify relationships and phone numbers for quick access.</li>
-                    <li>Ensure your loved ones can be reached when it matters most.</li>
-                    <li>Update information easily for peace of mind.</li>
-                </ul>
+            <div class="col-12 col-md-10 col-lg-8">
+                <div class="service-details-card card shadow-sm border-0 animate-hover">
+                    <div class="card-body">
+                        <i class="bi bi-person-badge-fill text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h3 class="card-title text-primary mb-2">Emergency Contact Management</h3>
+                        <p class="card-text text-secondary small">In critical situations, having immediate access to emergency contacts is vital. Our platform allows you to: Store and manage emergency contact information securely. Specify relationships and phone numbers for quick access. Ensure your loved ones can be reached when it matters most. Update information easily for peace of mind.</p>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+        </div>
 
-    <footer class="main-footer">
-        <div class="copyright">
-            &copy; 2024 DocReserve. All rights reserved.
+    <footer class="main-footer bg-dark text-white-50 py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h3 class="text-info mb-3 fs-5 fw-bold">DocReserve</h3>
+                    <p class="small">Streamlined doctor appointments and healthcare management. Experience seamless medical scheduling with trusted professionals.</p>
+                    <div class="social-icons fs-4">
+                        <a href="#" class="text-white-50 me-3"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-white-50 me-3"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" class="text-white-50 me-3"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="text-white-50"><i class="bi bi-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h3 class="text-info mb-3 fs-5 fw-bold">Quick Links</h3>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="./doctors.html" class="text-white-50 text-decoration-none">Find a Doctor</a></li>
+                        <li class="mb-2"><a href="./doctors.html" class="text-white-50 text-decoration-none">Book Appointment</a></li>
+                        <li class="mb-2"><a href="./services.html" class="text-white-50 text-decoration-none">Our Services</a></li>
+                        <li class="mb-2"><a href="./about.html" class="text-white-50 text-decoration-none">Health Blog</a></li>
+                        <li class="mb-2"><a href="./doctors.html" class="text-white-50 text-decoration-none">For Doctors</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h3 class="text-info mb-3 fs-5 fw-bold">Support</h3>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Contact Us</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">FAQ</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Privacy Policy</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Terms of Service</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Help Center</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h3 class="text-info mb-3 fs-5 fw-bold">Contact Info</h3>
+                    <p class="small mb-1">123 Healthcare Ave, Medical City, MC 12345</p>
+                    <p class="small mb-1">+1(555) 123-4567</p>
+                    <p class="small mb-1">support@medicare.com</p>
+                    <p class="small mb-1">Mon-Fri: 9:00 AM - 6:00 PM</p>
+                </div>
+            </div>
+            <div class="text-center pt-4 border-top border-secondary opacity-50">
+                <p class="small mb-0">&copy; 2024 DocReserve. All rights reserved.</p>
+            </div>
         </div>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
