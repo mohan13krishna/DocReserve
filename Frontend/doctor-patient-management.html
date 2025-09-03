@@ -4,149 +4,302 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor Patient Management - DocReserve</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/doctor-dashboard.css">
 </head>
 <body>
-    <div class="doctor-dashboard-container">
-        <aside class="sidebar">
-            <div class="logo">DocReserve</div>
-            <nav class="sidebar-nav">
-                <a href="/doctor-dashboard.html" class="nav-item">Schedule Management</a>
-                <a href="/doctor-patient-management.html" class="nav-item active">Patient Management</a>
-                <a href="/doctor-profile.html" class="nav-item">Profile</a>
+    <div class="doctor-dashboard-container d-flex min-vh-100">
+        <aside class="sidebar bg-white shadow-sm p-4 d-flex flex-column">
+            <div class="logo mb-5 text-primary fw-bold fs-4">DocReserve</div>
+            <nav class="sidebar-nav flex-grow-1">
+                <a href="./doctor-dashboard.html" class="nav-item d-flex align-items-center mb-2 p-3 rounded-pill text-decoration-none fw-semibold">
+                    <i class="bi bi-speedometer2 fs-5 me-3"></i> Dashboard
+                </a>
+                <a href="./doctor-schedule-management.html" class="nav-item d-flex align-items-center mb-2 p-3 rounded-pill text-decoration-none text-secondary fw-semibold">
+                    <i class="bi bi-calendar-event-fill fs-5 me-3"></i> Schedule Management
+                </a>
+                <a href="./doctor-patient-management.html" class="nav-item active d-flex align-items-center mb-2 p-3 rounded-pill text-decoration-none text-secondary fw-semibold">
+                    <i class="bi bi-people-fill fs-5 me-3"></i> Patient Management
+                </a>
+                <a href="./doctor-profile.html" class="nav-item d-flex align-items-center mb-2 p-3 rounded-pill text-decoration-none text-secondary fw-semibold">
+                    <i class="bi bi-person-fill fs-5 me-3"></i> Profile
+                </a>
             </nav>
-            <div class="availability-toggle-container">
-                <label class="switch">
+            <div class="availability-toggle-container d-flex align-items-center justify-content-between p-3 rounded-pill bg-light mt-4">
+                <span id="availability-status" class="fw-bold text-dark">Available</span>
+                <label class="switch mb-0">
                     <input type="checkbox" id="doctor-availability-toggle">
                     <span class="slider round"></span>
                 </label>
-                <span id="availability-status">Available</span>
             </div>
-            <button class="logout-btn" onclick="logout()">Logout</button>
+            <button class="btn btn-danger btn-lg w-100 rounded-pill shadow-sm mt-4" onclick="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i> Logout
+            </button>
         </aside>
 
-        <main class="main-content">
-            <header class="main-header-dashboard">
+        <main class="main-content flex-grow-1 p-4 bg-light">
+            <header class="main-header-dashboard d-flex justify-content-between align-items-center mb-4 pb-3">
                 <div class="dashboard-title">
-                    <h2>Patient Management</h2>
+                    <h2 class="display-6 fw-bold mb-0">Patient Management</h2>
                 </div>
-                <div class="user-profile-info">
-                    <span id="doctor-full-name">Dr. [Doctor Name]</span>
-                    <div class="user-profile-icon" id="doctor-initials">DR</div>
+                <div class="user-profile-info d-flex align-items-center gap-2">
+                    <span id="doctor-full-name" class="fw-bold text-dark me-2">Dr. [Doctor Name]</span>
+                    <div class="user-profile-icon rounded-circle bg-primary text-white d-flex justify-content-center align-items-center fw-bold fs-5 shadow-sm" style="width: 45px; height: 45px;">
+                        <span id="doctor-initials">DR</span>
+                    </div>
                 </div>
             </header>
 
-            <section class="patient-management-section">
-                <div class="search-filter-controls">
-                    <div class="search-bar">
-                        <input type="text" placeholder="Search patients by name, ID or phone..." id="patient-search-input">
-                        <span class="search-icon">Q</span>
+            <section class="patient-management-section card shadow-sm p-4 border-0 rounded-4">
+                <div class="d-flex flex-wrap align-items-center justify-content-between mb-4 gap-2">
+                    <div class="input-group" style="max-width: 420px;">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input type="text" class="form-control" placeholder="Search patients by name, ID or phone..." id="patient-search-input">
                     </div>
-                    <div class="patient-grid-list-toggle">
-                        <button class="button secondary small active">Grid</button>
-                        <button class="button secondary small">List</button>
-                    </div>
-                    <select id="sort-by-filter" class="filter-select">
-                        <option value="name">Sort by Name</option>
-                        <option value="last_visit">Sort by Last Visit</option>
-                        <option value="next_appointment">Sort by Next Appointment</option>
-                    </select>
-                    <button class="button secondary small">Filter</button>
-                </div>
-
-                <div class="patient-cards-grid" id="patient-cards-container">
-                    <div class="patient-card">
-                        <div class="initials">EW</div>
-                        <h4>Emma Wilson</h4>
-                        <p>Female, 34 years</p>
-                        <p>+1 (555) 123-4567</p>
-                        <p>emma.wilson@email.com</p>
-                        <p>Last visit: Dec 15, 2024</p>
-                        <p>Next: Dec 22, 2024 at 2:00 PM</p>
-                        <p>Conditions: Hypertension, Regular checkups</p>
-                        <button class="button primary">View Details</button>
-                        <button class="button secondary">Schedule</button>
-                    </div>
-                    <div class="patient-card">
-                        <div class="initials">JM</div>
-                        <h4>James Miller</h4>
-                        <p>Male, 42 years</p>
-                        <p>+1 (555) 234-5678</p>
-                        <p>james.miller@email.com</p>
-                        <p>Last visit: Dec 18, 2024</p>
-                        <p>Next: Dec 25, 2024 at 10:30 AM</p>
-                        <p>Conditions: Diabetes Type 2, Follow-up care</p>
-                        <button class="button primary">View Details</button>
-                        <button class="button secondary">Schedule</button>
-                    </div>
-                     <div class="patient-card">
-                        <div class="initials">LA</div>
-                        <h4>Lisa Anderson</h4>
-                        <p>Female, 28 years</p>
-                        <p>+1 (555) 345-6789</p>
-                        <p>lisa.anderson@email.com</p>
-                        <p>Last visit: Dec 10, 2024</p>
-                        <p>Next: Dec 20, 2024 at 3:15 PM</p>
-                        <p>Conditions: Annual physical, Preventive care</p>
-                        <button class="button primary">View Details</button>
-                        <button class="button secondary">Schedule</button>
-                    </div>
-                     <div class="patient-card">
-                        <div class="initials">RD</div>
-                        <h4>Robert Davis</h4>
-                        <p>Male, 58 years</p>
-                        <p>+1 (555) 456-7890</p>
-                        <p>robert.davis@email.com</p>
-                        <p>Last visit: Dec 18, 2024</p>
-                        <p>Next: Dec 19, 2024 at 11:00 AM</p>
-                        <p>Conditions: Heart disease, High blood pressure</p>
-                        <button class="button primary">View Details</button>
-                        <button class="button secondary">Schedule</button>
-                    </div>
-                    <div class="patient-card">
-                        <div class="initials">MG</div>
-                        <h4>Maria Garcia</h4>
-                        <p>Female, 45 years</p>
-                        <p>+1 (555) 567-8901</p>
-                        <p>maria.garcia@email.com</p>
-                        <p>Last visit: Dec 12, 2024</p>
-                        <p>Next: Dec 26, 2024 at 1:30 PM</p>
-                        <p>Conditions: Routine checkup, Wellness visit</p>
-                        <button class="button primary">View Details</button>
-                        <button class="button secondary">Schedule</button>
-                    </div>
-                    <div class="patient-card">
-                        <div class="initials">DT</div>
-                        <h4>David Thompson</h4>
-                        <p>Male, 37 years</p>
-                        <p>+1 (555) 678-9012</p>
-                        <p>david.thompson@email.com</p>
-                        <p>Last visit: Nov 28, 2024</p>
-                        <p>No upcoming appointments</p>
-                        <p>Conditions: Migraine management, Stress-related</p>
-                        <button class="button primary">View Details</button>
-                        <button class="button secondary">Schedule</button>
+                    <div class="d-flex gap-2">
+                        <select id="sort-by-filter" class="form-select">
+                            <option value="name">Sort by Name</option>
+                            <option value="last_visit">Sort by Last Visit</option>
+                            <option value="next_appointment">Sort by Next Appointment</option>
+                        </select>
+                        <button class="btn btn-outline-secondary rounded-pill" data-bs-toggle="offcanvas" data-bs-target="#pmFilters"><i class="bi bi-funnel me-1"></i>Filters</button>
                     </div>
                 </div>
 
-                <div class="pagination">
-                    <span>Showing 1-7 of 247 patients</span>
-                    <div class="pagination-controls">
-                        <button>&lt;</button>
-                        <button class="active">1</button>
-                        <button>2</button>
-                        <button>3</button>
-                        <span>...</span>
-                        <button>25</button>
-                        <button>&gt;</button>
+                <div class="row row-cols-1 row-cols-md-3 g-3" id="patient-cards-container"></div>
+
+                <!-- Filters Offcanvas -->
+                <div class="offcanvas offcanvas-end" tabindex="-1" id="pmFilters" aria-labelledby="pmFiltersLabel">
+                  <div class="offcanvas-header">
+                    <h5 class="offcanvas-title" id="pmFiltersLabel">Filters</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                  </div>
+                  <div class="offcanvas-body">
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Gender</label>
+                      <div class="d-flex gap-2 flex-wrap">
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" value="Male" id="filt-g-m">
+                          <label class="form-check-label" for="filt-g-m">Male</label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" value="Female" id="filt-g-f">
+                          <label class="form-check-label" for="filt-g-f">Female</label>
+                        </div>
+                        <div class="form-check">
+                          <input class="form-check-input" type="checkbox" value="Other" id="filt-g-o">
+                          <label class="form-check-label" for="filt-g-o">Other</label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Conditions</label>
+                      <input class="form-control" id="filt-conditions" placeholder="e.g., Diabetes, Hypertension">
+                      <div class="form-text">Comma separated</div>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Last Visit</label>
+                      <div class="row g-2">
+                        <div class="col"><input type="date" class="form-control" id="filt-last-from"></div>
+                        <div class="col"><input type="date" class="form-control" id="filt-last-to"></div>
+                      </div>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label fw-semibold">Next Appointment</label>
+                      <div class="row g-2">
+                        <div class="col"><input type="date" class="form-control" id="filt-next-from"></div>
+                        <div class="col"><input type="date" class="form-control" id="filt-next-to"></div>
+                      </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                      <button class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="offcanvas">Cancel</button>
+                      <button class="btn btn-primary rounded-pill" id="apply-filters-btn" data-bs-dismiss="offcanvas">Apply</button>
+                    </div>
+                  </div>
+                </div>
+                <!-- View Details Modal -->
+                <div class="modal fade" id="patientDetailsModal" tabindex="-1" aria-labelledby="patientDetailsLabel" aria-hidden="true">
+                  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="patientDetailsLabel">Patient Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div id="patient-details-body">Loading...</div>
+                      </div>
+                      <div class="modal-footer">
+                        <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                        <button class="btn btn-primary" id="pdm-create-appointment"><i class="bi bi-calendar-plus me-2"></i>Schedule</button>
+                        <button class="btn btn-secondary" id="pdm-start-chat"><i class="bi bi-chat-dots me-2"></i>Message</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <!-- Schedule Appointment Modal -->
+                <div class="modal fade" id="scheduleAppointmentModal" tabindex="-1" aria-labelledby="scheduleAppointmentLabel" aria-hidden="true">
+                  <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="scheduleAppointmentLabel">Schedule Appointment</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <form id="schedule-appointment-form">
+                          <input type="hidden" id="schedule-patient-id">
+                          
+                          <div class="row mb-3">
+                            <div class="col-md-6">
+                              <div class="patient-info-summary p-3 bg-light rounded-3">
+                                <h6 class="fw-bold mb-2">Patient</h6>
+                                <div id="schedule-patient-name" class="fw-semibold">Select a patient</div>
+                                <div id="schedule-patient-details" class="small text-muted"></div>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="mb-3">
+                                <label for="appointment-date" class="form-label">Date</label>
+                                <input type="date" class="form-control" id="appointment-date" required>
+                              </div>
+                              <div class="mb-3">
+                                <label for="appointment-time" class="form-label">Time</label>
+                                <select class="form-select" id="appointment-time" required>
+                                  <option value="" selected disabled>Select a time</option>
+                                  <!-- Time slots will be populated dynamically -->
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div class="mb-3">
+                            <label for="appointment-type" class="form-label">Appointment Type</label>
+                            <select class="form-select" id="appointment-type" required>
+                              <option value="" selected disabled>Select type</option>
+                              <option value="Consultation">Consultation</option>
+                              <option value="Follow-up">Follow-up</option>
+                              <option value="Procedure">Procedure</option>
+                              <option value="Emergency">Emergency</option>
+                              <option value="Routine Check-up">Routine Check-up</option>
+                            </select>
+                          </div>
+                          
+                          <div class="mb-3">
+                            <label for="appointment-reason" class="form-label">Reason</label>
+                            <textarea class="form-control" id="appointment-reason" rows="3" placeholder="Describe the reason for this appointment"></textarea>
+                          </div>
+                          
+                          <div class="mb-3">
+                            <label class="form-label">Duration</label>
+                            <div class="d-flex align-items-center">
+                              <select class="form-select" id="appointment-duration" required>
+                                <option value="15">15 minutes</option>
+                                <option value="30" selected>30 minutes</option>
+                                <option value="45">45 minutes</option>
+                                <option value="60">1 hour</option>
+                                <option value="90">1.5 hours</option>
+                                <option value="120">2 hours</option>
+                              </select>
+                            </div>
+                          </div>
+                          
+                          <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="send-notification" checked>
+                            <label class="form-check-label" for="send-notification">
+                              Send notification to patient
+                            </label>
+                          </div>
+                        </form>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" id="save-appointment-btn">
+                          <i class="bi bi-calendar-check me-1"></i>Schedule Appointment
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card shadow-sm p-4 border-0 rounded-4 mt-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0">Today's Appointments</h5>
+                        <a href="./doctor-schedule-management.html" class="btn btn-link btn-sm">Open schedule</a>
+                    </div>
+                    <div id="pm-today-list" class="row row-cols-1 row-cols-md-3 g-3 mt-1"></div>
+                </div>
+
+
+
+
+
+
+                    <!-- Bulk actions toolbar inserted below cards -->
+                    <div class="d-flex align-items-center gap-2 mt-2" id="bulk-actions" style="display:none;">
+                      <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="pm-select-all">
+                        <label class="form-check-label" for="pm-select-all">Select all</label>
+                      </div>
+                      <button class="btn btn-outline-secondary btn-sm rounded-pill" id="pm-bulk-message"><i class="bi bi-chat-dots me-1"></i>Message</button>
+                      <button class="btn btn-outline-primary btn-sm rounded-pill" id="pm-bulk-schedule"><i class="bi bi-calendar-plus me-1"></i>Schedule</button>
+                      <button class="btn btn-outline-danger btn-sm rounded-pill" id="pm-bulk-remove"><i class="bi bi-trash me-1"></i>Remove</button>
+                    </div>
+                    <!-- Patient Card Template -->
+                    <div class="d-none">
+                        <div id="patient-card-template" class="card h-100 border-0 shadow-sm rounded-4 animate-hover">
+                            <div class="card-body p-4">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="patient-avatar rounded-circle text-white d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; background-color: var(--bs-primary);">
+                                        <span class="patient-initials fw-bold"></span>
+                                    </div>
+                                    <div>
+                                        <h5 class="patient-name card-title mb-0 fw-bold"></h5>
+                                        <p class="patient-basic-info card-text small text-muted mb-0"></p>
+                                    </div>
+                                    <div class="ms-auto">
+                                        <div class="form-check">
+                                            <input class="form-check-input patient-select" type="checkbox">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="patient-contact mb-3">
+                                    <p class="card-text small mb-1"><i class="bi bi-telephone me-2 text-primary"></i><span class="patient-phone"></span></p>
+                                    <p class="card-text small mb-0"><i class="bi bi-envelope me-2 text-primary"></i><span class="patient-email"></span></p>
+                                </div>
+                                <div class="patient-medical-info">
+                                    <p class="card-text small mb-1"><i class="bi bi-calendar-check me-2 text-primary"></i>Last visit: <span class="patient-last-visit"></span></p>
+                                    <p class="card-text small mb-1"><i class="bi bi-calendar-event me-2 text-primary"></i><span class="patient-next-appt"></span></p>
+                                    <p class="card-text small mb-0"><i class="bi bi-heart-pulse me-2 text-primary"></i><span class="patient-conditions"></span></p>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white border-0 p-3 pt-0">
+                                <div class="d-flex justify-content-between">
+                                    <button class="btn btn-outline-primary btn-sm rounded-pill patient-view" data-patient-id=""><i class="bi bi-eye me-1"></i>View</button>
+                                    <button class="btn btn-primary btn-sm rounded-pill patient-schedule" data-patient-id=""><i class="bi bi-calendar-plus me-1"></i>Schedule</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div class="small text-muted" id="pm-count"></div>
+                    <div class="d-flex align-items-center gap-2">
+                        <button class="btn btn-outline-secondary btn-sm rounded-pill" id="pm-prev"><i class="bi bi-chevron-left"></i></button>
+                        <span id="pm-page" class="small"></span>
+                        <button class="btn btn-outline-secondary btn-sm rounded-pill" id="pm-next"><i class="bi bi-chevron-right"></i></button>
                     </div>
                 </div>
             </section>
         </main>
     </div>
 
-    <script src="js/doctor-dashboard.js"></script> <script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="js/doctor-dashboard.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/patient-management.js"></script>
+    <script>
         document.addEventListener('DOMContentLoaded', async () => {
             const token = localStorage.getItem('token');
             const userRole = localStorage.getItem('userRole');
@@ -200,9 +353,33 @@
             const patientSearchInput = document.getElementById('patient-search-input');
             const sortByFilter = document.getElementById('sort-by-filter');
 
+            let pmPage = 1; const pmPageSize = 9; // 3x3 grid
             const fetchPatients = async () => {
                 try {
-                    const response = await fetch(`/api/doctor/patients?search=${patientSearchInput.value}&sortBy=${sortByFilter.value}`, {
+                    // Build filters
+                    const genders = [];
+                    if (document.getElementById('filt-g-m')?.checked) genders.push('Male');
+                    if (document.getElementById('filt-g-f')?.checked) genders.push('Female');
+                    if (document.getElementById('filt-g-o')?.checked) genders.push('Other');
+                    const conditions = (document.getElementById('filt-conditions')?.value || '').split(',').map(s=>s.trim()).filter(Boolean);
+                    const lastFrom = document.getElementById('filt-last-from')?.value || '';
+                    const lastTo = document.getElementById('filt-last-to')?.value || '';
+                    const nextFrom = document.getElementById('filt-next-from')?.value || '';
+                    const nextTo = document.getElementById('filt-next-to')?.value || '';
+
+                    const params = new URLSearchParams();
+                    params.set('search', patientSearchInput.value || '');
+                    params.set('sortBy', sortByFilter.value || '');
+                    if (genders.length) params.set('gender', genders.join(','));
+                    if (conditions.length) params.set('conditions', conditions.join(','));
+                    if (lastFrom) params.set('last_from', lastFrom);
+                    if (lastTo) params.set('last_to', lastTo);
+                    if (nextFrom) params.set('next_from', nextFrom);
+                    if (nextTo) params.set('next_to', nextTo);
+                    params.set('page', String(pmPage));
+                    params.set('limit', String(pmPageSize));
+
+                    const response = await fetch(`/api/doctor/patients?${params.toString()}`, {
                         method: 'GET',
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
@@ -216,26 +393,122 @@
                         patients.forEach(patient => {
                             const initials = (patient.fullName.charAt(0) + (patient.fullName.split(' ')[1] ? patient.fullName.split(' ')[1].charAt(0) : '')).toUpperCase();
                             const card = `
-                                <div class="patient-card">
-                                    <div class="initials">${initials}</div>
-                                    <h4>${patient.fullName}</h4>
-                                    <p>${patient.gender}, ${patient.age} years</p>
-                                    <p>${patient.phoneNumber}</p>
-                                    <p>${patient.email}</p>
-                                    <p>Last visit: ${patient.lastVisit}</p>
-                                    <p>Next: ${patient.nextAppointment}</p>
-                                    <p>Conditions: ${patient.conditions.join(', ')}</p>
-                                    <button class="button primary view-details-btn" data-patient-id="${patient.patient_id}">View Details</button>
-                                    <button class="button secondary schedule-btn" data-patient-id="${patient.patient_id}">Schedule</button>
+                                <div class="col">
+                                  <div class="card h-100 shadow-sm border-0 animate-hover">
+                                    <div class="card-body">
+                                      <div class="d-flex align-items-center mb-3">
+                                        <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center fw-bold me-3" style="width:56px;height:56px;">${initials}</div>
+                                        <div>
+                                          <h5 class="card-title fw-bold mb-1">${patient.fullName}</h5>
+                                          <div class="text-muted small">${patient.gender}, ${patient.age} years</div>
+                                        </div>
+                                      </div>
+                                      <div class="mb-2 small text-muted">
+                                        <i class="bi bi-telephone me-1"></i>${patient.phoneNumber} &nbsp;|&nbsp; <i class="bi bi-envelope me-1"></i>${patient.email}
+                                      </div>
+                                      <div class="mb-2 small"><i class="bi bi-clock-history me-1 text-info"></i>Last visit: <span class="text-muted">${patient.lastVisit}</span></div>
+                                      <div class="mb-2 small"><i class="bi bi-calendar-event me-1 text-primary"></i>Next: <span class="text-muted">${patient.nextAppointment || '—'}</span></div>
+                                      <div class="mb-3 small"><i class="bi bi-heart-pulse-fill me-1 text-danger"></i>Conditions: <span class="text-muted">${patient.conditions.join(', ')}</span></div>
+                                      <div class="d-flex gap-2">
+                                        <div class="form-check d-flex align-items-center me-1">
+                                          <input class="form-check-input pm-select me-2" type="checkbox" value="${patient.patient_id}">
+                                        </div>
+                                        <button class="btn btn-primary btn-sm rounded-pill view-details-btn" data-patient-id="${patient.patient_id}" data-bs-toggle="modal" data-bs-target="#patientDetailsModal"><i class="bi bi-person-vcard me-1"></i>View</button>
+                                        <button class="btn btn-outline-secondary btn-sm rounded-pill schedule-btn" data-patient-id="${patient.patient_id}"><i class="bi bi-calendar-plus me-1"></i>Schedule</button>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
                             `;
                             patientCardsContainer.insertAdjacentHTML('beforeend', card);
                         });
-                        document.querySelector('.pagination span').textContent = `Showing 1-${patients.length} of ${totalPatients} patients`;
+                        const start = (pmPage - 1) * pmPageSize + 1;
+                        const end = (pmPage - 1) * pmPageSize + patients.length;
+                        const countEl = document.getElementById('pm-count');
+                        const pageEl = document.getElementById('pm-page');
+                        const prevBtn = document.getElementById('pm-prev');
+                        const nextBtn = document.getElementById('pm-next');
+                        if (countEl) countEl.textContent = `Showing ${start}-${end} of ${totalPatients} patients`;
+                        if (pageEl) pageEl.textContent = `Page ${pmPage}`;
+                        if (prevBtn) prevBtn.disabled = pmPage <= 1;
+                        if (nextBtn) nextBtn.disabled = end >= totalPatients;
                     } else {
-                        patientCardsContainer.innerHTML = '<p>No patients found.</p>';
-                        document.querySelector('.pagination span').textContent = 'Showing 0-0 of 0 patients';
+                        patientCardsContainer.innerHTML = '<div class="text-center text-muted my-4">No results. <button class="btn btn-link p-0" id="pm-clear-filters">Clear filters</button></div>';
+                        const countEl = document.getElementById('pm-count');
+                        const pageEl = document.getElementById('pm-page');
+                        const prevBtn = document.getElementById('pm-prev');
+                        const nextBtn = document.getElementById('pm-next');
+                        if (countEl) countEl.textContent = 'Showing 0-0 of 0 patients';
+                        if (pageEl) pageEl.textContent = '';
+                        if (prevBtn) prevBtn.disabled = true;
+                        if (nextBtn) nextBtn.disabled = true;
+                        document.getElementById('pm-clear-filters')?.addEventListener('click', () => {
+                          document.getElementById('filt-g-m').checked = false;
+                          document.getElementById('filt-g-f').checked = false;
+                          document.getElementById('filt-g-o').checked = false;
+                          document.getElementById('filt-conditions').value = '';
+                          document.getElementById('filt-last-from').value = '';
+                          document.getElementById('filt-last-to').value = '';
+                          document.getElementById('filt-next-from').value = '';
+                          document.getElementById('filt-next-to').value = '';
+                          pmPage = 1;
+                          fetchPatients();
+                        });
                     }
+
+                    // Setup bulk select behavior
+                    const toolbar = document.getElementById('bulk-actions');
+                    const selects = Array.from(document.querySelectorAll('.pm-select'));
+                    const selectAll = document.getElementById('pm-select-all');
+                    function refreshToolbar() {
+                      const any = selects.some(ch => ch.checked);
+                      toolbar.style.display = any ? 'flex' : 'none';
+                    }
+                    selects.forEach(ch => ch.addEventListener('change', refreshToolbar));
+                    if (selectAll) selectAll.addEventListener('change', (e) => {
+                      selects.forEach(ch => ch.checked = e.target.checked);
+                      refreshToolbar();
+                    });
+
+                    // View details modal population
+                    document.querySelectorAll('.view-details-btn').forEach(btn => {
+                      btn.addEventListener('click', () => {
+                        const pid = btn.getAttribute('data-patient-id');
+                        const p = patients.find(x => String(x.patient_id) === String(pid));
+                        const body = document.getElementById('patient-details-body');
+                        if (!body) return;
+                        if (!p) { body.textContent = 'Patient not found'; return; }
+                        body.innerHTML = `
+                          <div class="d-flex align-items-start gap-3">
+                            <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center fw-bold" style="width:64px;height:64px;">${(p.fullName.match(/\b(\w)/g)||[]).join('').toUpperCase()}</div>
+                            <div>
+                              <div class="fs-5 fw-bold">${p.fullName}</div>
+                              <div class="text-muted">${p.gender}, ${p.age} years</div>
+                              <div class="mt-2 small"><i class="bi bi-telephone me-1"></i>${p.phoneNumber} &nbsp;|&nbsp; <i class="bi bi-envelope me-1"></i>${p.email}</div>
+                              <div class="small"><i class="bi bi-heart-pulse-fill me-1 text-danger"></i>${p.conditions.join(', ')}</div>
+                            </div>
+                          </div>
+                          <hr/>
+                          <div class="row g-3">
+                            <div class="col-md-6">
+                              <div class="p-3 bg-light rounded-3 h-100">
+                                <div class="fw-semibold mb-2">Last Visit</div>
+                                <div>${p.lastVisit}</div>
+                              </div>
+                            </div>
+                            <div class="col-md-6">
+                              <div class="p-3 bg-light rounded-3 h-100">
+                                <div class="fw-semibold mb-2">Next Appointment</div>
+                                <div>${p.nextAppointment || '—'}</div>
+                              </div>
+                            </div>
+                          </div>`;
+                        document.getElementById('pdm-create-appointment').onclick = () => {
+                          window.location.href = './doctor-schedule-management.html';
+                        };
+                        document.getElementById('pdm-start-chat').onclick = () => alert('Chat feature to be implemented');
+                      });
+                    });
                 } catch (error) {
                     console.error('Error fetching patients:', error);
                     patientCardsContainer.innerHTML = '<p style="color:red;">Failed to load patients.</p>';
@@ -243,8 +516,35 @@
             };
 
             fetchPatients();
-            patientSearchInput.addEventListener('input', fetchPatients);
-            sortByFilter.addEventListener('change', fetchPatients);
+            patientSearchInput.addEventListener('input', () => { pmPage = 1; fetchPatients(); });
+            sortByFilter.addEventListener('change', () => { pmPage = 1; fetchPatients(); });
+            document.getElementById('apply-filters-btn').addEventListener('click', () => { pmPage = 1; fetchPatients(); });
+            document.getElementById('pm-prev').addEventListener('click', () => { if (pmPage > 1) { pmPage--; fetchPatients(); }});
+            document.getElementById('pm-next').addEventListener('click', () => { pmPage++; fetchPatients(); });
+            document.getElementById('pm-bulk-message').addEventListener('click', async () => {
+              const ids = Array.from(document.querySelectorAll('.pm-select:checked')).map(i=>i.value);
+              if (!ids.length) return;
+              alert('Messaging '+ids.length+' patients (wire to API)');
+            });
+            document.getElementById('pm-bulk-schedule').addEventListener('click', () => {
+              const ids = Array.from(document.querySelectorAll('.pm-select:checked')).map(i=>i.value);
+              if (!ids.length) return;
+              // Navigate to schedule with selected IDs in query, for future prepopulation
+              window.location.href = './doctor-schedule-management.html?patients='+encodeURIComponent(ids.join(','));
+            });
+            document.getElementById('pm-bulk-remove').addEventListener('click', async () => {
+              const ids = Array.from(document.querySelectorAll('.pm-select:checked')).map(i=>i.value);
+              if (!ids.length) return;
+              if (!confirm('Remove '+ids.length+' patients from your list?')) return;
+              try {
+                const resp = await fetch('/api/doctor/patients/bulk-remove', {
+                  method: 'POST', headers: { 'Content-Type':'application/json', 'Authorization': `Bearer ${token}` },
+                  body: JSON.stringify({ patient_ids: ids })
+                });
+                if (!resp.ok) throw new Error('Failed');
+                pmPage = 1; fetchPatients();
+              } catch (e) { alert('Failed to remove'); }
+            });
             // Add listeners for view toggles (grid/list) if implementing different layouts
         });
 
@@ -253,6 +553,37 @@
             localStorage.removeItem('userRole');
             window.location.href = '/login.html';
         }
+    </script>
+    <script>
+      (async () => {
+        const token = localStorage.getItem('token');
+        const pmTodayList = document.getElementById('pm-today-list');
+        if (!pmTodayList) return;
+        try {
+          const todayStr = new Date().toISOString().split('T')[0];
+          const resp = await fetch(`/api/doctor/schedule?date=${todayStr}&view=daily`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          if (!resp.ok) return;
+          const d = await resp.json();
+          pmTodayList.innerHTML = '';
+          (d.todayAppointments || []).slice(0, 9).forEach(app => {
+            const initials = (app.patientName.match(/\b(\w)/g) || []).join('').toUpperCase();
+            pmTodayList.insertAdjacentHTML('beforeend', `
+              <div class="col">
+                <div class="card h-100 shadow-sm border-0">
+                  <div class="card-body d-flex align-items-center">
+                    <div class="rounded-circle bg-primary text-white d-flex justify-content-center align-items-center fw-bold me-3" style="width:44px;height:44px;">${initials}</div>
+                    <div>
+                      <div class="fw-bold">${app.patientName}</div>
+                      <div class="small text-muted">${app.time} • ${app.status}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>`);
+          });
+        } catch (e) { console.warn('Failed loading PM today list', e); }
+      })();
     </script>
 </body>
 </html>
