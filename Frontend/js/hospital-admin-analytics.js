@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     },
                     title: {
                         display: true,
-                        text: options.titleText || ''
+                        text: options && options.titleText ? options.titleText : ''
                     }
                 },
                 scales: options.scales || {}
@@ -100,16 +100,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 legendPosition: 'right'
             });
 
-            // Populate Other Metrics
-            patientSatisfactionScoreEl.textContent = data.metrics.patientSatisfaction.score;
-            patientSatisfactionReviewsEl.textContent = `Based on ${data.metrics.patientSatisfaction.reviews} reviews`;
-            avgWaitTimeEl.textContent = data.metrics.avgWaitTime.minutes;
-            avgWaitTimeChangeEl.textContent = data.metrics.avgWaitTime.change;
-            cancellationRateEl.textContent = data.metrics.cancellationRate.rate;
-            cancellationRateChangeEl.textContent = data.metrics.cancellationRate.change;
+            // Populate Other Metrics - with null checks
+            if (patientSatisfactionScoreEl) patientSatisfactionScoreEl.textContent = data.metrics.patientSatisfaction.score;
+            if (patientSatisfactionReviewsEl) patientSatisfactionReviewsEl.textContent = `Based on ${data.metrics.patientSatisfaction.reviews} reviews`;
+            if (avgWaitTimeEl) avgWaitTimeEl.textContent = data.metrics.avgWaitTime.minutes;
+            if (avgWaitTimeChangeEl) avgWaitTimeChangeEl.textContent = data.metrics.avgWaitTime.change;
+            if (cancellationRateEl) cancellationRateEl.textContent = data.metrics.cancellationRate.rate;
+            if (cancellationRateChangeEl) cancellationRateChangeEl.textContent = data.metrics.cancellationRate.change;
 
-            // Load Top Performing Doctors
-            topDoctorsTableBody.innerHTML = '';
+            // Load Top Performing Doctors - with null check
+            if (topDoctorsTableBody) topDoctorsTableBody.innerHTML = '';
             if (data.topDoctors && data.topDoctors.length > 0) {
                 data.topDoctors.forEach(doc => {
                     const row = `
@@ -121,11 +121,60 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <td style="color:${doc.growth.startsWith('+') ? '#28a745' : '#dc3545'};">${doc.growth}</td>
                         </tr>
                     `;
-                    topDoctorsTableBody.insertAdjacentHTML('beforeend', row);
+                    if (topDoctorsTableBody) topDoctorsTableBody.insertAdjacentHTML('beforeend', row);
                 });
+
+
             } else {
-                topDoctorsTableBody.innerHTML = '<tr><td colspan="5">No top performing doctors found.</td></tr>';
+                if (topDoctorsTableBody) topDoctorsTableBody.innerHTML = '<tr><td colspan="5">No top performing doctors found.</td></tr>';
             }
+
+
+            // Reviews table (bottom full-width)
+            let reviewsPage = 1; const reviewsLimit = 10;
+            const reviewsBody = document.getElementById('reviews-table-body');
+            const reviewsPrev = document.getElementById('reviews-prev');
+            const reviewsNext = document.getElementById('reviews-next');
+            const reviewsPageSpan = document.getElementById('reviews-page');
+
+            async function loadReviews() {
+                if (!reviewsBody) return;
+                reviewsBody.innerHTML = '<tr><td colspan="5" class="text-center">Loading...</td></tr>';
+                try {
+                    const r = await fetch(`/api/hospital-admin/analytics/reviews?page=${reviewsPage}&limit=${reviewsLimit}`, { headers: { Authorization: `Bearer ${token}` }});
+                    if (!r.ok) throw new Error('Failed to load reviews');
+                    const data = await r.json();
+                    const rows = data.reviews || [];
+                    const totalPages = data.totalPages || 1;
+                    reviewsBody.innerHTML = '';
+                    if (rows.length === 0) {
+                        reviewsBody.innerHTML = '<tr><td colspan="5" class="text-center">No reviews found.</td></tr>';
+                    } else {
+                        for (const x of rows) {
+                            const name = `Dr. ${x.first_name} ${x.last_name}`;
+                            const dateStr = x.review_date ? new Date(x.review_date).toLocaleDateString() : '-';
+                            reviewsBody.insertAdjacentHTML('beforeend', `
+                                <tr>
+                                    <td>${dateStr}</td>
+                                    <td>${name}</td>
+                                    <td>${x.specialization || '-'}</td>
+                                    <td>${x.rating ?? '-'}</td>
+                                    <td>${x.review_text || '-'}</td>
+                                </tr>`);
+                        }
+                    }
+                    reviewsPageSpan.textContent = String(reviewsPage);
+                    reviewsPrev.disabled = reviewsPage <= 1;
+                    reviewsNext.disabled = reviewsPage >= totalPages;
+                } catch (err) {
+                    reviewsBody.innerHTML = '<tr><td colspan="5" class="text-danger text-center">Failed to load reviews.</td></tr>';
+                }
+            }
+
+            reviewsPrev?.addEventListener('click', ()=>{ if (reviewsPage > 1) { reviewsPage--; loadReviews(); } });
+            reviewsNext?.addEventListener('click', ()=>{ reviewsPage++; loadReviews(); });
+
+            await loadReviews();
 
         } catch (error) {
             console.error('Error loading analytics data:', error);
@@ -138,8 +187,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const decodedToken = JSON.parse(atob(token.split('.')[1]));
     const adminFirstName = decodedToken.first_name || 'Sarah';
     const adminLastName = decodedToken.last_name || 'Johnson';
-    document.getElementById('admin-full-name').textContent = `${adminFirstName} ${adminLastName}`;
-    document.getElementById('admin-initials').textContent = `${adminFirstName.charAt(0)}${adminLastName.charAt(0)}`.toUpperCase();
+    if (document.getElementById('admin-full-name')) document.getElementById('admin-full-name').textContent = `${adminFirstName} ${adminLastName}`;
+    if (document.getElementById('admin-initials')) document.getElementById('admin-initials').textContent = `${adminFirstName.charAt(0)}${adminLastName.charAt(0)}`.toUpperCase();
 
     loadAllAnalyticsData('daily'); // Initialize with daily view
 
