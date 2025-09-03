@@ -9,34 +9,33 @@ const app = express();
 
 // Define CORS options
 const corsOptions = {
-  origin: 'http://localhost:5000', // MUST match your frontend's exact origin
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods for your API
-  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed request headers
-  credentials: true // Allow sending cookies (if you later use them for authentication)
+  origin: 'http://localhost:5000', // MUST match your frontend's exact origin [cite: 1]
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allowed HTTP methods for your API [cite: 1]
+  allowedHeaders: ['Content-Type', 'Authorization'], // Allowed request headers [cite: 1]
+  credentials: true // Allow sending cookies (if you later use them for authentication) [cite: 1]
 };
 
 // Middleware
-app.use(cors(corsOptions)); // Apply the CORS middleware with explicit options
-app.use(express.json()); // For parsing application/json
-app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded
+app.use(cors(corsOptions)); // Apply the CORS middleware with explicit options [cite: 1]
+app.use(express.json()); // For parsing application/json [cite: 1]
+app.use(express.urlencoded({ extended: true })); // For parsing application/x-www-form-urlencoded [cite: 1]
 
-// === CORRECTED STATIC FILE SERVING BASED ON YOUR SCREENSHOTS ===
+// --- CORRECTED STATIC FILE SERVING BASED ON YOUR EXACT DIRECTORY STRUCTURE ---
 // Assuming your project root is 'Project'
 // and server.js is in 'Project/Backend/server.js'
 // and frontend files are in 'Project/Frontend/'
-// HTML files are in 'Project/Frontend/'
-// CSS/JS are in 'Project/Frontend/assets/css' and 'Project/Frontend/assets/js'
+// HTML files are directly in 'Project/Frontend/'
+// CSS is in 'Project/Frontend/css/'
+// JS is in 'Project/Frontend/js/'
+// Images are in 'Project/Frontend/assets/'
 
-// Serve HTML files directly from the 'Frontend' directory (accessible at http://localhost:5000/index.html etc.)
+// Serve the 'Frontend' directory as the root for static files.
+// This means:
+// - HTML files (e.g., index.html, login.html) are directly accessible at http://localhost:5000/index.html etc.
+// - Files in 'Frontend/css/' are accessible at http://localhost:5000/css/style.css
+// - Files in 'Frontend/js/' are accessible at http://localhost:5000/js/main.js
+// - The 'assets' folder itself is now accessible directly as /assets/ from the root
 app.use(express.static(path.join(__dirname, '..', 'Frontend')));
-
-// Serve CSS, JS, Images from the 'assets' subdirectory within 'Frontend'
-// They will be accessible via /assets/css/style.css, /assets/js/login.js etc.
-// This means your HTML files should reference them like: <link rel="stylesheet" href="/assets/css/style.css">
-//                                                    <script src="/assets/js/login.js"></script>
-// If you want to keep 'href="css/style.css"', then the path needs to be adjusted in the HTML files instead.
-// For simplicity and standard practice, let's assume assets are accessed via '/assets/' prefix.
-app.use('/assets', express.static(path.join(__dirname, '..', 'Frontend', 'assets')));
 
 
 // Test DB connection
@@ -55,7 +54,7 @@ const authRoutes = require('./routes/authRoutes');
 const patientRoutes = require('./routes/patientRoutes');
 const doctorRoutes = require('./routes/doctorRoutes');
 const hospitalAdminRoutes = require('./routes/hospitalAdminRoutes');
-const superAdminRoutes = require('./routes/superAdminRoutes');
+const superAdminRoutes = require('./routes/superAdminRoutes'); // Correctly references the route file [cite: 2]
 
 app.use('/api/auth', authRoutes);
 app.use('/api/patient', patientRoutes);
@@ -63,13 +62,16 @@ app.use('/api/doctor', doctorRoutes);
 app.use('/api/hospital-admin', hospitalAdminRoutes);
 app.use('/api/super-admin', superAdminRoutes);
 
+// Appointment routes (for approve/cancel actions)
+app.put('/api/appointments/:appointmentId/approve', require('./middleware/authMiddleware').authenticateToken, require('./middleware/authMiddleware').authorizeRole(['doctor']), require('./controllers/doctorController').approveAppointment);
+app.put('/api/appointments/:appointmentId/cancel', require('./middleware/authMiddleware').authenticateToken, require('./middleware/authMiddleware').authorizeRole(['doctor']), require('./controllers/doctorController').cancelAppointment);
 
 // Catch-all for SPA-like routing: serves the appropriate HTML file or defaults to index.html
 app.get('*', (req, res) => {
-    const frontendRoot = path.join(__dirname, '..', 'Frontend'); // Correct path to your Frontend directory
+    const frontendRoot = path.join(__dirname, '..', 'Frontend'); // Correct path to your Frontend directory [cite: 1]
     const requestedPath = req.path;
 
-    // Check if the requested path is for a specific HTML file
+    // List of all expected HTML files (directly in Frontend folder)
     const htmlFiles = [
         '/index.html', '/login.html', '/register.html', '/doctors.html', '/services.html', '/about.html',
         '/patient-dashboard.html', '/patient-doctors.html', '/patient-appointments.html', '/patient-profile.html',
@@ -78,22 +80,24 @@ app.get('*', (req, res) => {
         '/super-admin-dashboard.html', '/super-admin-analytics.html', '/super-admin-profile.html'
     ];
 
+    // If the request path directly matches one of our HTML files, serve it
     if (htmlFiles.includes(requestedPath)) {
         return res.sendFile(path.join(frontendRoot, requestedPath));
     }
 
     // Handle dashboard roots which might not have .html in URL
+    // These redirect to the main dashboard HTML files for each role.
     if (requestedPath.startsWith('/patient')) {
-        return res.sendFile(path.join(frontendRoot, 'patient-dashboard.html')); // Assumes patient-dashboard is default for /patient/*
+        return res.sendFile(path.join(frontendRoot, 'patient-dashboard.html'));
     } else if (requestedPath.startsWith('/doctor')) {
-        return res.sendFile(path.join(frontendRoot, 'doctor-dashboard.html')); // Assumes doctor-dashboard is default for /doctor/*
+        return res.sendFile(path.join(frontendRoot, 'doctor-dashboard.html'));
     } else if (requestedPath.startsWith('/hospital-admin')) {
         return res.sendFile(path.join(frontendRoot, 'hospital-admin-dashboard.html'));
     } else if (requestedPath.startsWith('/super-admin')) {
         return res.sendFile(path.join(frontendRoot, 'super-admin-dashboard.html'));
     }
 
-    // Default fallback to the landing page for any other route
+    // Default fallback to the landing page for any other route not explicitly handled
     res.sendFile(path.join(frontendRoot, 'index.html'));
 });
 
