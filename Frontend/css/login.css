@@ -1,0 +1,58 @@
+/* Frontend/css/login.css */
+
+/* Full-page background with overlay for the login page */
+.login-page-bg {
+    background-image: url('../assets/Index.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    z-index: 0;
+}
+
+.login-page-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Dark overlay */
+    backdrop-filter: blur(5px); /* Add a subtle blur effect */
+    z-index: -1;
+}
+
+
+/* Specific styling for the login card */
+.login-box-card {
+    border: none; /* Remove default Bootstrap card border */
+    max-width: 450px; /* Set a fixed max width for a cleaner look */
+    width: 100%;
+    transition: transform 0.3s ease-in-out;
+}
+
+.login-box-card:hover {
+    transform: scale(1.02); /* Slight lift on hover */
+}
+
+
+/* Custom styling for Bootstrap's floating labels */
+.form-floating > label {
+    color: #6c757d; /* Muted label color */
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: #0d6efd; /* Blue color when focused/filled */
+}
+
+/* Override for Bootstrap alerts to match your previous design */
+.alert-danger.hidden {
+    display: none !important;
+}
+
+.alert-danger {
+    background-color: #ffe0e0;
+    color: red;
+    border-color: red;
+}
