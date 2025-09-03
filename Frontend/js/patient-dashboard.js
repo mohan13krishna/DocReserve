@@ -53,7 +53,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Update summary cards
         totalUpcomingAppointmentsEl.textContent = data.upcomingAppointments.length;
-        totalVisitsEl.textContent = data.totalVisits;
+        
+        // Fix for total visits counter - ensure we're getting the value from the backend
+        if (data.totalVisits !== undefined && data.totalVisits !== null) {
+            totalVisitsEl.textContent = data.totalVisits;
+        } else {
+            // Fallback to fetch total visits separately if not included in dashboard data
+            fetchTotalVisits(token);
+        }
+        
         favoriteDoctorsEl.textContent = data.favoriteDoctors;
         healthScoreEl.textContent = data.healthScore;
 
@@ -63,15 +71,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             data.upcomingAppointments.forEach(appointment => {
                 const doctorInitials = (appointment.doctorName.match(/\b(\w)/g) || []).join('').toUpperCase();
                 const appointmentCard = `
-                    <div class="appointment-card">
-                        <div class="doctor-initials">${doctorInitials}</div>
-                        <div class="appointment-details">
-                            <h4>${appointment.doctorName}</h4>
-                            <p>${appointment.specialization}</p>
-                            <p class="appointment-date">${appointment.date}</p>
+                    <div class="appointment-card d-flex align-items-center p-3 rounded-3 mb-3 bg-light animate-hover">
+                        <div class="doctor-initials rounded-circle me-3 d-flex justify-content-center align-items-center text-white bg-info" style="width: 50px; height: 50px;">${doctorInitials}</div>
+                        <div class="appointment-details flex-grow-1">
+                            <h4 class="fw-bold mb-1 fs-6">${appointment.doctorName}</h4>
+                            <p class="text-muted mb-1 small">${appointment.specialization}</p>
+                            <p class="appointment-date text-primary fw-bold mb-0 small">${appointment.date}</p>
                         </div>
-                        <button class="view-details-btn">View Details</button>
-                        <button class="reschedule-btn">Reschedule</button>
+                        <div class="d-flex flex-column gap-2">
+                            <button class="btn btn-outline-primary btn-sm rounded-pill">View Details</button>
+                            <button class="btn btn-warning btn-sm rounded-pill text-dark">Reschedule</button>
+                        </div>
                     </div>
                 `;
                 upcomingAppointmentsList.insertAdjacentHTML('beforeend', appointmentCard);
@@ -85,6 +95,35 @@ document.addEventListener('DOMContentLoaded', async () => {
         upcomingAppointmentsList.innerHTML = '<p>Failed to load appointments. Please try again later.</p>';
     }
 });
+
+// Function to fetch total visits count separately
+async function fetchTotalVisits(token) {
+    try {
+        const response = await fetch('/api/patient/visits/count', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const totalVisitsEl = document.getElementById('total-visits');
+        
+        if (data.count !== undefined) {
+            totalVisitsEl.textContent = data.count;
+        } else {
+            totalVisitsEl.textContent = '0'; // Default if no data
+        }
+    } catch (error) {
+        console.error('Error fetching total visits:', error);
+        document.getElementById('total-visits').textContent = '0';
+    }
+}
 
 function logout() {
     localStorage.removeItem('token');
