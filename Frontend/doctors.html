@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Find Doctors - DocReserve</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        /* Basic styling for the Find Doctors page */
+        /* Basic styling for the Find Doctors page - keep if specific */
         .find-doctors-container {
             padding: 50px;
             background-color: #f4f7f6;
@@ -93,6 +95,11 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
             display: flex;
             flex-direction: column;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Added transition */
+        }
+        .doctor-card-listing:hover { /* Added hover effect */
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
         }
         .doctor-card-listing h3 {
             font-size: 1.5em;
@@ -166,16 +173,23 @@
     </style>
 </head>
 <body>
-    <header class="main-header">
-        <div class="logo">DocReserve</div>
-        <nav class="main-nav">
-            <a href="./index.html">Home</a>
-            <a href="./doctors.html">Doctors</a>
-            <a href="./services.html">Services</a>
-            <a href="./about.html">About</a>
-        </nav>
-        <div class="auth-buttons">
-            <a href="./login.html" class="button primary">Login</a>
+    <header class="main-header navbar navbar-expand-lg bg-white shadow-sm py-3">
+        <div class="container-fluid px-md-5">
+            <a class="navbar-brand logo fs-4 fw-bold text-primary" href="./index.html">DocReserve</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <nav class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <a class="nav-link text-secondary fw-semibold mx-2" href="./index.html">Home</a>
+                    <a class="nav-link text-secondary fw-semibold mx-2" href="./doctors.html">Doctors</a>
+                    <a class="nav-link text-secondary fw-semibold mx-2" href="./services.html">Services</a>
+                    <a class="nav-link text-secondary fw-semibold mx-2" href="./about.html">About</a>
+                </nav>
+                <div class="d-flex auth-buttons">
+                    <a href="./login.html" class="btn btn-primary px-4 fw-semibold rounded-pill">Login</a>
+                </div>
+            </div>
         </div>
     </header>
 
@@ -186,8 +200,7 @@
         <section class="filters-section">
             <div class="search-bar">
                 <input type="text" placeholder="Search doctor name..." id="doctor-search-input">
-                <span class="search-icon">Q</span>
-            </div>
+                <span class="search-icon"><i class="bi bi-search"></i></span> </div>
             <select id="specialty-filter">
                 <option value="">All Specialties</option>
                 <option value="Cardiologist">Cardiologist</option>
@@ -195,21 +208,23 @@
                 <option value="Dermatologist">Dermatologist</option>
                 <option value="Neurologist">Neurologist</option>
                 <option value="Orthopedic Surgeon">Orthopedic Surgeon</option>
-                <option value="Psychiatrist">Psychiatrist</option>
-                <option value="Oncologist">Oncologist</option>
+                <option value="General Physician">General Physician</option>
                 <option value="Gynecologist">Gynecologist</option>
+                <option value="Ophthalmologist">Ophthalmologist</option>
             </select>
             <select id="location-filter">
                 <option value="">All Locations</option>
-                <option value="Downtown">Downtown Medical Center</option>
-                <option value="Children's Hospital">Children's Hospital</option>
-                <option value="Skin Care Clinic">Skin Care Clinic</option>
-                <option value="Neurology Institute">Neurology Institute</option>
+                <option value="Banjara Hills">Banjara Hills</option>
+                <option value="Gachibowli">Gachibowli</option>
+                <option value="Kondapur">Kondapur</option>
+                <option value="Secunderabad">Secunderabad</option>
+                <option value="Hitech City">Hitech City</option>
             </select>
             <select id="rating-filter">
                 <option value="">All Ratings</option>
                 <option value="4.5+">4.5+ Rating</option>
                 <option value="4.0+">4.0+ Rating</option>
+                <option value="3.5+">3.5+ Rating</option>
             </select>
             <input type="date" id="date-filter">
             <select id="sort-by-filter">
@@ -217,84 +232,83 @@
                 <option value="experience">Sort by Experience</option>
             </select>
             <div class="filter-buttons">
-                <button class="button secondary" id="clear-filters-btn">Clear All Filters</button>
-            </div>
+                <button class="btn btn-outline-secondary px-3" id="clear-filters-btn">Clear All Filters</button> </div>
         </section>
 
-        <p class="results-info"><span id="doctors-found-count">24</span> doctors found</p>
+        <p class="results-info"><span id="doctors-found-count"></span></p>
 
         <section class="doctors-grid" id="doctors-grid-container">
             <div class="doctor-card-listing">
-                <h3>Dr. Sarah Johnson</h3>
+                <h3>Dr. R. K. Sharma</h3>
                 <p class="specialty">Cardiologist</p>
-                <p class="rating"><span>4.9</span> (127 reviews)</p>
-                <p class="experience">15 years experience</p>
-                <p class="location">Downtown Medical Center</p>
-                <a href="./login.html" class="button primary book-button">Book Appointment</a>
-            </div>
-            <div class="doctor-card-listing">
-                <h3>Dr. Michael Chen</h3>
-                <p class="specialty">Pediatrician</p>
-                <p class="rating"><span>4.8</span> (89 reviews)</p>
-                <p class="experience">12 years experience</p>
-                <p class="location">Children's Hospital</p>
-                <a href="./login.html" class="button primary book-button">Book Appointment</a>
-            </div>
-            <div class="doctor-card-listing">
-                <h3>Dr. Emily Rodriguez</h3>
-                <p class="specialty">Dermatologist</p>
-                <p class="rating"><span>4.9</span> (156 reviews)</p>
-                <p class="experience">10 years experience</p>
-                <p class="location">Skin Care Clinic</p>
-                <a href="./login.html" class="button primary book-button">Book Appointment</a>
-            </div>
-            <div class="doctor-card-listing">
-                <h3>Dr. David Thompson</h3>
-                <p class="specialty">Neurologist</p>
-                <p class="rating"><span>4.7</span> (94 reviews)</p>
+                <p class="rating"><span>4.8</span> (150 reviews)</p>
                 <p class="experience">18 years experience</p>
-                <p class="location">Neurology Institute</p>
-                <a href="./login.html" class="button primary book-button">Book Appointment</a>
+                <p class="location">Apollo Hospitals, Jubilee Hills</p>
+                <a href="./login.html" class="btn btn-primary rounded-pill book-button">Book Appointment</a>
             </div>
             <div class="doctor-card-listing">
-                <h3>Dr. Lisa Anderson</h3>
-                <p class="specialty">Orthopedic Surgeon</p>
-                <p class="rating"><span>4.9</span> (203 reviews)</p>
-                <p class="experience">14 years experience</p>
-                <p class="location">Sports Medicine Center</p>
-                <a href="./login.html" class="button primary book-button">Book Appointment</a>
-            </div>
-            <div class="doctor-card-listing">
-                <h3>Dr. Robert Martinez</h3>
-                <p class="specialty">Psychiatrist</p>
-                <p class="rating"><span>4.8</span> (76 reviews)</p>
-                <p class="experience">16 years experience</p>
-                <p class="location">Mental Health Clinic</p>
-                <a href="./login.html" class="button primary book-button">Book Appointment</a>
-            </div>
-            <div class="doctor-card-listing">
-                <h3>Dr. Jennifer Kim</h3>
-                <p class="specialty">Oncologist</p>
-                <p class="rating"><span>4.9</span> (142 reviews)</p>
-                <p class="experience">13 years experience</p>
-                <p class="location">Cancer Treatment Center</p>
-                <a href="./login.html" class="button primary book-button">Book Appointment</a>
-            </div>
-            <div class="doctor-card-listing">
-                <h3>Dr. William Brown</h3>
-                <p class="specialty">Cardiologist</p>
-                <p class="rating"><span>4.7</span> (118 reviews)</p>
-                <p class="experience">20 years experience</p>
-                <p class="location">Heart Institute</p>
-                <a href="./login.html" class="button primary book-button">Book Appointment</a>
-            </div>
-            <div class="doctor-card-listing">
-                <h3>Dr. Amanda Davis</h3>
+                <h3>Dr. Priya Singh</h3>
                 <p class="specialty">Pediatrician</p>
-                <p class="rating"><span>4.9</span> (167 reviews)</p>
-                <p class="experience">11 years experience</p>
-                <p class="location">Pediatric Clinic</p>
-                <a href="./login.html" class="button primary book-button">Book Appointment</a>
+                <p class="rating"><span>4.9</span> (210 reviews)</p>
+                <p class="experience">12 years experience</p>
+                <p class="location">Rainbow Children's Hospital, Banjara Hills</p>
+                <a href="./login.html" class="btn btn-primary rounded-pill book-button">Book Appointment</a>
+            </div>
+            <div class="doctor-card-listing">
+                <h3>Dr. Anand Rao</h3>
+                <p class="specialty">Dermatologist</p>
+                <p class="rating"><span>4.7</span> (95 reviews)</p>
+                <p class="experience">10 years experience</p>
+                <p class="location">Care Hospitals, Gachibowli</p>
+                <a href="./login.html" class="btn btn-primary rounded-pill book-button">Book Appointment</a>
+            </div>
+            <div class="doctor-card-listing">
+                <h3>Dr. Lakshmi Devi</h3>
+                <p class="specialty">General Physician</p>
+                <p class="rating"><span>4.5</span> (300 reviews)</p>
+                <p class="experience">25 years experience</p>
+                <p class="location">Yashoda Hospitals, Secunderabad</p>
+                <a href="./login.html" class="btn btn-primary rounded-pill book-button">Book Appointment</a>
+            </div>
+            <div class="doctor-card-listing">
+                <h3>Dr. Manoj Kumar</h3>
+                <p class="specialty">Neurologist</p>
+                <p class="rating"><span>4.9</span> (180 reviews)</p>
+                <p class="experience">16 years experience</p>
+                <p class="location">Continental Hospital, Gachibowli</p>
+                <a href="./login.html" class="btn btn-primary rounded-pill book-button">Book Appointment</a>
+            </div>
+            <div class="doctor-card-listing">
+                <h3>Dr. Sana Khan</h3>
+                <p class="specialty">Gynecologist</p>
+                <p class="rating"><span>4.8</span> (110 reviews)</p>
+                <p class="experience">14 years experience</p>
+                <p class="location">Apollo Cradle, Kondapur</p>
+                <a href="./login.html" class="btn btn-primary rounded-pill book-button">Book Appointment</a>
+            </div>
+            <div class="doctor-card-listing">
+                <h3>Dr. Vikram Reddy</h3>
+                <p class="specialty">Orthopedic Surgeon</p>
+                <p class="rating"><span>4.6</span> (130 reviews)</p>
+                <p class="experience">20 years experience</p>
+                <p class="location">MaxCure Hospitals, Hitech City</p>
+                <a href="./login.html" class="btn btn-primary rounded-pill book-button">Book Appointment</a>
+            </div>
+            <div class="doctor-card-listing">
+                <h3>Dr. Meena Iyer</h3>
+                <p class="specialty">Ophthalmologist</p>
+                <p class="rating"><span>4.7</span> (85 reviews)</p>
+                <p class="experience">15 years experience</p>
+                <p class="location">L.V. Prasad Eye Institute, Banjara Hills</p>
+                <a href="./login.html" class="btn btn-primary rounded-pill book-button">Book Appointment</a>
+            </div>
+            <div class="doctor-card-listing">
+                <h3>Dr. Rajesh Gupta</h3>
+                <p class="specialty">Pediatrician</p>
+                <p class="rating"><span>4.9</span> (190 reviews)</p>
+                <p class="experience">10 years experience</p>
+                <p class="location">KIMS Hospitals, Secunderabad</p>
+                <a href="./login.html" class="btn btn-primary rounded-pill book-button">Book Appointment</a>
             </div>
         </section>
 
@@ -315,10 +329,52 @@
         </div>
     </div>
 
-    <footer class="main-footer">
-        <div class="copyright">
-            &copy; 2024 DocReserve. All rights reserved.
+    <footer class="main-footer bg-dark text-white-50 py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h3 class="text-info mb-3 fs-5 fw-bold">DocReserve</h3>
+                    <p class="small">Streamlined doctor appointments and healthcare management. Experience seamless medical scheduling with trusted professionals.</p>
+                    <div class="social-icons fs-4">
+                        <a href="#" class="text-white-50 me-3"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-white-50 me-3"><i class="bi bi-linkedin"></i></a>
+                        <a href="#" class="text-white-50 me-3"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="text-white-50"><i class="bi bi-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h3 class="text-info mb-3 fs-5 fw-bold">Quick Links</h3>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="./doctors.html" class="text-white-50 text-decoration-none">Find a Doctor</a></li>
+                        <li class="mb-2"><a href="./doctors.html" class="text-white-50 text-decoration-none">Book Appointment</a></li>
+                        <li class="mb-2"><a href="./services.html" class="text-white-50 text-decoration-none">Our Services</a></li>
+                        <li class="mb-2"><a href="./about.html" class="text-white-50 text-decoration-none">Health Blog</a></li>
+                        <li class="mb-2"><a href="./doctors.html" class="text-white-50 text-decoration-none">For Doctors</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-2 mb-4">
+                    <h3 class="text-info mb-3 fs-5 fw-bold">Support</h3>
+                    <ul class="list-unstyled small">
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Contact Us</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">FAQ</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Privacy Policy</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Terms of Service</a></li>
+                        <li class="mb-2"><a href="#" class="text-white-50 text-decoration-none">Help Center</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h3 class="text-info mb-3 fs-5 fw-bold">Contact Info</h3>
+                    <p class="small mb-1">123 Healthcare Ave, Medical City, MC 12345</p>
+                    <p class="small mb-1">+1(555) 123-4567</p>
+                    <p class="small mb-1">support@medicare.com</p>
+                    <p class="small mb-1">Mon-Fri: 9:00 AM - 6:00 PM</p>
+                </div>
+            </div>
+            <div class="text-center pt-4 border-top border-secondary opacity-50">
+                <p class="small mb-0">&copy; 2024 DocReserve. All rights reserved.</p>
+            </div>
         </div>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     </body>
 </html>
