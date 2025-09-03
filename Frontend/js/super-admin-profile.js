@@ -95,8 +95,47 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    // Event listener for "Upload New Photo" (requires file upload logic)
-    document.getElementById('change-photo-btn').addEventListener('click', () => {
-        alert('Photo upload logic to be implemented!');
+
+    // Password strength meter and toggles
+    const strengthBar = document.getElementById('password-strength-bar');
+    const strengthText = document.getElementById('password-strength-text');
+    function evaluateStrength(pwd) {
+        let score = 0;
+        if (pwd.length >= 8) score++;
+        if (/[A-Z]/.test(pwd)) score++;
+        if (/[a-z]/.test(pwd)) score++;
+        if (/[0-9]/.test(pwd)) score++;
+        if (/[^A-Za-z0-9]/.test(pwd)) score++;
+        return score; // 0..5
+    }
+    function renderStrength(score) {
+        const pct = (score / 5) * 100;
+        strengthBar.style.width = pct + '%';
+        let cls = 'bg-danger', label = 'Very Weak';
+        if (score === 2) { cls = 'bg-warning'; label = 'Weak'; }
+        if (score === 3) { cls = 'bg-info'; label = 'Okay'; }
+        if (score === 4) { cls = 'bg-primary'; label = 'Good'; }
+        if (score === 5) { cls = 'bg-success'; label = 'Strong'; }
+        strengthBar.className = 'progress-bar ' + cls;
+        strengthText.textContent = 'Strength: ' + label;
+    }
+    newPasswordInput.addEventListener('input', () => {
+        renderStrength(evaluateStrength(newPasswordInput.value));
     });
+
+    const showPwdsCheckbox = document.getElementById('show-passwords');
+    const toggleNewBtn = document.getElementById('toggle-new-password');
+    const toggleConfirmBtn = document.getElementById('toggle-confirm-password');
+    function toggleVisibility(input, btn) {
+        const isPwd = input.type === 'password';
+        input.type = isPwd ? 'text' : 'password';
+        if (btn) btn.textContent = isPwd ? 'Hide' : 'Show';
+    }
+    showPwdsCheckbox.addEventListener('change', () => {
+        const makeText = showPwdsCheckbox.checked;
+        newPasswordInput.type = makeText ? 'text' : 'password';
+        confirmNewPasswordInput.type = makeText ? 'text' : 'password';
+    });
+    toggleNewBtn.addEventListener('click', () => toggleVisibility(newPasswordInput, toggleNewBtn));
+    toggleConfirmBtn.addEventListener('click', () => toggleVisibility(confirmNewPasswordInput, toggleConfirmBtn));
 });
