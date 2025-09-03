@@ -4,70 +4,119 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - DocReserve</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/register.css">
 </head>
-<body>
-    <header class="main-header">
-        <div class="logo">DocReserve</div>
-        <nav class="main-nav">
-            <a href="/">Home</a>
-            <a href="/doctors.html">Doctors</a>
-            <a href="/services.html">Services</a>
-            <a href="/about.html">About</a>
-        </nav>
-        <div class="auth-buttons">
-            <a href="/login.html" class="button primary">Login</a>
+<body class="d-flex flex-column min-vh-100 register-page-bg">
+    <header class="main-header navbar navbar-expand-lg bg-white shadow-sm py-3">
+        <div class="container-fluid px-md-5">
+            <a class="navbar-brand logo fs-4 fw-bold text-primary" href="./index.html">DocReserve</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+                <nav class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <a class="nav-link text-secondary fw-semibold mx-2" href="./index.html">Home</a>
+                    <a class="nav-link text-secondary fw-semibold mx-2" href="./doctors.html">Doctors</a>
+                    <a class="nav-link text-secondary fw-semibold mx-2" href="./services.html">Services</a>
+                    <a class="nav-link text-secondary fw-semibold mx-2" href="./about.html">About</a>
+                </nav>
+                <div class="d-flex auth-buttons">
+                    <a href="./login.html" class="btn btn-primary px-4 fw-semibold rounded-pill">Login</a>
+                </div>
+            </div>
         </div>
     </header>
 
-    <div class="register-container">
-        <div class="register-box">
-            <h2>Register for DocReserve</h2>
-            <div id="register-message" class="message hidden"></div>
-            <form id="register-form">
-                <label for="first_name">First Name:</label>
-                <input type="text" id="first_name" name="first_name" required>
+    <main class="d-flex align-items-center justify-content-center flex-grow-1 py-5">
+        <div class="card shadow-lg p-4 p-md-5 register-box-card border-0">
+            <div class="card-body text-center">
+                <h2 class="card-title fw-bold text-dark mb-2 display-6">Create your DocReserve account</h2>
+                <p class="text-muted mb-4">Choose your role. Some roles require approval before you can log in.</p>
+                <div id="register-message" class="alert hidden" role="alert"></div>
+                <form id="register-form">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
+                                <label for="first_name">First Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
+                                <label for="last_name">Last Name</label>
+                            </div>
+                        </div>
+                    </div>
 
-                <label for="last_name">Last Name:</label>
-                <input type="text" id="last_name" name="last_name" required>
+                    <div class="form-floating mb-3">
+                        <input type="email" class="form-control" id="email" name="email" placeholder="name@example.com" required>
+                        <label for="email">Email address</label>
+                    </div>
 
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required>
+                    <div class="form-floating mb-3 position-relative">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                        <label for="password">Password</label>
+                        <button type="button" class="btn btn-sm btn-link position-absolute top-50 end-0 translate-middle-y me-2" id="toggle-password" tabindex="-1">Show</button>
+                        <div class="form-text mt-1">
+                            <div class="progress" style="height:6px;">
+                                <div id="password-strength-bar" class="progress-bar" role="progressbar" style="width:0%"></div>
+                            </div>
+                            <small id="password-strength-text" class="text-muted">Strength: -</small>
+                        </div>
+                    </div>
 
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" required>
+                    <div class="form-floating mb-3 position-relative">
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
+                        <label for="confirm_password">Confirm Password</label>
+                        <button type="button" class="btn btn-sm btn-link position-absolute top-50 end-0 translate-middle-y me-2" id="toggle-confirm" tabindex="-1">Show</button>
+                    </div>
 
-                <label for="role">Register as:</label>
-                <select id="role" name="role" required>
-                    <option value="user">Patient</option>
-                    <option value="doctor">Doctor</option>
-                    <option value="hospital_admin">Hospital Admin</option>
-                </select>
+                    <div class="form-floating mb-3">
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="user">Patient</option>
+                            <option value="doctor">Doctor</option>
+                            <option value="hospital_admin">Hospital Admin</option>
+                        </select>
+                        <label for="role">Register as:</label>
+                    </div>
+                    <div id="role-help" class="text-start small text-muted mb-3"></div>
 
-                <div id="doctor-fields" class="hidden">
-                    <label for="doctor_registration_id">Doctor Registration ID:</label>
-                    <input type="text" id="doctor_registration_id" name="doctor_registration_id">
-                    <label for="doctor_hospital_id">Hospital ID (Optional, can be set by Admin):</label>
-                    <input type="text" id="doctor_hospital_id" name="doctor_hospital_id">
-                </div>
+                    <div id="doctor-fields" class="hidden">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="doctor_registration_id" name="doctor_registration_id" placeholder="Doctor Registration ID">
+                            <label for="doctor_registration_id">Doctor Registration ID (required for Doctors)</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="doctor_hospital_id" name="doctor_hospital_id" placeholder="Hospital ID (required)">
+                            <label for="doctor_hospital_id">Hospital ID (required for Doctors)</label>
+                        </div>
+                    </div>
 
-                <div id="hospital-admin-fields" class="hidden">
-                    <label for="hospital_id">Hospital ID:</label>
-                    <input type="text" id="hospital_id" name="hospital_id">
-                </div>
+                    <div id="hospital-admin-fields" class="hidden">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="hospital_id" name="hospital_id" placeholder="Hospital ID">
+                            <label for="hospital_id">Hospital ID (required for Hospital Admins)</label>
+                        </div>
+                    </div>
 
-                <button type="submit">Register</button>
-            </form>
-            <p>Already have an account? <a href="/login.html">Login here</a></p>
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill shadow-sm mt-3">Register</button>
+                </form>
+                <p class="mt-4 mb-0 text-muted fs-6">Already have an account? <a href="./login.html" class="text-primary fw-bold text-decoration-none">Login here</a></p>
+            </div>
         </div>
-    </div>
+    </main>
 
-    <footer class="main-footer">
-        <div class="copyright">
-            &copy; 2024 DocReserve. All rights reserved.
+    <footer class="main-footer bg-dark text-white-50 py-4 mt-auto">
+        <div class="container text-center">
+            <p class="small mb-0">&copy; 2024 DocReserve. All rights reserved.</p>
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="js/register.js"></script>
 </body>
 </html>
