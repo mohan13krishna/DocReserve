@@ -4,23 +4,38 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Doctors - DocReserve</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/patient-dashboard.css">
 </head>
 <body>
-    <div class="patient-dashboard-container">
-        <aside class="sidebar">
-            <div class="logo">DocReserve</div>
-            <nav class="sidebar-nav">
-                <a href="/patient-dashboard.html" class="nav-item">Dashboard</a>
-                <a href="/patient-doctors.html" class="nav-item active">Doctors</a>
-                <a href="/patient-appointments.html" class="nav-item">Appointments</a>
-                <a href="/patient-profile.html" class="nav-item">Profile</a>
+    <div class="patient-dashboard-container d-flex min-vh-100">
+        <aside class="sidebar bg-white shadow-sm p-4 d-flex flex-column">
+            <div class="logo mb-5 text-primary fw-bold fs-4">DocReserve</div>
+            <nav class="sidebar-nav flex-grow-1">
+                <a href="./patient-dashboard.html" class="nav-item d-flex align-items-center mb-2 p-3 rounded-pill text-decoration-none fw-semibold">
+                    <i class="bi bi-speedometer2 fs-5 me-3"></i> Dashboard
+                </a>
+                <a href="./patient-doctors.html" class="nav-item active d-flex align-items-center mb-2 p-3 rounded-pill text-decoration-none text-secondary fw-semibold">
+                    <i class="bi bi-person-heart fs-5 me-3"></i> Doctors
+                </a>
+                <a href="./patient-appointments.html" class="nav-item d-flex align-items-center mb-2 p-3 rounded-pill text-decoration-none text-secondary fw-semibold">
+                    <i class="bi bi-calendar-check-fill fs-5 me-3"></i> Appointments
+                </a>
+                <a href="./patient-profile.html" class="nav-item d-flex align-items-center mb-2 p-3 rounded-pill text-decoration-none text-secondary fw-semibold">
+                    <i class="bi bi-person-fill fs-5 me-3"></i> Profile
+                </a>
             </nav>
-            <button class="logout-btn" onclick="logout()">Logout</button>
+            <button class="btn btn-danger btn-lg w-100 rounded-pill shadow-sm mt-4" onclick="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i> Logout
+            </button>
         </aside>
+
         <main class="main-content">
-            <header class="main-header-dashboard">
+            <!-- <header class="main-header-dashboard"> -->
+                 <header class="main-header-dashboard d-flex justify-content-between align-items-center mb-4 pb-3">
+            <h2 class="display-6 fw-bold mb-0">Doctors Connect</h2>
                 <div class="user-profile-info">
                     <span id="patient-full-name">John Doe</span>
                     <div class="user-profile-icon" id="patient-initials">JD</div>
@@ -31,7 +46,7 @@
                 <div class="search-filter-controls">
                     <div class="search-bar">
                         <input type="text" placeholder="Search doctors by name or specialization" id="doctor-search-input">
-                        <span class="search-icon">Q</span>
+                        <span class="search-icon"><i class="bi bi-search"></i></span>
                     </div>
                     <select id="specialization-filter" class="filter-select">
                         <option value="">All Specializations</option>
@@ -50,98 +65,42 @@
                     </select>
                 </div>
 
-                <div class="doctors-list-container" id="doctors-list-container">
-                    <div class="doctor-card-listing">
-                        <h3>Dr. Michael Anderson</h3>
-                        <p class="specialty">Cardiologist</p>
-                        <p class="rating"><span>4.9</span> (127 reviews)</p>
-                        <p class="experience">15 years experience</p>
-                        <p class="availability">Next available: Tomorrow 10:30 AM</p>
-                        <button class="button primary book-button">Book Appointment</button>
+                <div class="doctors-list-container row" id="doctors-list-container">
                     </div>
-                    <div class="doctor-card-listing">
-                        <h3>Dr. Sarah Johnson</h3>
-                        <p class="specialty">Dermatologist</p>
-                        <p class="rating"><span>4.8</span> (89 reviews)</p>
-                        <p class="experience">12 years experience</p>
-                        <p class="availability">Next available: Dec 28, 2:00 PM</p>
-                        <button class="button primary book-button">Book Appointment</button>
-                    </div>
-                    <div class="doctor-card-listing">
-                        <h3>Dr. Robert Wilson</h3>
-                        <p class="specialty">Neurologist</p>
-                        <p class="rating"><span>4.7</span> (156 reviews)</p>
-                        <p class="experience">20 years experience</p>
-                        <p class="availability">Next available: Jan 5, 11:15 AM</p>
-                        <button class="button primary book-button">Book Appointment</button>
-                    </div>
-                    <div class="doctor-card-listing">
-                        <h3>Dr. Emily Chen</h3>
-                        <p class="specialty">Pediatrician</p>
-                        <p class="rating"><span>4.9</span> (203 reviews)</p>
-                        <p class="experience">8 years experience</p>
-                        <p class="availability">Next available: Today 4:30 PM</p>
-                        <button class="button primary book-button">Book Appointment</button>
-                    </div>
-                    <div class="doctor-card-listing">
-                        <h3>Dr. David Martinez</h3>
-                        <p class="specialty">Orthopedic Surgeon</p>
-                        <p class="rating"><span>4.6</span> (94 reviews)</p>
-                        <p class="experience">18 years experience</p>
-                        <p class="availability">Next available: Jan 8, 9:00 AM</p>
-                        <button class="button primary book-button">Book Appointment</button>
-                    </div>
-                    <div class="doctor-card-listing">
-                        <h3>Dr. Lisa Thompson</h3>
-                        <p class="specialty">Gynecologist</p>
-                        <p class="rating"><span>4.8</span> (112 reviews)</p>
-                        <p class="experience">14 years experience</p>
-                        <p class="availability">Next available: Jan 3, 1:30 PM</p>
-                        <button class="button primary book-button">Book Appointment</button>
-                    </div>
-                </div>
             </section>
         </main>
     </div>
-
-    <script src="js/patient-dashboard.js"></script> <script>
-        // Placeholder for patient-doctors.js logic
-        document.addEventListener('DOMContentLoaded', async () => {
-            const token = localStorage.getItem('token');
-            const userRole = localStorage.getItem('userRole');
-
-            if (!token || userRole !== 'user') {
-                window.location.href = '/login.html';
-                return;
-            }
-
-            // Update patient info in header
-            const decodedToken = JSON.parse(atob(token.split('.')[1]));
-            document.getElementById('patient-full-name').textContent = `${decodedToken.first_name || ''} ${decodedToken.last_name || ''}`;
-            document.getElementById('patient-initials').textContent = `${(decodedToken.first_name || '').charAt(0)}${(decodedToken.last_name || '').charAt(0)}`.toUpperCase();
-
-            // Fetch doctors logic (example)
-            const doctorsListContainer = document.getElementById('doctors-list-container');
-            const fetchDoctors = async () => {
-                // In a real app, you'd call an API like /api/doctors
-                // const response = await fetch('/api/doctors?search=...&specialization=...', {
-                //     headers: { 'Authorization': `Bearer ${token}` }
-                // });
-                // const doctors = await response.json();
-                // doctorsListContainer.innerHTML = '';
-                // doctors.forEach(doctor => { /* render doctor card */ });
-                doctorsListContainer.innerHTML = '<p>Doctor list will be loaded dynamically here.</p>'; // Placeholder
-            };
-
-            fetchDoctors();
-            // Add event listeners for search and filter inputs to re-call fetchDoctors
-        });
-
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('userRole');
-            window.location.href = '/login.html';
-        }
-    </script>
+    <div class="modal fade" id="doctorProfileModal" tabindex="-1" aria-labelledby="doctorProfileModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="doctorProfileModalLabel">Doctor Profile</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <div class="d-flex align-items-center mb-4">
+                <img src="" alt="Doctor Profile Picture" class="rounded-circle me-3" id="modal-doctor-image" style="width: 100px; height: 100px; object-fit: cover;">
+                <div>
+                    <h4 class="fw-bold" id="modal-doctor-name"></h4>
+                    <p class="text-primary mb-1" id="modal-doctor-specialty"></p>
+                    <p class="text-muted small mb-0"><span id="modal-doctor-experience"></span> years experience • <span id="modal-doctor-rating"></span> rating</p>
+                </div>
+            </div>
+            <div class="mb-4">
+                <h5 class="fw-bold text-dark">About Dr. <span id="modal-doctor-name-bio"></span></h5>
+                <p id="modal-doctor-bio"></p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary rounded-pill" data-bs-dismiss="modal">Close</button>
+            <a href="#" class="btn btn-primary rounded-pill" id="modal-book-btn">Book Appointment</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/patient-doctors.js"></script>
 </body>
 </html>
