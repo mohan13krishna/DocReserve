@@ -4,185 +4,252 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hospital Admin Dashboard - DocReserve</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/hospital-admin-dashboard.css">
 </head>
 <body>
-    <div class="admin-dashboard-container">
-        <aside class="sidebar">
-            <div class="logo">DocReserve</div>
-            <nav class="sidebar-nav">
-                <a href="/hospital-admin-dashboard.html" class="nav-item active">Doctor Management</a>
-                <a href="/hospital-admin-analytics.html" class="nav-item">Analytics</a>
-                <a href="/hospital-admin-profile.html" class="nav-item">Profile</a>
+    <div class="admin-dashboard-container d-flex min-vh-100">
+        <aside class="sidebar bg-white shadow-sm p-4 d-flex flex-column">
+            <div class="logo mb-5 text-primary fw-bold fs-4">DocReserve</div>
+            <nav class="sidebar-nav flex-grow-1">
+                <a href="/hospital-admin-dashboard.html" class="nav-item active d-flex align-items-center mb-2 p-3 rounded-pill text-decoration-none fw-semibold">
+                    <i class="bi bi-speedometer2 fs-5 me-3"></i> Dashboard
+                </a>
+                <a href="/hospital-admin-doctors-management.html" class="nav-item d-flex align-items-center mb-2 p-3 rounded-pill text-decoration-none text-secondary fw-semibold">
+                    <i class="bi bi-person-badge fs-5 me-3"></i> Doctors Management
+                </a>
+                <a href="/hospital-admin-analytics.html" class="nav-item d-flex align-items-center mb-2 p-3 rounded-pill text-decoration-none text-secondary fw-semibold">
+                    <i class="bi bi-graph-up fs-5 me-3"></i> Analytics
+                </a>
+                <a href="/hospital-admin-profile.html" class="nav-item d-flex align-items-center mb-2 p-3 rounded-pill text-decoration-none text-secondary fw-semibold">
+                    <i class="bi bi-person-fill fs-5 me-3"></i> Profile
+                </a>
             </nav>
-            <button class="logout-btn" onclick="logout()">Logout</button>
+            <button class="btn btn-danger btn-lg w-100 rounded-pill shadow-sm mt-4" onclick="logout()">
+                <i class="bi bi-box-arrow-right me-2"></i> Logout
+            </button>
         </aside>
 
-        <main class="main-content">
-            <header class="main-header-dashboard">
+        <main class="main-content flex-grow-1 p-4 bg-light">
+            <header class="main-header-dashboard d-flex justify-content-between align-items-center mb-4 pb-3">
                 <div class="dashboard-title">
-                    <h2>Welcome back, <span id="admin-full-name">Dr. Johnson</span></h2>
-                    <p id="current-date-time">Friday, August 1, 2025 10:30 AM</p>
+                    <h2 class="display-6 fw-bold mb-0">Welcome back, <span id="admin-full-name"></span></h2>
+                    <p id="current-date-time" class="text-muted mb-0"></p>
                 </div>
-                <div class="user-profile-info">
-                    <div class="user-profile-icon" id="admin-initials">SJ</div>
+                <div class="user-profile-info d-flex align-items-center gap-2">
+                    <div class="user-profile-icon rounded-circle bg-primary text-white d-flex justify-content-center align-items-center fw-bold fs-5 shadow-sm" style="width: 45px; height: 45px;">
+                        <span id="admin-initials"></span>
+                    </div>
                 </div>
             </header>
 
-            <section class="summary-cards-section">
-                <div class="summary-card">
-                    <h3>Total Doctors</h3>
-                    <p id="total-doctors">127</p>
-                    <span>+8% from last month</span>
+            <section class="summary-cards-section row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="summary-card card shadow-sm p-4 border-0 rounded-4 text-center animate-hover">
+                        <h3 class="card-title text-muted fw-normal fs-6">Total Doctors</h3>
+                        <p class="card-text text-primary display-4 fw-bold" id="total-doctors"></p>
+                        <span>+8% from last month</span>
+                    </div>
                 </div>
-                <div class="summary-card alert-card">
-                    <h3>Pending Approvals</h3>
-                    <p id="pending-approvals">12</p>
-                    <span>Requires attention</span>
+                <div class="col-md-3">
+                    <div class="summary-card card shadow-sm p-4 border-0 rounded-4 text-center alert-card animate-hover">
+                        <h3 class="card-title text-muted fw-normal fs-6">Pending Approvals</h3>
+                        <p class="card-text text-warning display-4 fw-bold" id="pending-approvals"></p>
+                        <span>Requires attention</span>
+                    </div>
                 </div>
-                <div class="summary-card">
-                    <h3>Today's Appointments</h3>
-                    <p id="today-appointments">284</p>
-                    <span>+12% from yesterday</span>
+                <div class="col-md-3">
+                    <div class="summary-card card shadow-sm p-4 border-0 rounded-4 text-center animate-hover">
+                        <h3 class="card-title text-muted fw-normal fs-6">Today's Appointments</h3>
+                        <p class="card-text text-primary display-4 fw-bold" id="today-appointments"></p>
+                        <span>+12% from yesterday</span>
+                    </div>
                 </div>
-                <div class="summary-card">
-                    <h3>Total Patients</h3>
-                    <p id="total-patients">8,542</p>
-                    <span>+15% from last month</span>
+                <div class="col-md-3">
+                    <div class="summary-card card shadow-sm p-4 border-0 rounded-4 text-center animate-hover">
+                        <h3 class="card-title text-muted fw-normal fs-6">Total Patients</h3>
+                        <p class="card-text text-primary display-4 fw-bold" id="total-patients"></p>
+                        <span>+15% from last month</span>
+                    </div>
                 </div>
             </section>
 
-            <section class="doctor-management-section">
-                <div class="tabs">
-                    <button class="tab-button active" id="pending-approvals-tab">Pending Approvals (<span id="pending-count">12</span>)</button>
-                    <button class="tab-button" id="approved-doctors-tab">Approved Doctors (<span id="approved-count">127</span>)</button>
-                </div>
-
-                <div class="search-filter-controls">
-                    <div class="search-bar">
-                        <input type="text" id="doctor-search" placeholder="Search doctors...">
-                        <span class="search-icon">Q</span>
-                    </div>
-                    <select id="specialization-filter" class="filter-select">
-                        <option value="">All Specializations</option>
-                        <option value="Cardiologist">Cardiologist</option>
-                        <option value="Pediatrician">Pediatrician</option>
-                        <option value="Dermatologist">Dermatologist</option>
-                        <option value="Neurologist">Neurologist</option>
-                    </select>
-                     <select id="status-filter" class="filter-select hidden">
-                        <option value="">All Status</option>
-                        <option value="Active">Active</option>
-                        <option value="On Leave">On Leave</option>
-                        <option value="Inactive">Inactive</option>
-                    </select>
-                </div>
-
-                <div id="pending-approvals-content" class="tab-content active">
-                    <h3>Pending Doctor Approvals</h3>
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Doctor</th>
-                                    <th>Department</th>
-                                    <th>Hospital</th>
-                                    <th>Applied Date</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="pending-doctors-table-body">
-                                <tr>
-                                    <td>
-                                        <div class="doctor-profile-cell">
-                                            <div class="initials">MC</div>
-                                            <div>
-                                                <h4>Dr. Michael Chen</h4>
-                                                <span>michael.chen@email.com</span>
-                                            </div>
+            <!-- Pending Approvals and Leave Requests Section -->
+            <section class="management-section">
+                <div class="row g-4">
+                    <!-- Pending Approvals Card -->
+                    <div class="col-12">
+                        <div class="card shadow-sm border-0 rounded-4">
+                            <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-person-check-fill fs-4 me-3"></i>
+                                    <h5 class="mb-0 fw-bold">Pending Doctor Approvals</h5>
+                                </div>
+                                <span class="badge bg-light text-primary fs-6" id="pending-total-count"></span>
+                            </div>
+                            <div class="card-body p-4">
+                                <!-- Search and Filter Controls -->
+                                <div class="row mb-4">
+                                    <div class="col-md-6">
+                                        <div class="search-container position-relative">
+                                            <input type="text" id="pending-search" class="form-control form-control-lg ps-5 rounded-pill" placeholder="Search doctors by name or email...">
+                                            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
                                         </div>
-                                    </td>
-                                    <td>Cardiology</td>
-                                    <td>Metropolitan General Hospital</td>
-                                    <td>July 28, 2025</td>
-                                    <td class="action-buttons">
-                                        <button class="button primary small approve-btn" data-id="1">Approve</button>
-                                        <button class="button secondary small reject-btn" data-id="1">Reject</button>
-                                        <button class="button tertiary small view-profile-btn" data-id="1">View Profile</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <select class="form-select form-select-lg rounded-pill" id="pending-department-filter">
+                                            <option value="">All Departments</option>
+                                            <option value="cardiology">Cardiology</option>
+                                            <option value="neurology">Neurology</option>
+                                            <option value="pediatrics">Pediatrics</option>
+                                            <option value="orthopedics">Orthopedics</option>
+                                            <option value="emergency">Emergency Medicine</option>
+                                            <option value="dermatology">Dermatology</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-outline-primary btn-lg w-100 rounded-pill" id="pending-refresh">
+                                            <i class="bi bi-arrow-clockwise"></i>
+                                        </button>
+                                    </div>
+                                </div>
 
-                <div id="approved-doctors-content" class="tab-content">
-                     <h3>Approved Doctors List</h3>
-                    <div class="table-responsive">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Doctor</th>
-                                    <th>Department</th>
-                                    <th>Rating</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="approved-doctors-table-body">
-                                <tr>
-                                    <td>
-                                        <div class="doctor-profile-cell">
-                                            <div class="initials">LT</div>
-                                            <div>
-                                                <h4>Dr. Lisa Thompson</h4>
-                                                <span>Neurology</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>Neurology</td>
-                                    <td>4.8 (124 reviews)</td>
-                                    <td><span class="status-badge active">Active</span></td>
-                                    <td class="action-buttons">
-                                        <button class="button tertiary small view-profile-btn">View Profile</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                <!-- Pending Approvals Table -->
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle" id="pending-approvals-table">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th scope="col" class="fw-bold text-uppercase">Doctor</th>
+                                                <th scope="col" class="fw-bold text-uppercase">Department</th>
+                                                <th scope="col" class="fw-bold text-uppercase">Hospital</th>
+                                                <th scope="col" class="fw-bold text-uppercase">Applied Date</th>
+                                                <th scope="col" class="fw-bold text-uppercase text-center">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="pending-approvals-tbody">
+                                            <!-- Dynamic content will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination Controls -->
+                                <div class="d-flex justify-content-between align-items-center mt-4">
+                                    <div class="pagination-info">
+                                        <span class="text-muted" id="pending-pagination-info">Showing 0 of 0 entries</span>
+                                    </div>
+                                    <nav aria-label="Pending approvals pagination">
+                                        <ul class="pagination pagination-lg mb-0">
+                                            <li class="page-item" id="pending-prev-li">
+                                                <button class="page-link rounded-pill me-2" id="pending-prev-btn">
+                                                    <i class="bi bi-chevron-left"></i> Previous
+                                                </button>
+                                            </li>
+                                            <li class="page-item" id="pending-next-li">
+                                                <button class="page-link rounded-pill" id="pending-next-btn">
+                                                    Next <i class="bi bi-chevron-right"></i>
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="pagination">
-                        <span>Showing 1 to 10 of <span id="total-approved-doctors">127</span> results</span>
-                        <div class="pagination-controls">
-                            <button>&lt;</button>
-                            <button class="active">1</button>
-                            <button>2</button>
-                            <button>3</button>
-                            <span>...</span>
-                            <button>13</button>
-                            <button>&gt;</button>
+
+                    <!-- Leave Requests Card -->
+                    <div class="col-12 mt-5">
+                        <div class="card shadow-sm border-0 rounded-4">
+                            <div class="card-header bg-gradient-warning text-white d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-calendar-event-fill fs-4 me-3"></i>
+                                    <h5 class="mb-0 fw-bold">Doctor Leave Requests</h5>
+                                </div>
+                                <span class="badge bg-light text-warning fs-6" id="leave-total-count"></span>
+                            </div>
+                            <div class="card-body p-4">
+                                <!-- Search and Filter Controls -->
+                                <div class="row mb-4">
+                                    <div class="col-md-5">
+                                        <div class="search-container position-relative">
+                                            <input type="text" id="leave-search" class="form-control form-control-lg ps-5 rounded-pill" placeholder="Search leave requests...">
+                                            <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select form-select-lg rounded-pill" id="leave-status-filter">
+                                            <option value="">All Statuses</option>
+                                            <option value="pending">Pending</option>
+                                            <option value="approved">Approved</option>
+                                            <option value="rejected">Rejected</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <select class="form-select form-select-lg rounded-pill" id="leave-type-filter">
+                                            <option value="">All Types</option>
+                                            <option value="medical">Medical Leave</option>
+                                            <option value="vacation">Vacation</option>
+                                            <option value="emergency">Emergency</option>
+                                            <option value="personal">Personal</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button class="btn btn-outline-warning btn-lg w-100 rounded-pill" id="leave-refresh">
+                                            <i class="bi bi-arrow-clockwise"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Leave Requests Table -->
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle" id="leave-requests-table">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th scope="col" class="fw-bold text-uppercase">Doctor</th>
+                                                <th scope="col" class="fw-bold text-uppercase">Department</th>
+                                                <th scope="col" class="fw-bold text-uppercase">Leave Type</th>
+                                                <th scope="col" class="fw-bold text-uppercase">Duration</th>
+                                                <th scope="col" class="fw-bold text-uppercase">Status</th>
+                                                <th scope="col" class="fw-bold text-uppercase text-center">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="leave-requests-tbody">
+                                            <!-- Dynamic content will be loaded here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <!-- Pagination Controls -->
+                                <div class="d-flex justify-content-between align-items-center mt-4">
+                                    <div class="pagination-info">
+                                        <span class="text-muted" id="leave-pagination-info">Showing 0 of 0 entries</span>
+                                    </div>
+                                    <nav aria-label="Leave requests pagination">
+                                        <ul class="pagination pagination-lg mb-0">
+                                            <li class="page-item" id="leave-prev-li">
+                                                <button class="page-link rounded-pill me-2" id="leave-prev-btn">
+                                                    <i class="bi bi-chevron-left"></i> Previous
+                                                </button>
+                                            </li>
+                                            <li class="page-item" id="leave-next-li">
+                                                <button class="page-link rounded-pill" id="leave-next-btn">
+                                                    Next <i class="bi bi-chevron-right"></i>
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
+
         </main>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <script src="js/hospital-admin-dashboard.js"></script>
-    <script>
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('userRole');
-            window.location.href = '/login.html';
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const token = localStorage.getItem('token');
-            const role = localStorage.getItem('userRole');
-            if (!token || role !== 'hospital_admin') {
-                window.location.href = '/login.html';
-            }
-        });
-    </script>
 </body>
 </html>
