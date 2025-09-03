@@ -11,7 +11,7 @@
 
 /* Pending Approvals Section (for Hospital Admins) */
 .pending-approvals-section {
-    background-color: #fff;
+    background-color: #ffffff;
     padding: 30px;
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
@@ -19,7 +19,7 @@
 
 .pending-approvals-section h3 {
     font-size: 1.4em;
-    color: #333;
+    color: #141313;
     margin-bottom: 20px;
 }
 
@@ -38,7 +38,7 @@
     height: 40px;
     border-radius: 50%;
     background-color: #e0f2f7;
-    color: #007bff;
+    color: #87bcf5;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -88,3 +88,68 @@
 
 /* Super Admin Profile */
 /* Inherits common profile styles from style.css */
+
+/* Collapsible sidebar behavior */
+.sidebar { transition: transform .25s ease; }
+@media (max-width: 992px) {
+  body:not(.sidebar-open) .sidebar { transform: translateX(-100%); position: fixed; top: 0; left: 0; height: 100vh; z-index: 1050; }
+  body.sidebar-open .sidebar { transform: translateX(0); }
+
+/* Super Admin Profile layout (moved from global) */
+.profile-section { display:grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap:20px; }
+.profile-card { background:#fff; padding:30px; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,.05); }
+.profile-card .form-row { display:flex; gap:20px; flex-wrap:wrap; margin-bottom:20px; }
+.profile-card .form-group { flex:1; min-width:150px; }
+.profile-card .form-group.full-width { flex:0 0 100%; min-width:unset; }
+.profile-card label { display:block; font-weight:600; margin-bottom:8px; color:#555; }
+.profile-card input[type="text"],
+.profile-card input[type="email"],
+.profile-card input[type="password"],
+.profile-card select,
+.profile-card textarea { width:calc(100% - 20px); padding:10px; border:1px solid #ddd; border-radius:6px; background:#fff; }
+.profile-card input[readonly]{ background:#f8f8f8; cursor:not-allowed; }
+.profile-picture-upload { text-align:center; margin-bottom:20px; }
+.profile-picture-upload img { width:120px; height:120px; border-radius:50%; object-fit:cover; margin-bottom:10px; border:3px solid #eee; }
+.profile-picture-upload .upload-info { font-size:.85em; color:#999; }
+
+}
+
+
+/* --- Super Admin Profile: Polished look & spacing --- */
+.profile-section .profile-card { border-radius: 16px; }
+.profile-section .card-title { display: flex; align-items: center; gap: 8px; }
+.profile-picture-upload img { width: 120px; height: 120px; object-fit: cover; }
+.profile-picture-upload #change-photo-btn { margin-top: 8px; }
+.profile-section .form-floating > .form-control { border-radius: 12px; }
+.profile-section .list-unstyled .bg-light { background-color: #f8f9fb !important; }
+
+/* Hover polish for cards */
+.pending-approvals-section,
+.analytics-section .analytics-card,
+.profile-card { transition: box-shadow .2s ease, transform .2s ease; }
+.pending-approvals-section:hover,
+.analytics-section .analytics-card:hover,
+.profile-card:hover { transform: translateY(-4px); box-shadow: 0 8px 16px rgba(0,0,0,.08); }
+
+/* --- Responsive layout for Super Admin pages --- */
+@media (max-width: 992px) {
+  .admin-dashboard-container { flex-direction: column; }
+  .sidebar { width: 100%; min-width: unset; padding: 16px; border-right: none; border-bottom: 1px solid #eee; align-items: stretch; }
+  .sidebar .logo { margin-bottom: 16px; }
+  .main-content { padding: 1rem !important; }
+  .analytics-section .analytics-row { gap: 12px; }
+  .analytics-section .analytics-card,
+  .analytics-section .analytics-card.large { flex: 1 1 100%; min-width: 100%; }
+}
+
+@media (max-width: 768px) {
+  .main-header-dashboard .dashboard-title h2 { font-size: 1.35rem; }
+  .main-header-dashboard .user-profile-icon { width: 40px !important; height: 40px !important; }
+  /* Quick stats: 2 per row */
+  .profile-section ul.row > li { flex: 0 0 50%; max-width: 50%; }
+}
+
+@media (max-width: 480px) {
+  .main-header-dashboard .dashboard-title h2 { font-size: 1.15rem; }
+  .profile-section ul.row > li { flex: 0 0 100%; max-width: 100%; }
+}
