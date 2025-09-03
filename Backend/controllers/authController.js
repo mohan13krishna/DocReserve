@@ -39,12 +39,13 @@ exports.login = async (req, res) => {
       payload.first_name = doctorRows[0].first_name;
       payload.last_name = doctorRows[0].last_name;
     } else if (user.role === 'hospital_admin') {
-      const [adminRows] = await db.execute('SELECT admin_id, hospital_id, is_approved, first_name, last_name FROM HospitalAdmins WHERE user_id = ?', [user.user_id]);
+      const [adminRows] = await db.execute('SELECT admin_id, hospital_id, hospital_code, is_approved, first_name, last_name FROM HospitalAdmins WHERE user_id = ?', [user.user_id]);
       if (adminRows.length === 0 || !adminRows[0].is_approved) {
         return res.status(403).json({ message: 'Your hospital admin account is pending approval by a super admin.' });
       }
       payload.hospital_admin_id = adminRows[0].admin_id;
       payload.hospital_id = adminRows[0].hospital_id;
+      payload.hospital_code = adminRows[0].hospital_code; // include for filtering
       payload.first_name = adminRows[0].first_name;
       payload.last_name = adminRows[0].last_name;
     } else if (user.role === 'user') {
@@ -109,9 +110,12 @@ exports.register = async (req, res) => {
         if (!doctor_registration_id) {
           throw new Error('Doctor registration ID is required for doctor role.');
         }
+        if (!hospital_id) {
+          throw new Error('Hospital ID is required for doctor role.');
+        }
         await connection.execute(
           'INSERT INTO Doctors (user_id, doctor_registration_id, first_name, last_name, hospital_id, is_approved) VALUES (?, ?, ?, ?, ?, FALSE)',
-          [userId, doctor_registration_id, first_name, last_name, hospital_id || null] // hospital_id is optional at registration
+          [userId, doctor_registration_id, first_name, last_name, hospital_id]
         );
         registrationMessage = 'Registration successful! Your doctor account is pending approval by a hospital admin.';
       } else if (role === 'hospital_admin') {
