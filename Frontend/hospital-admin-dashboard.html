@@ -178,11 +178,8 @@
                                         </div>
                                     </div>
                                     <div class="col-md-3">
-                                        <select class="form-select form-select-lg rounded-pill" id="leave-status-filter">
-                                            <option value="">All Statuses</option>
-                                            <option value="pending">Pending</option>
-                                            <option value="approved">Approved</option>
-                                            <option value="rejected">Rejected</option>
+                                        <select class="form-select form-select-lg rounded-pill" id="leave-status-filter" disabled>
+                                            <option value="pending" selected>Pending Only</option>
                                         </select>
                                     </div>
                                     <div class="col-md-2">
@@ -209,9 +206,12 @@
                                                 <th scope="col" class="fw-bold text-uppercase">Doctor</th>
                                                 <th scope="col" class="fw-bold text-uppercase">Department</th>
                                                 <th scope="col" class="fw-bold text-uppercase">Leave Type</th>
+                                                <th scope="col" class="fw-bold text-uppercase">Start Date</th>
+                                                <th scope="col" class="fw-bold text-uppercase">End Date</th>
                                                 <th scope="col" class="fw-bold text-uppercase">Duration</th>
                                                 <th scope="col" class="fw-bold text-uppercase">Status</th>
-                                                <th scope="col" class="fw-bold text-uppercase text-center">Actions</th>
+                                                <th scope="col" class="fw-bold text-uppercase">Reason</th>
+                                                <th scope="col" class="fw-bold text-uppercase">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody id="leave-requests-tbody">
