@@ -112,15 +112,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                         
                         // Dashboard only shows pending appointments with approve/reject actions
                         let actionButtons = `
-                            <button class="btn btn-sm btn-success me-1 appt-approve" title="Approve Appointment">
-                                <i class="bi bi-check-circle"></i> Approve
-                            </button>
-                            <button class="btn btn-sm btn-danger me-1 appt-reject" title="Reject Appointment">
-                                <i class="bi bi-x-circle"></i> Reject
-                            </button>
-                            <button class="btn btn-sm btn-outline-secondary appt-view" data-bs-toggle="modal" data-bs-target="#appointmentModal">
-                                <i class="bi bi-eye"></i> View
-                            </button>
+                            <div class="d-flex gap-1 justify-content-start">
+                                <button class="btn btn-sm btn-success appt-approve" title="Approve Appointment">
+                                    <i class="bi bi-check-circle"></i> Approve
+                                </button>
+                                <button class="btn btn-sm btn-danger appt-reject" title="Reject Appointment">
+                                    <i class="bi bi-x-circle"></i> Reject
+                                </button>
+                                <button class="btn btn-sm btn-outline-primary appt-view" data-bs-toggle="modal" data-bs-target="#appointmentModal" title="View Details">
+                                    <i class="bi bi-eye"></i> View
+                                </button>
+                            </div>
                         `;
                         
                         tr.innerHTML = `
