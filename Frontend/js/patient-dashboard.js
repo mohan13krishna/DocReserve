@@ -70,17 +70,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (data.upcomingAppointments.length > 0) {
             data.upcomingAppointments.forEach(appointment => {
                 const doctorInitials = (appointment.doctorName.match(/\b(\w)/g) || []).join('').toUpperCase();
+                // Determine status badge color
+                const statusColor = appointment.status === 'Confirmed' ? 'bg-success' : 'bg-warning';
+                const statusTextColor = appointment.status === 'Confirmed' ? 'text-white' : 'text-dark';
+                
                 const appointmentCard = `
                     <div class="appointment-card d-flex align-items-center p-3 rounded-3 mb-3 bg-light animate-hover">
                         <div class="doctor-initials rounded-circle me-3 d-flex justify-content-center align-items-center text-white bg-info" style="width: 50px; height: 50px;">${doctorInitials}</div>
                         <div class="appointment-details flex-grow-1">
                             <h4 class="fw-bold mb-1 fs-6">${appointment.doctorName}</h4>
                             <p class="text-muted mb-1 small">${appointment.specialization}</p>
-                            <p class="appointment-date text-primary fw-bold mb-0 small">${appointment.date}</p>
+                            <p class="appointment-date text-primary fw-bold mb-1 small">${appointment.date}</p>
+                            <span class="badge ${statusColor} ${statusTextColor} rounded-pill small">${appointment.status}</span>
                         </div>
                         <div class="d-flex flex-column gap-2">
-                            <button class="btn btn-outline-primary btn-sm rounded-pill">View Details</button>
-                            <button class="btn btn-warning btn-sm rounded-pill text-dark">Reschedule</button>
+                            <button class="btn btn-outline-primary btn-sm rounded-pill view-details-btn" data-appointment-id="${appointment.appointment_id}">View Details</button>
+                            <button class="btn btn-warning btn-sm rounded-pill text-dark reschedule-btn" data-appointment-id="${appointment.appointment_id}">Reschedule</button>
                         </div>
                     </div>
                 `;
@@ -94,6 +99,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error fetching dashboard data:', error);
         upcomingAppointmentsList.innerHTML = '<p>Failed to load appointments. Please try again later.</p>';
     }
+
+    // Add event listeners for appointment action buttons
+    document.addEventListener('click', async (event) => {
+        const viewDetailsBtn = event.target.closest('.view-details-btn');
+        const rescheduleBtn = event.target.closest('.reschedule-btn');
+
+        if (viewDetailsBtn) {
+            const appointmentId = viewDetailsBtn.dataset.appointmentId;
+            // Redirect to appointments page with specific appointment highlighted
+            window.location.href = `./patient-appointments.html?highlight=${appointmentId}`;
+        } else if (rescheduleBtn) {
+            const appointmentId = rescheduleBtn.dataset.appointmentId;
+            // Redirect to booking page for rescheduling
+            window.location.href = `./patient-booking.html?appointmentId=${appointmentId}`;
+        }
+    });
 });
 
 // Function to fetch total visits count separately
