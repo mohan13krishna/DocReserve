@@ -9,19 +9,102 @@
 /* No specific overrides needed here beyond what's in style.css */
 
 
-/* Pending Approvals Section (for Hospital Admins) */
+/* Pending Approvals Section (for Hospital Admins) - Blue Theme */
 .pending-approvals-section {
     background-color: #ffffff;
     padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 2px solid #007bff;
 }
 
 .pending-approvals-section h3 {
-    font-size: 1.4em;
-    color: #141313;
-    margin-bottom: 20px;
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin: -30px -30px 20px -30px;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
 }
+
+.pending-approvals-section .table thead th {
+    background: #e3f2fd;
+    color: #1565c0;
+    border-bottom: 2px solid #007bff;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
+
+.pending-approvals-section .table tbody tr:hover {
+    background-color: #f3f8ff;
+}
+
+/* Approved Hospital Admins Section - Blue Theme */
+.approved-admins-section {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 2px solid #007bff;
+}
+
+.approved-admins-section h3 {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin: -30px -30px 20px -30px;
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.approved-admins-section .table thead th {
+    background: #e3f2fd;
+    color: #1565c0;
+    border-bottom: 2px solid #007bff;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
+
+.approved-admins-section .table tbody tr:hover {
+    background-color: #f3f8ff;
+}
+
+/* Hospital List Section - Green Theme */
+.hospital-list-section {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 2px solid #28a745;
+}
+
+.hospital-list-section h3 {
+    background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    margin: -30px -30px 20px -30px;
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2);
+}
+
+.hospital-list-section .table thead th {
+    background: #e8f5e8;
+    color: #155724;
+    border-bottom: 2px solid #28a745;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+}
+
+.hospital-list-section .table tbody tr:hover {
+    background-color: #f1f8f1;
+}
+
 
 /* Search and Filter Controls - Inherited from style.css */
 
