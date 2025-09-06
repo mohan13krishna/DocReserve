@@ -62,7 +62,7 @@
 }
 
 .tab-button.active {
-    color: #007bff;
+    color: #f6ff00;
     border-bottom-color: #007bff;
     font-weight: bold;
 }
@@ -603,12 +603,17 @@
     letter-spacing: 0.5px;
 }
 
-.dept-cardiology { background: #e3f2fd; color: #1976d2; }
-.dept-neurology { background: #f3e5f5; color: #7b1fa2; }
-.dept-pediatrics { background: #e8f5e8; color: #388e3c; }
-.dept-orthopedics { background: #fff3e0; color: #f57c00; }
+.dept-cardiology, .dept-cardiologist { background: #e3f2fd; color: #1976d2; }
+.dept-neurology, .dept-neurologist { background: #f3e5f5; color: #7b1fa2; }
+.dept-pediatrics, .dept-pediatrician { background: #e8f5e8; color: #388e3c; }
+.dept-orthopedics, .dept-orthopedist { background: #fcce83; color: #f57c00; }
 .dept-emergency { background: #ffebee; color: #d32f2f; }
-.dept-dermatology { background: #f1f8e9; color: #689f38; }
+.dept-dermatology, .dept-dermatologist { background: #f1f8e9; color: #689f38; }
+.dept-general, .dept-general-medicine { background: #f5f5f5; color: #424242; }
+.dept-surgery, .dept-surgeon { background: #fce4ec; color: #c2185b; }
+.dept-psychiatry, .dept-psychiatrist { background: #e8eaf6; color: #3f51b5; }
+.dept-radiology, .dept-radiologist { background: #fff8e1; color: #ff8f00; }
+.dept-anesthesiology, .dept-anesthesiologist { background: #e0f2f1; color: #00695c; }
 
 /* Enhanced Pagination Styles */
 .pagination .page-link {
@@ -619,6 +624,35 @@
     margin: 0 0.25rem;
     border-radius: 25px;
     transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* Modern Pagination Button Styles */
+.btn-group .btn {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-group .btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+}
+
+.btn-group .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.btn-outline-primary {
+    cursor: pointer;
+}
+
+.btn-outline-primary:hover:not(:disabled) {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
 }
 
 .pagination .page-link:hover {
@@ -737,6 +771,151 @@
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
+}
+
+/* Enhanced Leave Type Badge Styles */
+.leave-type-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: capitalize;
+    letter-spacing: 0.3px;
+    display: inline-block;
+}
+
+.leave-personal-leave { background: linear-gradient(135deg, #17a2b8, #138496); color: white; }
+.leave-emergency { background: linear-gradient(135deg, #dc3545, #c82333); color: white; }
+.leave-sick-leave { background: linear-gradient(135deg, #fd7e14, #e55a00); color: white; }
+.leave-vacation { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
+.leave-maternity-paternity { background: linear-gradient(135deg, #6f42c1, #5a32a3); color: white; }
+.leave-other { background: linear-gradient(135deg, #6c757d, #5a6268); color: white; }
+
+/* Enhanced Table Section Header */
+.table-section-header {
+    background: linear-gradient(135deg, #f8b500 0%, #ffa000 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px 8px 0 0;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 4px rgba(248, 181, 0, 0.2);
+}
+
+/* Doctors Table - Blue Theme */
+.doctors-table-section .table-section-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.doctors-table-section .modern-table-container {
+    border: 2px solid #007bff;
+}
+
+.doctors-table-section .table thead th {
+    background: #e3f2fd;
+    color: #1565c0;
+    border-bottom: 2px solid #007bff;
+}
+
+.doctors-table-section .table tbody tr:hover {
+    background-color: #f3f8ff;
+}
+
+/* Leave Requests Table - Yellow Theme */
+.leave-requests-table-section .table-section-header {
+    background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+    box-shadow: 0 2px 4px rgba(255, 193, 7, 0.2);
+}
+
+.leave-requests-table-section .modern-table-container {
+    border: 2px solid #ffc107;
+}
+
+.leave-requests-table-section .table thead th {
+    background: #fff8e1;
+    color: #f57f17;
+    border-bottom: 2px solid #ffc107;
+}
+
+.leave-requests-table-section .table tbody tr:hover {
+    background-color: #fffef7;
+}
+
+
+.table-section-header h5 {
+    margin: 0;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+}
+
+.table-section-header .bi {
+    margin-right: 0.5rem;
+    font-size: 1.2rem;
+}
+
+.table-section-header .badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+}
+
+/* Modern Table Container */
+.modern-table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.modern-table-container .table {
+    margin-bottom: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.modern-table-container .table thead th {
+    background: #f8f9fa;
+    border-bottom: 2px solid #e9ecef;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+    color: #495057;
+    padding: 1.2rem 1rem;
+    border-top: none;
+}
+
+.modern-table-container .table tbody tr {
+    transition: all 0.2s ease;
+    border: none;
+}
+
+.modern-table-container .table tbody tr:hover {
+    background-color: #f8f9fa;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.modern-table-container .table tbody td {
+    padding: 1rem;
+    vertical-align: middle;
+    border-top: 1px solid #f1f3f4;
+}
+
+/* Enhanced Reason Text Display */
+.reason-text {
+    max-width: 200px;
+    font-size: 0.85rem;
+    color: #6c757d;
+    line-height: 1.4;
+    cursor: help;
 }
 
 /* Hospital Admin Profile */
