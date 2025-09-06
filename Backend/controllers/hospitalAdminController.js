@@ -3,41 +3,37 @@ const bcrypt = require('bcryptjs');
 
 exports.getAdminDashboardOverview = async (req, res) => {
     try {
-        const hospitalCode = req.user.hospital_code; // Filter strictly by hospital_code
+        const hospitalId = req.user.hospital_id;
 
         const [totalDoctorsResult] = await db.execute(`
             SELECT COUNT(*) AS count
             FROM Doctors d
-            WHERE (d.hospital_code = ? OR (d.hospital_code IS NULL AND d.hospital_id IN (SELECT h2.hospital_id FROM Hospitals h2 WHERE h2.hospital_code = ?)))
-              AND d.is_approved = TRUE;
-        `, [hospitalCode, hospitalCode]);
+            WHERE d.hospital_id = ? AND d.is_approved = TRUE;
+        `, [hospitalId]);
         const totalDoctors = totalDoctorsResult[0].count;
 
         const [pendingApprovalsResult] = await db.execute(`
             SELECT COUNT(*) AS count
             FROM Doctors d
-            WHERE (d.hospital_code = ? OR (d.hospital_code IS NULL AND d.hospital_id IN (SELECT h2.hospital_id FROM Hospitals h2 WHERE h2.hospital_code = ?)))
-              AND d.is_approved = FALSE;
-        `, [hospitalCode, hospitalCode]);
+            WHERE d.hospital_id = ? AND d.is_approved = FALSE;
+        `, [hospitalId]);
         const pendingApprovals = pendingApprovalsResult[0].count;
 
         const [todayAppointmentsResult] = await db.execute(`
             SELECT COUNT(a.appointment_id) AS count
             FROM Appointments a
             JOIN Doctors d ON a.doctor_id = d.doctor_id
-            LEFT JOIN Hospitals h ON d.hospital_id = h.hospital_id
-            WHERE (d.hospital_code = ? OR h.hospital_code = ?)
+            WHERE d.hospital_id = ?
               AND DATE(a.appointment_date) = CURDATE();
-        `, [hospitalCode, hospitalCode]);
+        `, [hospitalId]);
         const todayAppointments = todayAppointmentsResult[0].count;
 
         const [totalPatientsResult] = await db.execute(`
             SELECT COUNT(DISTINCT a.patient_id) AS count
             FROM Appointments a
             JOIN Doctors d ON a.doctor_id = d.doctor_id
-            LEFT JOIN Hospitals h ON d.hospital_id = h.hospital_id
-            WHERE (d.hospital_code = ? OR h.hospital_code = ?);
-        `, [hospitalCode, hospitalCode]);
+            WHERE d.hospital_id = ?;
+        `, [hospitalId]);
         const totalPatients = totalPatientsResult[0].count;
 
         res.status(200).json({
@@ -57,14 +53,14 @@ exports.getAdminDashboardOverview = async (req, res) => {
 // CRUD for Approved Doctors (view/update/delete)
 exports.getDoctorById = async (req, res) => {
     try {
-        const hospitalCode = req.user.hospital_code;
+        const hospitalId = req.user.hospital_id;
         const { id } = req.params;
         const [rows] = await db.execute(`
             SELECT d.doctor_id, d.first_name, d.last_name, d.specialization, d.rating, d.experience_years, d.is_available
             FROM Doctors d
             LEFT JOIN Hospitals h ON d.hospital_id = h.hospital_id
-            WHERE d.doctor_id = ? AND d.is_approved = TRUE AND (d.hospital_code = ? OR h.hospital_code = ?)
-        `, [id, hospitalCode, hospitalCode]);
+            WHERE d.doctor_id = ? AND d.is_approved = TRUE AND d.hospital_id = ?
+        `, [id, hospitalId]);
         if (!rows.length) return res.status(404).json({ message: 'Doctor not found.' });
         res.status(200).json(rows[0]);
     } catch (error) {
@@ -75,18 +71,17 @@ exports.getDoctorById = async (req, res) => {
 
 exports.updateDoctor = async (req, res) => {
     try {
-        const hospitalCode = req.user.hospital_code;
+        const hospitalId = req.user.hospital_id;
         const { id } = req.params;
         const { first_name, last_name, specialization, is_available } = req.body;
         const [result] = await db.execute(`
             UPDATE Doctors d
-            LEFT JOIN Hospitals h ON d.hospital_id = h.hospital_id
             SET d.first_name = COALESCE(?, d.first_name),
                 d.last_name = COALESCE(?, d.last_name),
                 d.specialization = COALESCE(?, d.specialization),
                 d.is_available = COALESCE(?, d.is_available)
-            WHERE d.doctor_id = ? AND d.is_approved = TRUE AND (d.hospital_code = ? OR h.hospital_code = ?)
-        `, [first_name, last_name, specialization, is_available, id, hospitalCode, hospitalCode]);
+            WHERE d.doctor_id = ? AND d.is_approved = TRUE AND d.hospital_id = ?
+        `, [first_name, last_name, specialization, is_available, id, hospitalId]);
         if (result.affectedRows === 0) return res.status(404).json({ message: 'Doctor not found or not in your hospital.' });
         res.status(200).json({ message: 'Doctor updated successfully.' });
     } catch (error) {
@@ -97,10 +92,10 @@ exports.updateDoctor = async (req, res) => {
 
 exports.deleteDoctor = async (req, res) => {
     try {
-        const hospitalCode = req.user.hospital_code;
+        const hospitalId = req.user.hospital_id;
         const { id } = req.params;
         // Ensure doctor is in this hospital
-        const [rows] = await db.execute(`SELECT user_id FROM Doctors d LEFT JOIN Hospitals h ON d.hospital_id = h.hospital_id WHERE d.doctor_id = ? AND (d.hospital_code = ? OR h.hospital_code = ?)`, [id, hospitalCode, hospitalCode]);
+        const [rows] = await db.execute(`SELECT user_id FROM Doctors d WHERE d.doctor_id = ? AND d.hospital_id = ?`, [id, hospitalId]);
         if (!rows.length) return res.status(404).json({ message: 'Doctor not found or not in your hospital.' });
         const userId = rows[0].user_id;
         await db.execute('DELETE FROM Doctors WHERE doctor_id = ?', [id]);
@@ -114,7 +109,7 @@ exports.deleteDoctor = async (req, res) => {
 
 exports.getPendingDoctorApprovals = async (req, res) => {
     try {
-        const hospitalCode = req.user.hospital_code;
+        const hospitalId = req.user.hospital_id;
         const page = Math.max(parseInt(req.query.page || '1', 10), 1);
         const limit = Math.max(parseInt(req.query.limit || '10', 10), 1);
         const offset = (page - 1) * limit;
@@ -124,9 +119,8 @@ exports.getPendingDoctorApprovals = async (req, res) => {
             SELECT COUNT(*) AS total
             FROM Doctors d
             LEFT JOIN Hospitals h ON d.hospital_id = h.hospital_id
-            WHERE d.is_approved = FALSE
-              AND (d.hospital_code = ? OR h.hospital_code = ?)
-        `, [hospitalCode, hospitalCode]);
+            WHERE d.is_approved = FALSE AND d.hospital_id = ?
+        `, [hospitalId]);
         const total = countRows[0]?.total || 0;
         const totalPages = Math.max(Math.ceil(total / limit), 1);
 
@@ -138,11 +132,10 @@ exports.getPendingDoctorApprovals = async (req, res) => {
             FROM Doctors d
             JOIN Users u ON d.user_id = u.user_id
             LEFT JOIN Hospitals h ON d.hospital_id = h.hospital_id
-            WHERE d.is_approved = FALSE
-              AND (d.hospital_code = ? OR h.hospital_code = ?)
+            WHERE d.is_approved = FALSE AND d.hospital_id = ?
             ORDER BY applied_date DESC
             LIMIT ? OFFSET ?
-        `, [hospitalCode, hospitalCode, limit, offset]);
+        `, [hospitalId, limit, offset]);
 
         res.status(200).json({ doctors, totalCount: total, page, limit, totalPages });
     } catch (error) {
@@ -153,14 +146,14 @@ exports.getPendingDoctorApprovals = async (req, res) => {
 
 exports.getApprovedDoctors = async (req, res) => {
     try {
-        const hospitalCode = req.user.hospital_code;
+        const hospitalId = req.user.hospital_id;
         const { search = '', specialization = '', status = '', page: pageStr = '1', limit: limitStr = '10' } = req.query;
         const page = Math.max(parseInt(pageStr, 10) || 1, 1);
         const limit = Math.max(parseInt(limitStr, 10) || 10, 1);
         const offset = (page - 1) * limit;
 
-        let baseWhere = `WHERE d.is_approved = TRUE AND (d.hospital_code = ? OR h.hospital_code = ?)`;
-        const params = [hospitalCode, hospitalCode];
+        let baseWhere = `WHERE d.is_approved = TRUE AND d.hospital_id = ?`;
+        const params = [hospitalId];
 
         if (search) {
             baseWhere += ` AND (d.first_name LIKE ? OR d.last_name LIKE ? OR d.specialization LIKE ?)`;
@@ -208,7 +201,7 @@ exports.getApprovedDoctors = async (req, res) => {
 exports.approveDoctor = async (req, res) => {
     try {
         const { id } = req.params;
-        const hospitalCode = req.user.hospital_code;
+        const hospitalId = req.user.hospital_id;
 
         const [result] = await db.execute(
             'UPDATE Doctors SET is_approved = TRUE, hospital_code = COALESCE(hospital_code, ?) WHERE doctor_id = ? AND (hospital_code = ? OR hospital_code IS NULL)',
@@ -229,7 +222,7 @@ exports.approveDoctor = async (req, res) => {
 exports.rejectDoctor = async (req, res) => {
     try {
         const { id } = req.params;
-        const hospitalCode = req.user.hospital_code;
+        const hospitalId = req.user.hospital_id;
 
         // Ensure the doctor belongs to this hospital (by code) before deletion
         const [doctorRows] = await db.execute('SELECT user_id FROM Doctors WHERE doctor_id = ? AND (hospital_code = ? OR hospital_code IS NULL)', [id, hospitalCode]);
@@ -252,32 +245,58 @@ exports.rejectDoctor = async (req, res) => {
 // Leave Requests for Doctors
 exports.getLeaveRequests = async (req, res) => {
     try {
-        const hospitalCode = req.user.hospital_code;
+        const hospitalId = req.user.hospital_id;
         const page = Math.max(parseInt(req.query.page || '1', 10), 1);
         const limit = Math.max(parseInt(req.query.limit || '10', 10), 1);
         const offset = (page - 1) * limit;
+        
+        // Get filter parameters
+        const search = req.query.search || '';
+        const status = req.query.status || '';
+        const type = req.query.type || '';
 
-        // Count total leave requests for doctors belonging to this hospital
+        // Build WHERE conditions
+        let whereConditions = ['d.hospital_id = ?'];
+        let queryParams = [hospitalId];
+
+        if (search) {
+            whereConditions.push('(d.first_name LIKE ? OR d.last_name LIKE ? OR d.specialization LIKE ?)');
+            const searchTerm = `%${search}%`;
+            queryParams.push(searchTerm, searchTerm, searchTerm);
+        }
+
+        if (status) {
+            whereConditions.push('lr.status = ?');
+            queryParams.push(status);
+        }
+
+        if (type) {
+            whereConditions.push('lr.leave_type = ?');
+            queryParams.push(type);
+        }
+
+        const whereClause = whereConditions.join(' AND ');
+
+        // Count total leave requests with filters
         const [countRows] = await db.execute(`
             SELECT COUNT(*) AS total
-            FROM DoctorLeaveRequests lr
+            FROM doctorleaverequests lr
             JOIN Doctors d ON lr.doctor_id = d.doctor_id
-            LEFT JOIN Hospitals h ON d.hospital_id = h.hospital_id
-            WHERE (d.hospital_code = ? OR h.hospital_code = ?)
-        `, [hospitalCode, hospitalCode]);
+            WHERE ${whereClause}
+        `, queryParams);
         const total = countRows[0]?.total || 0;
         const totalPages = Math.max(Math.ceil(total / limit), 1);
 
+        // Get filtered leave requests
         const [rows] = await db.execute(`
-            SELECT lr.leave_id, lr.requested_date, lr.reason, lr.status,
+            SELECT lr.leave_id, lr.requested_date, lr.end_date, lr.leave_type, lr.reason, lr.status, lr.created_at,
                    d.doctor_id, d.first_name, d.last_name, d.specialization
-            FROM DoctorLeaveRequests lr
+            FROM doctorleaverequests lr
             JOIN Doctors d ON lr.doctor_id = d.doctor_id
-            LEFT JOIN Hospitals h ON d.hospital_id = h.hospital_id
-            WHERE (d.hospital_code = ? OR h.hospital_code = ?)
+            WHERE ${whereClause}
             ORDER BY lr.created_at DESC
             LIMIT ? OFFSET ?
-        `, [hospitalCode, hospitalCode, limit, offset]);
+        `, [...queryParams, limit, offset]);
 
         res.status(200).json({ requests: rows, totalCount: total, page, limit, totalPages });
     } catch (error) {
@@ -288,18 +307,17 @@ exports.getLeaveRequests = async (req, res) => {
 
 exports.approveLeaveRequest = async (req, res) => {
     try {
-        const hospitalCode = req.user.hospital_code;
+        const hospitalId = req.user.hospital_id;
         const { id } = req.params; // leave_id
         // validate the request belongs to this hospital
         const [rows] = await db.execute(`
             SELECT lr.doctor_id
-            FROM DoctorLeaveRequests lr
+            FROM doctorleaverequests lr
             JOIN Doctors d ON lr.doctor_id = d.doctor_id
-            LEFT JOIN Hospitals h ON d.hospital_id = h.hospital_id
-            WHERE lr.leave_id = ? AND (d.hospital_code = ? OR h.hospital_code = ?)
-        `, [id, hospitalCode, hospitalCode]);
+            WHERE lr.leave_id = ? AND d.hospital_id = ?
+        `, [id, hospitalId]);
         if (!rows.length) return res.status(404).json({ message: 'Leave request not found.' });
-        await db.execute('UPDATE DoctorLeaveRequests SET status = "Approved" WHERE leave_id = ?', [id]);
+        await db.execute('UPDATE doctorleaverequests SET status = "approved" WHERE leave_id = ?', [id]);
         res.status(200).json({ message: 'Leave request approved.' });
     } catch (error) {
         console.error('Error approving leave request:', error);
@@ -309,17 +327,16 @@ exports.approveLeaveRequest = async (req, res) => {
 
 exports.rejectLeaveRequest = async (req, res) => {
     try {
-        const hospitalCode = req.user.hospital_code;
+        const hospitalId = req.user.hospital_id;
         const { id } = req.params; // leave_id
         const [rows] = await db.execute(`
             SELECT lr.doctor_id
-            FROM DoctorLeaveRequests lr
+            FROM doctorleaverequests lr
             JOIN Doctors d ON lr.doctor_id = d.doctor_id
-            LEFT JOIN Hospitals h ON d.hospital_id = h.hospital_id
-            WHERE lr.leave_id = ? AND (d.hospital_code = ? OR h.hospital_code = ?)
-        `, [id, hospitalCode, hospitalCode]);
+            WHERE lr.leave_id = ? AND d.hospital_id = ?
+        `, [id, hospitalId]);
         if (!rows.length) return res.status(404).json({ message: 'Leave request not found.' });
-        await db.execute('UPDATE DoctorLeaveRequests SET status = "Rejected" WHERE leave_id = ?', [id]);
+        await db.execute('UPDATE doctorleaverequests SET status = "rejected" WHERE leave_id = ?', [id]);
         res.status(200).json({ message: 'Leave request rejected.' });
     } catch (error) {
         console.error('Error rejecting leave request:', error);
@@ -350,15 +367,15 @@ exports.getHospitalAdminProfile = async (req, res) => {
 
 exports.updateHospitalAdminProfile = async (req, res) => {
     const adminId = req.user.hospital_admin_id;
-    const { first_name, last_name, phone_number, department } = req.body; // Hospital name is read-only
+    const { first_name, last_name, phone_number } = req.body; // Hospital name is read-only
 
     try {
         await db.execute(`
             UPDATE HospitalAdmins SET
-                first_name = ?, last_name = ?, phone_number = ?, department = ?
+                first_name = ?, last_name = ?, phone_number = ?
             WHERE admin_id = ?
         `, [
-            first_name, last_name, phone_number, department,
+            first_name, last_name, phone_number,
             adminId
         ]);
         res.status(200).json({ message: 'Profile updated successfully.' });
