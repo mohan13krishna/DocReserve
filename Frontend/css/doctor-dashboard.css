@@ -295,3 +295,185 @@
 .recent-patients-mini::-webkit-scrollbar-thumb:hover {
     background: #999;
 }
+
+/* Enhanced Appointments Table Styling */
+.todays-appointments-section .table {
+    border: 2px solid #007bff;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.todays-appointments-section .table thead th {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1rem 0.75rem;
+    position: relative;
+}
+
+.todays-appointments-section .table thead th::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0.3) 100%);
+}
+
+.todays-appointments-section .table tbody tr {
+    transition: all 0.3s ease;
+    border-bottom: 1px solid #e3f2fd;
+}
+
+.todays-appointments-section .table tbody tr:hover {
+    background: linear-gradient(135deg, #f8f9ff 0%, #e3f2fd 100%);
+    transform: translateX(5px);
+    box-shadow: 0 2px 10px rgba(0, 123, 255, 0.1);
+}
+
+.todays-appointments-section .table tbody tr:nth-child(even) {
+    background-color: #fafbff;
+}
+
+.todays-appointments-section .table tbody tr:nth-child(even):hover {
+    background: linear-gradient(135deg, #f0f4ff 0%, #e1ecff 100%);
+}
+
+.todays-appointments-section .table tbody td {
+    padding: 1rem 0.75rem;
+    vertical-align: middle;
+    border: none;
+    color: #2c3e50;
+}
+
+.todays-appointments-section .table tbody td:first-child {
+    font-weight: 600;
+    color: #007bff;
+}
+
+/* Status Badge Enhancements */
+.todays-appointments-section .badge {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.todays-appointments-section .badge.bg-warning {
+    background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%) !important;
+    color: #212529 !important;
+    box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);
+}
+
+.todays-appointments-section .badge.bg-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3);
+}
+
+.todays-appointments-section .badge.bg-primary {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.todays-appointments-section .badge.bg-info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(23, 162, 184, 0.3);
+}
+
+.todays-appointments-section .badge.bg-secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
+    color: white !important;
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+/* Action Button Enhancements */
+.todays-appointments-section .btn {
+    border-radius: 20px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.7rem;
+    padding: 0.35rem 0.7rem;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-width: 80px;
+}
+
+.todays-appointments-section .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.todays-appointments-section .btn-success {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    color: white;
+}
+
+.todays-appointments-section .btn-danger {
+    background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+    border: none;
+    color: white;
+}
+
+.todays-appointments-section .btn-outline-primary {
+    border: 2px solid #007bff;
+    color: #007bff;
+    background: transparent;
+}
+
+.todays-appointments-section .btn-outline-primary:hover {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border-color: transparent;
+}
+
+/* Action buttons container */
+.todays-appointments-section .d-flex.gap-1 {
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+/* Table column width optimizations */
+.todays-appointments-section .table th:nth-child(1) {
+    min-width: 100px;
+    text-align: center;
+}
+
+.todays-appointments-section .table th:nth-child(2) {
+    min-width: 180px;
+}
+
+.todays-appointments-section .table th:nth-child(4) {
+    min-width: 120px;
+    text-align: center;
+}
+
+.todays-appointments-section .table th:nth-child(5) {
+    min-width: 280px;
+    text-align: center;
+}
+
+.todays-appointments-section .table td:nth-child(1) {
+    text-align: center;
+    font-weight: 600;
+    color: #007bff;
+}
+
+.todays-appointments-section .table td:nth-child(4) {
+    text-align: center;
+}
+
+.todays-appointments-section .table td:nth-child(5) {
+    text-align: center;
+}
