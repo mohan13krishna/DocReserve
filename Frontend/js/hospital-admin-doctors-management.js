@@ -55,24 +55,57 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         for (const d of doctors) {
           const statusText = d.status ? 'Active' : 'Inactive';
+          
+          // Create doctor avatar with initials and color
+          const doctorInitials = `${d.first_name.charAt(0)}${d.last_name.charAt(0)}`.toUpperCase();
+          const avatarColors = ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#6f42c1', '#e83e8c', '#fd7e14', '#20c997', '#6610f2'];
+          const avatarColor = avatarColors[d.doctor_id % avatarColors.length];
+          
+          // Get department badge class
+          const deptClass = d.specialization ? `dept-${d.specialization.toLowerCase().replace(/\s+/g, '-')}` : 'dept-general';
+          
+          // Create rating display
+          const ratingDisplay = d.rating ? 
+            `<div class="d-flex align-items-center">
+              <span class="badge bg-warning text-dark me-1">${d.rating}</span>
+              <i class="bi bi-star-fill text-warning"></i>
+            </div>` : 
+            '<span class="text-muted">No rating</span>';
+          
           const row = `
             <tr>
               <td>
-                <div class="doctor-profile-cell d-flex align-items-center">
-                  <img src="${getProfileImageUrl(d.gender, d.doctor_id)}" class="rounded-circle me-3" alt="Dr. ${d.first_name} ${d.last_name}" style="width: 40px; height: 40px; object-fit: cover;">
-                  <div>
-                    <h4 class="fw-bold mb-0">Dr. ${d.first_name} ${d.last_name}</h4>
-                    <span>${d.specialization}</span>
+                <div class="doctor-info">
+                  <div class="doctor-avatar" style="background-color: ${avatarColor}">
+                    ${doctorInitials}
+                  </div>
+                  <div class="doctor-details">
+                    <h6>Dr. ${d.first_name} ${d.last_name}</h6>
+                    <small class="text-muted">${d.specialization}</small>
                   </div>
                 </div>
               </td>
-              <td>${d.specialization}</td>
-              <td>${d.rating ?? '-'}</td>
-              <td><span class="badge ${d.status ? 'bg-success' : 'bg-secondary'} rounded-pill">${statusText}</span></td>
-              <td class="action-buttons">
-                <button class="btn btn-outline-info btn-sm me-1 view-btn" data-id="${d.doctor_id}">View</button>
-                <button class="btn btn-outline-primary btn-sm me-1 edit-btn" data-id="${d.doctor_id}">Edit</button>
-                <button class="btn btn-outline-danger btn-sm remove-btn" data-id="${d.doctor_id}">Remove</button>
+              <td>
+                <span class="dept-badge ${deptClass}">${d.specialization}</span>
+              </td>
+              <td>${ratingDisplay}</td>
+              <td>
+                <span class="status-badge status-${d.status ? 'approved' : 'rejected'}">
+                  ${statusText}
+                </span>
+              </td>
+              <td>
+                <div class="action-buttons">
+                  <button class="btn btn-action btn-view view-btn" data-id="${d.doctor_id}">
+                    <i class="bi bi-eye"></i> View
+                  </button>
+                  <button class="btn btn-action btn-approve edit-btn" data-id="${d.doctor_id}">
+                    <i class="bi bi-pencil"></i> Edit
+                  </button>
+                  <button class="btn btn-action btn-reject remove-btn" data-id="${d.doctor_id}">
+                    <i class="bi bi-trash"></i> Remove
+                  </button>
+                </div>
               </td>
             </tr>`;
           tableBody.insertAdjacentHTML('beforeend', row);
@@ -89,8 +122,18 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Pagination
-  prevBtn.addEventListener('click', () => { if (page > 1) { page--; loadPage(); } });
-  nextBtn.addEventListener('click', () => { page++; loadPage(); });
+  prevBtn.addEventListener('click', (e) => { 
+    e.preventDefault();
+    if (page > 1) { 
+      page--; 
+      loadPage(); 
+    } 
+  });
+  nextBtn.addEventListener('click', (e) => { 
+    e.preventDefault();
+    page++; 
+    loadPage(); 
+  });
 
   // Filters
   searchInput.addEventListener('input', () => { page = 1; loadPage(); });
@@ -179,9 +222,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function loadLeaveRequests() {
     if (!lrBody) return;
-    lrBody.innerHTML = '<tr><td colspan="5" class="text-center">Loading...</td></tr>';
+    lrBody.innerHTML = '<tr><td colspan="7" class="text-center">Loading...</td></tr>';
+    
+    // Get filter values
+    const searchInput = document.getElementById('lr-search');
+    const statusFilter = document.getElementById('lr-status-filter');
+    const typeFilter = document.getElementById('lr-type-filter');
+    
+    const params = new URLSearchParams({
+      page: lrPage,
+      limit: lrLimit,
+      search: searchInput?.value || '',
+      status: statusFilter?.value || '',
+      type: typeFilter?.value || ''
+    });
+    
     try {
-      const r = await fetch(`/api/hospital-admin/leave-requests?page=${lrPage}&limit=${lrLimit}`, { headers: { Authorization: `Bearer ${token}` } });
+      const r = await fetch(`/api/hospital-admin/leave-requests?${params.toString()}`, { headers: { Authorization: `Bearer ${token}` } });
       if (!r.ok) throw new Error('Failed');
       const data = await r.json();
       const rows = data.requests || [];
@@ -189,21 +246,50 @@ document.addEventListener('DOMContentLoaded', () => {
       const total = data.totalCount || 0;
       lrBody.innerHTML = '';
       if (rows.length === 0) {
-        lrBody.innerHTML = '<tr><td colspan="5" class="text-center">No leave requests.</td></tr>';
+        lrBody.innerHTML = '<tr><td colspan="7" class="text-center">No leave requests.</td></tr>';
       } else {
         for (const x of rows) {
           const name = `Dr. ${x.first_name} ${x.last_name}`;
-          const statusBadge = `<span class="badge ${x.status === 'Approved' ? 'bg-success' : x.status === 'Rejected' ? 'bg-danger' : 'bg-secondary'}">${x.status}</span>`;
+          const startDate = x.requested_date;
+          const endDate = x.end_date || x.requested_date;
+          const start = new Date(startDate);
+          const end = new Date(endDate);
+          const duration = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
+          
+          // Format leave type for display
+          const leaveTypeDisplay = x.leave_type ? 
+            x.leave_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 
+            'Personal Leave';
+          
+          // Get leave type class for colorful badge
+          const leaveTypeClass = x.leave_type ? `leave-${x.leave_type}` : 'leave-personal-leave';
+          
+          const statusBadge = `<span class="status-badge status-${x.status.toLowerCase()}">${x.status.charAt(0).toUpperCase() + x.status.slice(1)}</span>`;
+          
+          // Create doctor avatar with initials
+          const doctorInitials = `${x.first_name.charAt(0)}${x.last_name.charAt(0)}`.toUpperCase();
+          const avatarColors = ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#6f42c1', '#e83e8c', '#fd7e14', '#20c997', '#6610f2'];
+          const avatarColor = avatarColors[name.length % avatarColors.length];
+          
           lrBody.insertAdjacentHTML('beforeend', `
             <tr>
-              <td>${name}<br><span class="text-muted small">${x.specialization}</span></td>
-              <td>${x.requested_date ? new Date(x.requested_date).toLocaleDateString() : '-'}</td>
-              <td>${x.reason || '-'}</td>
-              <td>${statusBadge}</td>
               <td>
-                <button class="btn btn-outline-success btn-sm me-1 lr-approve" data-id="${x.leave_id}">Approve</button>
-                <button class="btn btn-outline-danger btn-sm lr-reject" data-id="${x.leave_id}">Reject</button>
+                <div class="doctor-info">
+                  <div class="doctor-avatar" style="background-color: ${avatarColor}">
+                    ${doctorInitials}
+                  </div>
+                  <div class="doctor-details">
+                    <h6>${name}</h6>
+                    <small class="text-muted">${x.specialization}</small>
+                  </div>
+                </div>
               </td>
+              <td><span class="leave-type-badge ${leaveTypeClass}">${leaveTypeDisplay}</span></td>
+              <td><small class="text-muted d-block">${startDate ? new Date(startDate).toLocaleDateString() : '-'}</small></td>
+              <td><small class="text-muted d-block">${endDate ? new Date(endDate).toLocaleDateString() : '-'}</small></td>
+              <td><span class="badge bg-secondary">${duration} day${duration > 1 ? 's' : ''}</span></td>
+              <td>${statusBadge}</td>
+              <td><div class="reason-text" title="${x.reason}">${x.reason ? (x.reason.length > 30 ? x.reason.substring(0, 30) + '...' : x.reason) : 'No reason provided'}</div></td>
             </tr>`);
         }
       }
@@ -211,28 +297,48 @@ document.addEventListener('DOMContentLoaded', () => {
       lrPrev.disabled = lrPage <= 1;
       lrNext.disabled = lrPage >= totalPages;
     } catch (e) {
-      lrBody.innerHTML = '<tr><td colspan="5" class="text-danger text-center">Failed to load leave requests.</td></tr>';
+      lrBody.innerHTML = '<tr><td colspan="7" class="text-danger text-center">Failed to load leave requests.</td></tr>';
     }
   }
 
-  lrPrev?.addEventListener('click', () => { if (lrPage > 1) { lrPage--; loadLeaveRequests(); } });
-  lrNext?.addEventListener('click', () => { lrPage++; loadLeaveRequests(); });
-
-  lrBody?.addEventListener('click', async (e) => {
-    const approveBtn = e.target.closest('.lr-approve');
-    const rejectBtn = e.target.closest('.lr-reject');
-    if (approveBtn) {
-      const id = approveBtn.dataset.id;
-      const r = await fetch(`/api/hospital-admin/leave-requests/${id}/approve`, { method: 'PUT', headers: { Authorization: `Bearer ${token}` } });
-      if (!r.ok) alert('Approve failed');
-      await loadLeaveRequests();
-    } else if (rejectBtn) {
-      const id = rejectBtn.dataset.id;
-      const r = await fetch(`/api/hospital-admin/leave-requests/${id}/reject`, { method: 'PUT', headers: { Authorization: `Bearer ${token}` } });
-      if (!r.ok) alert('Reject failed');
-      await loadLeaveRequests();
-    }
+  lrPrev?.addEventListener('click', (e) => { 
+    e.preventDefault();
+    if (lrPage > 1) { 
+      lrPage--; 
+      loadLeaveRequests(); 
+    } 
   });
+  lrNext?.addEventListener('click', (e) => { 
+    e.preventDefault();
+    lrPage++; 
+    loadLeaveRequests(); 
+  });
+
+  // Add event listeners for leave request filters
+  const lrSearchInput = document.getElementById('lr-search');
+  const lrStatusFilter = document.getElementById('lr-status-filter');
+  const lrTypeFilter = document.getElementById('lr-type-filter');
+
+  if (lrSearchInput) {
+    lrSearchInput.addEventListener('input', () => {
+      lrPage = 1;
+      loadLeaveRequests();
+    });
+  }
+
+  if (lrStatusFilter) {
+    lrStatusFilter.addEventListener('change', () => {
+      lrPage = 1;
+      loadLeaveRequests();
+    });
+  }
+
+  if (lrTypeFilter) {
+    lrTypeFilter.addEventListener('change', () => {
+      lrPage = 1;
+      loadLeaveRequests();
+    });
+  }
 
   loadLeaveRequests();
 
