@@ -41,7 +41,8 @@ exports.getPatientDashboardOverview = async (req, res) => {
       return res.status(400).json({ message: 'Patient ID not found for this user.' });
     }
 
-    // Upcoming Appointments
+    // Upcoming Appointments - only show Pending and Confirmed appointments from today onwards
+    // Sort with tomorrow's appointments first, then other dates in ascending order
     const [upcomingAppointments] = await db.execute(`
       SELECT
         a.appointment_id,
@@ -53,8 +54,15 @@ exports.getPatientDashboardOverview = async (req, res) => {
         d.specialization
       FROM Appointments a
       JOIN Doctors d ON a.doctor_id = d.doctor_id
-      WHERE a.patient_id = ? AND a.status IN ('Upcoming', 'Confirmed', 'Pending')
-      ORDER BY a.appointment_date ASC
+      WHERE a.patient_id = ? 
+        AND a.status IN ('Confirmed', 'Pending')
+        AND DATE(a.appointment_date) >= CURDATE()
+      ORDER BY 
+        CASE 
+          WHEN DATE(a.appointment_date) = CURDATE() + INTERVAL 1 DAY THEN 0
+          ELSE 1
+        END,
+        a.appointment_date ASC
       LIMIT 3;
     `, [patientId]);
 
@@ -189,7 +197,7 @@ exports.getPatientAppointments = async (req, res) => {
             FROM Appointments a
             JOIN Doctors d ON a.doctor_id = d.doctor_id
             WHERE a.patient_id = ?
-            ORDER BY a.appointment_date DESC;
+            ORDER BY a.appointment_date ASC;
         `, [patientId]);
 
         const upcoming = [];
@@ -197,8 +205,14 @@ exports.getPatientAppointments = async (req, res) => {
         const cancelled = [];
 
         const now = new Date();
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Start of today
+
         appointments.forEach(app => {
             const appDate = new Date(app.appointment_date);
+            const appDateOnly = new Date(appDate);
+            appDateOnly.setHours(0, 0, 0, 0); // Start of appointment date
+
             const formattedApp = {
                 appointment_id: app.appointment_id,
                 doctorName: `Dr. ${app.doctor_first_name} ${app.doctor_last_name}`,
@@ -210,9 +224,11 @@ exports.getPatientAppointments = async (req, res) => {
 
             if (app.status === 'Cancelled') {
                 cancelled.push(formattedApp);
-            } else if (appDate > now && (app.status === 'Upcoming' || app.status === 'Confirmed' || app.status === 'Pending')) {
+            } else if (appDateOnly >= today && (app.status === 'Confirmed' || app.status === 'Pending')) {
+                // Only show Pending and Confirmed appointments from today onwards for upcoming tab
                 upcoming.push(formattedApp);
             } else {
+                // Past appointments include completed ones and those before today
                 past.push(formattedApp);
             }
         });
