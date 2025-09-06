@@ -263,19 +263,19 @@ function loadPendingApprovals() {
     });
 }
 
-// Load leave requests with pagination and filters
+// Load leave requests with pagination and filters - Dashboard shows only pending requests
 function loadLeaveRequests() {
     const token = localStorage.getItem('token');
     const searchTerm = document.getElementById('leave-search')?.value || '';
-    const status = document.getElementById('leave-status-filter')?.value || '';
+    const status = document.getElementById('leave-status-filter')?.value || 'pending'; // Default to pending only
     const type = document.getElementById('leave-type-filter')?.value || '';
     
-    // Build query parameters
+    // Build query parameters - Force status to pending for dashboard
     const params = new URLSearchParams({
         page: leaveRequestsPage,
         limit: itemsPerPage,
         search: searchTerm,
-        status: status,
+        status: 'pending', // Always filter for pending requests only in dashboard
         type: type
     });
     
@@ -298,18 +298,30 @@ function loadLeaveRequests() {
     .then(data => {
         console.log('Leave requests response:', data);
         const requests = data.requests || [];
-        const mappedRequests = requests.map(request => ({
-            id: request.leave_id,
-            doctorName: `${request.first_name} ${request.last_name}`,
-            doctorEmail: 'N/A', // Not provided in backend response
-            department: request.specialization,
-            leaveType: 'N/A', // Not provided in backend response
-            startDate: request.requested_date,
-            endDate: request.requested_date,
-            duration: 1, // Default since not provided
-            status: request.status?.toLowerCase() || 'pending',
-            reason: request.reason
-        }));
+        const mappedRequests = requests.map(request => {
+            const startDate = request.requested_date;
+            const endDate = request.end_date || request.requested_date;
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const duration = Math.max(1, Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1);
+            
+            // Format leave type for display
+            const leaveTypeDisplay = request.leave_type ? 
+                request.leave_type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) : 
+                'Personal Leave';
+            
+            return {
+                id: request.leave_id,
+                doctorName: `Dr. ${request.first_name} ${request.last_name}`,
+                department: request.specialization || 'General',
+                leaveType: leaveTypeDisplay,
+                startDate: startDate,
+                endDate: endDate,
+                duration: duration,
+                status: (request.status || 'pending').toLowerCase(),
+                reason: request.reason
+            };
+        });
         renderLeaveRequests(mappedRequests);
         updateLeavePagination(data.totalCount || 0, data.page || 1);
         updateLeaveTotalCount(data.totalCount || 0);
@@ -382,7 +394,7 @@ function renderLeaveRequests(leaveRequests) {
     if (leaveRequests.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="6" class="text-center py-4">
+                <td colspan="9" class="text-center py-4">
                     <i class="bi bi-calendar-x fs-1 text-muted"></i>
                     <p class="text-muted mt-2">No leave requests found</p>
                 </td>
@@ -400,29 +412,35 @@ function renderLeaveRequests(leaveRequests) {
                     </div>
                     <div class="doctor-details">
                         <h6>${leave.doctorName}</h6>
-                        <small>${leave.doctorEmail}</small>
                     </div>
                 </div>
             </td>
             <td>
-                <span class="dept-badge dept-${leave.department?.toLowerCase() || 'general'}">
+                <span class="dept-badge dept-${leave.department?.toLowerCase().replace(/\s+/g, '-') || 'general'}">
                     ${leave.department || 'General'}
                 </span>
             </td>
             <td>
-                <span class="badge bg-light text-dark">${leave.leaveType}</span>
+                <span class="badge bg-info text-white">${leave.leaveType}</span>
             </td>
             <td>
-                <small class="text-muted">
-                    ${formatDate(leave.startDate)} - ${formatDate(leave.endDate)}
-                    <br>
-                    <strong>${leave.duration} days</strong>
-                </small>
+                <small class="text-muted d-block">${formatDate(leave.startDate)}</small>
+            </td>
+            <td>
+                <small class="text-muted d-block">${formatDate(leave.endDate)}</small>
+            </td>
+            <td>
+                <span class="badge bg-secondary">${leave.duration} day${leave.duration > 1 ? 's' : ''}</span>
             </td>
             <td>
                 <span class="status-badge status-${leave.status}">
-                    ${leave.status}
+                    ${leave.status.charAt(0).toUpperCase() + leave.status.slice(1)}
                 </span>
+            </td>
+            <td>
+                <div class="reason-text" title="${leave.reason}">
+                    ${leave.reason ? (leave.reason.length > 50 ? leave.reason.substring(0, 50) + '...' : leave.reason) : 'No reason provided'}
+                </div>
             </td>
             <td>
                 <div class="action-buttons">
