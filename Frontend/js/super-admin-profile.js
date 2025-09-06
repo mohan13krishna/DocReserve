@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    const adminInitialsProfileEl = document.getElementById('admin-initials-profile');
+    const adminInitialsProfileEl = document.getElementById('admin-initials');
     const usernameInput = document.getElementById('username');
     const emailAddressInput = document.getElementById('email-address');
 
