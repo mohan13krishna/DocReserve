@@ -1,0 +1,27 @@
+-- Patients Table
+CREATE TABLE IF NOT EXISTS patients (
+    patient_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT UNIQUE NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    date_of_birth DATE,
+    phone_number VARCHAR(20),
+    address TEXT,
+    blood_type VARCHAR(5),
+    gender ENUM('Male', 'Female', 'Other'),
+    allergies TEXT,
+    current_medications TEXT,
+    medical_conditions TEXT,
+    insurance_provider VARCHAR(100),
+    policy_number VARCHAR(100),
+    group_number VARCHAR(100),
+    member_id VARCHAR(100),
+    emergency_contact_name VARCHAR(255),
+    emergency_contact_relationship VARCHAR(100),
+    emergency_contact_phone VARCHAR(20),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    INDEX idx_user_id (user_id),
+    INDEX idx_first_name (first_name),
+    INDEX idx_last_name (last_name),
+    INDEX idx_phone_number (phone_number)
+);
