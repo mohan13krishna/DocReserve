@@ -214,6 +214,14 @@ exports.getDoctorSchedule = async (req, res) => {
                 };
             });
 
+            // Fetch blocked times for the date
+            const [blockedTimes] = await db.execute(`
+                SELECT blocked_time_id, start_time, end_time, reason
+                FROM blocked_times
+                WHERE doctor_id = ? AND blocked_date = ?
+                ORDER BY start_time ASC;
+            `, [doctorId, date]);
+
             // Generate a full day's schedule (e.g., 8:00 AM to 5:00 PM in 30-minute slots)
             let currentTime = new Date(date);
             currentTime.setHours(8, 0, 0, 0); // Start at 8:00 AM
@@ -228,13 +236,23 @@ exports.getDoctorSchedule = async (req, res) => {
                 const bookedSlot = bookedSlots.find(s => s.time === timeString);
                 if (bookedSlot) {
                     slot.status = 'Booked';
+                    slot.patientName = bookedSlot.patientName;
+                    slot.reason = bookedSlot.reason;
                     slot.details = `${bookedSlot.patientName} - ${bookedSlot.reason}`;
                 }
                 
-                // Add logic for blocked times (e.g., lunch break)
-                if (timeString === '12:00 PM') {
+                // Check if this slot is blocked
+                const blockedSlot = blockedTimes.find(bt => {
+                    const startTime = new Date(`${date}T${bt.start_time}`);
+                    const endTime = new Date(`${date}T${bt.end_time}`);
+                    return currentTime >= startTime && currentTime < endTime;
+                });
+                
+                if (blockedSlot) {
                     slot.status = 'Blocked';
-                    slot.details = 'Lunch Break';
+                    slot.reason = blockedSlot.reason;
+                    slot.id = blockedSlot.blocked_time_id;
+                    slot.details = blockedSlot.reason;
                 }
 
                 scheduleGrid.push(slot);
@@ -272,9 +290,21 @@ exports.updateDoctorAvailability = async (req, res) => {
         const doctorId = req.user.doctor_id;
         const { is_available } = req.body;
 
+        // Validate input parameters
+        if (doctorId === undefined || doctorId === null) {
+            return res.status(400).json({ message: 'Doctor ID is required.' });
+        }
+
+        if (is_available === undefined || is_available === null) {
+            return res.status(400).json({ message: 'Availability status is required.' });
+        }
+
+        // Convert boolean to integer for MySQL
+        const availabilityValue = is_available ? 1 : 0;
+
         await db.execute(
             'UPDATE doctors SET is_available = ? WHERE doctor_id = ?',
-            [is_available, doctorId]
+            [availabilityValue, doctorId]
         );
 
         res.status(200).json({ message: 'Availability updated successfully.' });
@@ -773,14 +803,35 @@ exports.blockTime = async (req, res) => {
         const doctorId = req.user.doctor_id;
         const { date, startTime, endTime, reason, recurring, recurringDays } = req.body;
         
-        // This would typically save to a blocked_times table
-        // For now, just return success
-        res.status(200).json({ 
-            message: 'Time blocked successfully',
+        if (!date || !startTime || !endTime) {
+            return res.status(400).json({ message: 'Date, start time, and end time are required.' });
+        }
+        
+        // Insert blocked time into database
+        const insertQuery = `
+            INSERT INTO blocked_times (doctor_id, blocked_date, start_time, end_time, reason, is_recurring, recurring_days)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+        
+        const recurringDaysJson = recurring && recurringDays ? JSON.stringify(recurringDays) : null;
+        
+        const [result] = await db.execute(insertQuery, [
+            doctorId,
             date,
             startTime,
             endTime,
-            reason
+            reason || 'Blocked',
+            recurring || false,
+            recurringDaysJson
+        ]);
+        
+        res.status(200).json({ 
+            message: 'Time blocked successfully',
+            blockedTimeId: result.insertId,
+            date,
+            startTime,
+            endTime,
+            reason: reason || 'Blocked'
         });
         
     } catch (error) {
@@ -794,11 +845,21 @@ exports.unblockTime = async (req, res) => {
         const { id } = req.params;
         const doctorId = req.user.doctor_id;
         
-        // This would typically delete from blocked_times table
-        // For now, just return success
+        // Delete the blocked time slot
+        const deleteQuery = `
+            DELETE FROM blocked_times 
+            WHERE blocked_time_id = ? AND doctor_id = ?
+        `;
+        
+        const [result] = await db.execute(deleteQuery, [id, doctorId]);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ message: 'Blocked time slot not found or unauthorized.' });
+        }
+        
         res.status(200).json({ 
-            message: 'Time unblocked successfully',
-            blockId: id
+            message: 'Time slot unblocked successfully',
+            blockedTimeId: id
         });
         
     } catch (error) {
@@ -1004,4 +1065,181 @@ exports.getAppointmentDetails = async (req, res) => {
         console.error('Error fetching appointment details:', error);
         res.status(500).json({ message: 'Internal server error.' });
     }
+};
+
+// Update appointment status
+exports.updateAppointmentStatus = async (req, res) => {
+    try {
+        const { appointmentId } = req.params;
+        const { status } = req.body;
+        
+        console.log('Update appointment status request:', { appointmentId, status });
+        console.log('User object:', req.user);
+        
+        // Get doctor_id from the user object - check multiple possible fields
+        let doctorId = req.user.doctor_id || req.user.id;
+        
+        // If still no doctor_id, try to get it from the database using user_id
+        if (!doctorId && req.user.user_id) {
+            const [doctorRows] = await db.execute(
+                'SELECT doctor_id FROM doctors WHERE user_id = ?', 
+                [req.user.user_id]
+            );
+            if (doctorRows.length > 0) {
+                doctorId = doctorRows[0].doctor_id;
+            }
+        }
+        
+        if (!doctorId) {
+            console.error('Doctor ID not found in user object:', req.user);
+            return res.status(400).json({
+                success: false,
+                message: 'Doctor ID not found. Please log in again.'
+            });
+        }
+        
+        // Validate status - match database enum values exactly
+        const validStatuses = ['Upcoming', 'Confirmed', 'Pending', 'Cancelled', 'Completed'];
+        
+        // Map frontend status to database enum values
+        let dbStatus = status;
+        if (status === 'In Progress') {
+            dbStatus = 'Confirmed'; // Map "In Progress" to "Confirmed" in database
+        }
+        
+        if (!validStatuses.includes(dbStatus)) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid status. Valid statuses are: ' + validStatuses.join(', ')
+            });
+        }
+        
+        console.log('Updating appointment:', { appointmentId, status, doctorId });
+        
+        const [result] = await db.execute(`
+            UPDATE Appointments 
+            SET status = ? 
+            WHERE appointment_id = ? AND doctor_id = ?
+        `, [dbStatus, appointmentId, doctorId]);
+        
+        console.log('Update result:', result);
+        
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Appointment not found or you do not have permission to update it'
+            });
+        }
+        
+        res.json({
+            success: true,
+            message: `Appointment status updated to ${status}`,
+            data: {
+                appointment_id: appointmentId,
+                status: dbStatus
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error updating appointment status:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        });
+    }
+};
+
+// Get past appointments for doctor
+exports.getPastAppointments = async (req, res) => {
+    try {
+        const doctorId = req.user.doctor_id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
+
+        const query = `
+            SELECT 
+                a.appointment_id,
+                a.appointment_date,
+                a.reason,
+                a.status,
+                a.notes,
+                CONCAT(p.first_name, ' ', p.last_name) as patient_name,
+                p.phone_number as patient_phone,
+                CASE 
+                    WHEN camr.appointment_id IS NOT NULL THEN 1 
+                    ELSE 0 
+                END as has_medical_records
+            FROM appointments a
+            JOIN patients p ON a.patient_id = p.patient_id
+            LEFT JOIN completed_appointments_medical_records camr ON a.appointment_id = camr.appointment_id
+            WHERE a.doctor_id = ? 
+            AND a.status IN ('Completed', 'Cancelled')
+            AND DATE(a.appointment_date) < CURDATE()
+            ORDER BY a.appointment_date DESC
+            LIMIT ? OFFSET ?
+        `;
+
+        const countQuery = `
+            SELECT COUNT(*) as total
+            FROM appointments a
+            WHERE a.doctor_id = ? 
+            AND a.status IN ('Completed', 'Cancelled')
+            AND DATE(a.appointment_date) < CURDATE()
+        `;
+
+        const [appointments] = await db.execute(query, [doctorId, limit, offset]);
+        const [countResult] = await db.execute(countQuery, [doctorId]);
+        
+        const total = countResult[0].total;
+        const totalPages = Math.ceil(total / limit);
+
+        res.json({
+            success: true,
+            data: {
+                appointments,
+                pagination: {
+                    currentPage: page,
+                    totalPages,
+                    totalItems: total,
+                    itemsPerPage: limit
+                }
+            }
+        });
+
+    } catch (error) {
+        console.error('Error fetching past appointments:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        });
+    }
+};
+
+module.exports = {
+    getDoctorSchedule: exports.getDoctorSchedule,
+    approveAppointment: exports.approveAppointment,
+    cancelAppointment: exports.cancelAppointment,
+    updateAppointmentStatus: exports.updateAppointmentStatus,
+    completeAppointment: exports.completeAppointment,
+    startAppointment: exports.startAppointment,
+    getDoctorProfile: exports.getDoctorProfile,
+    updateDoctorProfile: exports.updateDoctorProfile,
+    updateDoctorAvailability: exports.updateDoctorAvailability,
+    getDoctorAvailability: exports.getDoctorAvailability,
+    getPastAppointments: exports.getPastAppointments,
+    getDoctorPatients: exports.getDoctorPatients,
+    getDoctorLeaves: exports.getDoctorLeaves,
+    getLeaveRequest: exports.getLeaveRequest,
+    updateLeaveRequest: exports.updateLeaveRequest,
+    deleteLeaveRequest: exports.deleteLeaveRequest,
+    submitLeaveRequest: exports.submitLeaveRequest,
+    setWeeklyAvailability: exports.setWeeklyAvailability,
+    blockTime: exports.blockTime,
+    unblockTime: exports.unblockTime,
+    addScheduleSlot: exports.addScheduleSlot,
+    updateQuickSettings: exports.updateQuickSettings,
+    getAppointmentDetails: exports.getAppointmentDetails
 };
