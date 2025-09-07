@@ -1,0 +1,25 @@
+-- Doctors Table
+CREATE TABLE IF NOT EXISTS doctors (
+    doctor_id INT PRIMARY KEY AUTO_INCREMENT,
+    user_id INT UNIQUE NOT NULL,
+    doctor_registration_id VARCHAR(100) UNIQUE NOT NULL,
+    first_name VARCHAR(100) NOT NULL,
+    last_name VARCHAR(100) NOT NULL,
+    specialization VARCHAR(100),
+    experience_years INT,
+    rating DECIMAL(2,1),
+    bio TEXT,
+    phone_number VARCHAR(20),
+    hospital_id INT,
+    is_approved TINYINT(1) DEFAULT 0,
+    is_available TINYINT(1) DEFAULT 1,
+    hospital_code VARCHAR(50),
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (hospital_id) REFERENCES hospitals(hospital_id) ON DELETE SET NULL,
+    INDEX idx_user_id (user_id),
+    INDEX idx_hospital_id (hospital_id),
+    INDEX idx_specialization (specialization),
+    INDEX idx_is_approved (is_approved),
+    INDEX idx_is_available (is_available),
+    INDEX idx_hospital_code (hospital_code)
+);
