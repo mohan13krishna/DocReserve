@@ -94,7 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const q = (searchEl?.value || '').toLowerCase();
                     const status = (statusEl?.value || '').toLowerCase();
                     const appointmentsToShow = data.todayAppointments || data.appointments || [];
-                    // Dashboard should only show pending appointments for approve/reject
+                    // Dashboard should only show pending appointments waiting for approval
                     const filtered = appointmentsToShow.filter(a => {
                         const matchesQ = !q || a.patientName.toLowerCase().includes(q) || (a.reason || '').toLowerCase().includes(q);
                         const matchesS = !status || (a.status || '').toLowerCase() === status;
@@ -110,8 +110,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const tr = document.createElement('tr');
                         tr.dataset.id = a.appointment_id;
                         
-                        // Dashboard only shows pending appointments with approve/reject actions
-                        let actionButtons = `
+                        // Only show approve/reject actions for pending appointments
+                        const actionButtons = `
                             <div class="d-flex gap-1 justify-content-start">
                                 <button class="btn btn-sm btn-success appt-approve" title="Approve Appointment">
                                     <i class="bi bi-check-circle"></i> Approve
@@ -125,7 +125,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                             </div>
                         `;
                         
+                        // Format the date from appointment_date
+                        const appointmentDate = new Date(a.appointment_date || a.date);
+                        const formattedDate = appointmentDate.toLocaleDateString('en-US', { 
+                            month: 'short', 
+                            day: 'numeric',
+                            year: 'numeric'
+                        });
+                        
                         tr.innerHTML = `
+                            <td>${formattedDate}</td>
                             <td>${a.time}</td>
                             <td>${a.patientName}</td>
                             <td>${a.reason || ''}</td>
@@ -146,11 +155,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                         tr.querySelector('.appt-reject')?.addEventListener('click', () => {
                             cancelAppointment(apptId);
                         });
+                        tr.querySelector('.appt-cancel')?.addEventListener('click', () => {
+                            cancelAppointment(apptId);
+                        });
+                        tr.querySelector('.appt-start')?.addEventListener('click', () => {
+                            startAppointment(apptId);
+                        });
+                        tr.querySelector('.appt-complete')?.addEventListener('click', () => {
+                            completeAppointment(apptId);
+                        });
                     });
 
                     if (pageItems.length === 0) {
                         const tr = document.createElement('tr');
-                        tr.innerHTML = `<td colspan="5" class="text-center">No appointments found</td>`;
+                        tr.innerHTML = `<td colspan="6" class="text-center">No pending appointments found</td>`;
                         todaysTbody.appendChild(tr);
                     }
 
