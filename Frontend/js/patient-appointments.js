@@ -40,6 +40,250 @@ document.addEventListener('DOMContentLoaded', async () => {
     patientFullNameEl.textContent = `${decodedToken.first_name || ''} ${decodedToken.last_name || ''}`;
     patientInitialsEl.textContent = `${(decodedToken.first_name || '').charAt(0)}${(decodedToken.last_name || '').charAt(0)}`.toUpperCase();
 
+    // --- Medical Records Functions ---
+    async function viewMedicalRecords(appointmentId) {
+        const modal = new bootstrap.Modal(document.getElementById('medicalRecordsModal'));
+        const modalContent = document.getElementById('medicalRecordsContent');
+        
+        // Show loading spinner
+        modalContent.innerHTML = `
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        `;
+        
+        modal.show();
+        
+        try {
+            console.log('Fetching medical records for appointment:', appointmentId);
+            const response = await fetch(`/api/appointments/${appointmentId}/medical-records`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            console.log('Response status:', response.status);
+
+            if (response.status === 404) {
+                // Medical records not found - show basic appointment info instead
+                await showBasicAppointmentInfo(appointmentId, modalContent);
+                return;
+            }
+
+            if (!response.ok) {
+                const errorData = await response.text();
+                console.error('Error response:', errorData);
+                throw new Error(`HTTP error! status: ${response.status} - ${errorData}`);
+            }
+
+            const data = await response.json();
+            const record = data.data;
+            
+            // Display medical records content
+            modalContent.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-primary text-white">
+                                <h6 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Appointment Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Date:</strong> ${new Date(record.appointment_date).toLocaleDateString()}</p>
+                                <p><strong>Doctor:</strong> ${record.doctor_name}</p>
+                                <p><strong>Specialization:</strong> ${record.specialization}</p>
+                                <p><strong>Reason:</strong> ${record.appointment_reason}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="card mb-3">
+                            <div class="card-header bg-info text-white">
+                                <h6 class="mb-0"><i class="bi bi-person me-2"></i>Patient Information</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Name:</strong> ${record.patient_name}</p>
+                                <p><strong>Date of Birth:</strong> ${new Date(record.date_of_birth).toLocaleDateString()}</p>
+                                <p><strong>Gender:</strong> ${record.gender}</p>
+                                <p><strong>Blood Type:</strong> ${record.blood_type || 'Not specified'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="card mb-3">
+                            <div class="card-header bg-success text-white">
+                                <h6 class="mb-0"><i class="bi bi-clipboard-pulse me-2"></i>Medical Details</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Symptoms:</strong> ${record.symptoms || 'Not recorded'}</p>
+                                <p><strong>Diagnosis:</strong> ${record.diagnosis || 'Not recorded'}</p>
+                                <p><strong>Treatment:</strong> ${record.treatment || 'Not recorded'}</p>
+                                <p><strong>Prescribed Medicines:</strong> ${record.prescribed_medicines || 'None'}</p>
+                                <p><strong>Follow-up Instructions:</strong> ${record.follow_up_instructions || 'None'}</p>
+                                <p><strong>Doctor Notes:</strong> ${record.doctor_notes || 'None'}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="card">
+                            <div class="card-header bg-warning text-dark">
+                                <h6 class="mb-0"><i class="bi bi-heart-pulse me-2"></i>Medical History</h6>
+                            </div>
+                            <div class="card-body">
+                                <p><strong>Allergies:</strong> ${record.allergies || 'None known'}</p>
+                                <p><strong>Current Medications:</strong> ${record.current_medications || 'None'}</p>
+                                <p><strong>Medical Conditions:</strong> ${record.medical_conditions || 'None'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3 d-flex justify-content-between">
+                    <button type="button" class="btn btn-outline-primary" onclick="printMedicalRecord()">
+                        <i class="bi bi-printer me-2"></i>Print Record
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="showRatingModal('${appointmentId}')">
+                        <i class="bi bi-star me-2"></i>Rate Appointment
+                    </button>
+                </div>
+            `;
+            
+        } catch (error) {
+            console.error('Error fetching medical records:', error);
+            let errorMessage = 'Failed to load medical records. Please try again later.';
+            
+            if (error.message.includes('404')) {
+                errorMessage = 'Medical records not found for this appointment. The doctor may not have completed the medical documentation yet.';
+            } else if (error.message.includes('403')) {
+                errorMessage = 'Access denied. You can only view your own medical records.';
+            } else if (error.message.includes('500')) {
+                errorMessage = 'Server error occurred while loading medical records. Please try again later.';
+            }
+            
+            modalContent.innerHTML = `
+                <div class="alert alert-warning" role="alert">
+                    <i class="bi bi-info-circle me-2"></i>
+                    ${errorMessage}
+                </div>
+                <div class="text-center mt-3">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            `;
+        }
+    }
+
+    // Print function for medical records
+    window.printMedicalRecord = function() {
+        const printContent = document.getElementById('medicalRecordsContent').innerHTML;
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <html>
+                <head>
+                    <title>Medical Record</title>
+                    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+                    <style>
+                        @media print {
+                            .btn { display: none !important; }
+                            .card { break-inside: avoid; }
+                        }
+                    </style>
+                </head>
+                <body class="p-4">
+                    <h2 class="mb-4">Medical Record</h2>
+                    ${printContent}
+                </body>
+            </html>
+        `);
+        printWindow.document.close();
+        printWindow.print();
+    };
+
+    // Rating modal function
+    window.showRatingModal = function(appointmentId) {
+        // Close medical records modal first
+        const medicalModal = bootstrap.Modal.getInstance(document.getElementById('medicalRecordsModal'));
+        if (medicalModal) medicalModal.hide();
+        
+        // Find appointment data
+        const appointmentInfo = findAppointmentById(appointmentId);
+        
+        if (appointmentInfo) {
+            // Use existing openRatingModal function
+            openRatingModal(appointmentInfo);
+        } else {
+            // Fallback: set appointment ID directly
+            const ratingModal = document.getElementById('ratingModal');
+            if (ratingModal) {
+                document.getElementById('rating-appointment-id').value = appointmentId;
+                const modal = new bootstrap.Modal(ratingModal);
+                modal.show();
+            }
+        }
+    };
+
+    // Function to show basic appointment info when medical records aren't available
+    async function showBasicAppointmentInfo(appointmentId, modalContent) {
+        try {
+            // Try to get basic appointment information from the appointments list
+            const appointmentInfo = findAppointmentById(appointmentId);
+            
+            modalContent.innerHTML = `
+                <div class="alert alert-info" role="alert">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Medical records not available yet.</strong><br>
+                    The doctor has not completed the medical documentation for this appointment.
+                </div>
+                
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0"><i class="bi bi-calendar-check me-2"></i>Appointment Information</h6>
+                    </div>
+                    <div class="card-body">
+                        ${appointmentInfo ? `
+                            <p><strong>Doctor:</strong> ${appointmentInfo.doctorName}</p>
+                            <p><strong>Specialization:</strong> ${appointmentInfo.specialization || 'Not specified'}</p>
+                            <p><strong>Date/Time:</strong> ${appointmentInfo.dateTime}</p>
+                            <p><strong>Reason:</strong> ${appointmentInfo.reason || 'Not specified'}</p>
+                            <p><strong>Status:</strong> ${appointmentInfo.status}</p>
+                        ` : `
+                            <p><strong>Appointment ID:</strong> ${appointmentId}</p>
+                            <p class="text-muted">Basic appointment details are not available at the moment.</p>
+                        `}
+                    </div>
+                </div>
+                
+                <div class="mt-3 d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="showRatingModal('${appointmentId}')">
+                        <i class="bi bi-star me-2"></i>Rate Appointment
+                    </button>
+                </div>
+            `;
+        } catch (error) {
+            console.error('Error showing basic appointment info:', error);
+            modalContent.innerHTML = `
+                <div class="alert alert-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Medical records are not available for this appointment yet.
+                </div>
+                <div class="text-center mt-3">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            `;
+        }
+    }
+
+    // Helper function to find appointment by ID in the loaded data
+    function findAppointmentById(appointmentId) {
+        const allAppointments = [...lastData.past, ...lastData.cancelled, ...lastData.upcoming];
+        return allAppointments.find(app => app.appointment_id == appointmentId);
+    }
+
+    // Make viewMedicalRecords globally available
+    window.viewMedicalRecords = viewMedicalRecords;
+
     // --- Pagination Functions ---
     const createPagination = (type, totalItems) => {
         const paginationEl = document.getElementById(`${type}-pagination`);
@@ -131,7 +375,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <button class="btn btn-warning btn-sm rounded-pill text-dark reschedule-btn" data-appointment-id="${app.appointment_id}">Reschedule</button>
                 <button class="btn btn-danger btn-sm rounded-pill cancel-btn" data-appointment-id="${app.appointment_id}">Cancel</button>`;
             } else {
-                actions = `<button class="btn btn-outline-secondary btn-sm rounded-pill view-details-btn" data-appointment-id="${app.appointment_id}">View</button>`;
+                actions = `<button class="btn btn-outline-secondary btn-sm rounded-pill" onclick="viewMedicalRecords('${app.appointment_id}')">View Medical Records</button>`;
             }
             
             const tr = document.createElement('tr');
@@ -145,7 +389,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Add rating column for past appointments
             if (isPast) {
-                rowHtml += `<td class="rating-cell">${createStarRating(app.rating || 0, app.appointment_id)}</td>`;
+                const ratingDisplay = app.rating_status === 'submitted' 
+                    ? `<span class="text-success"><i class="bi bi-check-circle-fill me-1"></i>Rated</span>`
+                    : `<button class="btn btn-outline-primary btn-sm rate-appointment-btn" data-appointment-id="${app.appointment_id}">Rate</button>`;
+                rowHtml += `<td class="rating-cell">${ratingDisplay}</td>`;
             }
             
             rowHtml += `<td class="text-end">${actions}</td>`;
@@ -300,12 +547,278 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Bootstrap 5 handles tab switching automatically with data-bs-toggle="tab"
 
+    // --- Rating Modal Functions ---
+    const ratingModal = new bootstrap.Modal(document.getElementById('ratingModal'));
+    const medicalRecordsModal = new bootstrap.Modal(document.getElementById('medicalRecordsModal'));
+    let currentAppointmentForRating = null;
+
+    // Initialize star rating interactions
+    const initializeStarRatings = () => {
+        document.querySelectorAll('.rating-stars').forEach(starContainer => {
+            const stars = starContainer.querySelectorAll('i');
+            const ratingType = starContainer.dataset.rating;
+            const hiddenInput = document.getElementById(ratingType);
+
+            stars.forEach((star, index) => {
+                star.addEventListener('mouseenter', () => {
+                    stars.forEach((s, i) => {
+                        s.classList.toggle('filled', i <= index);
+                    });
+                });
+
+                star.addEventListener('mouseleave', () => {
+                    const currentRating = parseInt(hiddenInput.value) || 0;
+                    stars.forEach((s, i) => {
+                        s.classList.toggle('filled', i < currentRating);
+                    });
+                });
+
+                star.addEventListener('click', () => {
+                    const rating = index + 1;
+                    hiddenInput.value = rating;
+                    stars.forEach((s, i) => {
+                        s.classList.toggle('filled', i < rating);
+                    });
+                });
+            });
+        });
+    };
+
+    // Open rating modal
+    const openRatingModal = (appointment) => {
+        currentAppointmentForRating = appointment;
+        
+        // Populate appointment details
+        document.getElementById('rating-doctor-name').textContent = appointment.doctorName;
+        document.getElementById('rating-appointment-date').textContent = appointment.dateTime;
+        document.getElementById('rating-appointment-reason').textContent = appointment.reason || 'N/A';
+        document.getElementById('rating-appointment-id').value = appointment.appointment_id;
+
+        // Reset form
+        document.getElementById('ratingForm').reset();
+        document.querySelectorAll('.rating-stars i').forEach(star => {
+            star.classList.remove('filled');
+        });
+
+        ratingModal.show();
+    };
+
+    // Open medical records modal
+    const openMedicalRecordsModal = async (appointmentId) => {
+        const contentDiv = document.getElementById('medicalRecordsContent');
+        
+        // Show loading spinner
+        contentDiv.innerHTML = `
+            <div class="d-flex justify-content-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        `;
+        
+        medicalRecordsModal.show();
+        
+        try {
+            const response = await fetch(`/api/appointments/${appointmentId}/medical-records`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.ok) {
+                const result = await response.json();
+                const data = result.data;
+                
+                contentDiv.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-primary text-white">
+                                    <h6 class="mb-0"><i class="bi bi-person-fill me-2"></i>Patient Information</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Name:</strong> ${data.patient_name}</p>
+                                    <p><strong>Date of Birth:</strong> ${new Date(data.date_of_birth).toLocaleDateString()}</p>
+                                    <p><strong>Gender:</strong> ${data.gender}</p>
+                                    <p><strong>Blood Type:</strong> ${data.blood_type || 'N/A'}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-info text-white">
+                                    <h6 class="mb-0"><i class="bi bi-calendar-event me-2"></i>Appointment Details</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Date:</strong> ${new Date(data.appointment_date).toLocaleString()}</p>
+                                    <p><strong>Reason:</strong> ${data.appointment_reason || 'N/A'}</p>
+                                    <p><strong>Session Duration:</strong> ${data.session_duration || 'N/A'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card mb-3">
+                                <div class="card-header bg-success text-white">
+                                    <h6 class="mb-0"><i class="bi bi-heart-pulse me-2"></i>Medical History</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <p><strong>Allergies:</strong><br>${data.allergies || 'None reported'}</p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p><strong>Current Medications:</strong><br>${data.current_medications || 'None reported'}</p>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <p><strong>Medical Conditions:</strong><br>${data.medical_conditions || 'None reported'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-warning text-dark">
+                                    <h6 class="mb-0"><i class="bi bi-clipboard-pulse me-2"></i>Symptoms & Diagnosis</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Symptoms:</strong><br>${data.symptoms || 'Not recorded'}</p>
+                                    <p><strong>Diagnosis:</strong><br>${data.diagnosis || 'Not recorded'}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card mb-3">
+                                <div class="card-header bg-secondary text-white">
+                                    <h6 class="mb-0"><i class="bi bi-prescription2 me-2"></i>Treatment & Medications</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Treatment:</strong><br>${data.treatment || 'Not recorded'}</p>
+                                    <p><strong>Prescribed Medicines:</strong><br>${data.prescribed_medicines || 'None prescribed'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card mb-3">
+                                <div class="card-header bg-dark text-white">
+                                    <h6 class="mb-0"><i class="bi bi-journal-medical me-2"></i>Doctor's Notes & Follow-up</h6>
+                                </div>
+                                <div class="card-body">
+                                    <p><strong>Doctor's Notes:</strong><br>${data.doctor_notes || 'No notes recorded'}</p>
+                                    <p><strong>Follow-up Instructions:</strong><br>${data.follow_up || 'No follow-up instructions'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                const errorData = await response.json();
+                contentDiv.innerHTML = `
+                    <div class="alert alert-warning" role="alert">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        ${errorData.message || 'Medical records not found for this appointment.'}
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error fetching medical records:', error);
+            contentDiv.innerHTML = `
+                <div class="alert alert-danger" role="alert">
+                    <i class="bi bi-x-circle me-2"></i>
+                    Error loading medical records. Please try again.
+                </div>
+            `;
+        }
+    };
+
+    // Submit rating
+    const submitRating = async () => {
+        const formData = new FormData(document.getElementById('ratingForm'));
+        const ratingData = {
+            patient_rating: parseFloat(formData.get('patient_rating')) || null,
+            doctor_rating: parseFloat(formData.get('doctor_rating')) || null,
+            service_rating: parseFloat(formData.get('service_rating')) || null,
+            patient_feedback: formData.get('patient_feedback') || null,
+            would_recommend: formData.get('would_recommend') ? 1 : 0
+        };
+
+        // Validate at least one rating is provided
+        if (!ratingData.patient_rating && !ratingData.doctor_rating && !ratingData.service_rating) {
+            alert('Please provide at least one rating before submitting.');
+            return;
+        }
+
+        try {
+            // Get appointment ID from form or current appointment
+            const appointmentId = document.getElementById('rating-appointment-id').value || 
+                                (currentAppointmentForRating ? currentAppointmentForRating.appointment_id : null);
+            
+            if (!appointmentId) {
+                alert('Appointment ID not found. Please try again.');
+                return;
+            }
+            
+            console.log('Submitting rating for appointment:', appointmentId);
+            console.log('Rating data:', ratingData);
+            
+            const response = await fetch(`/api/appointments/${appointmentId}/rate`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(ratingData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                ratingModal.hide();
+                
+                // Show success message
+                const successMsg = document.createElement('div');
+                successMsg.className = 'alert alert-success alert-dismissible fade show position-fixed';
+                successMsg.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+                successMsg.innerHTML = `
+                    <i class="bi bi-check-circle-fill me-2"></i>Rating submitted successfully!
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                document.body.appendChild(successMsg);
+
+                setTimeout(() => {
+                    if (successMsg.parentNode) {
+                        successMsg.remove();
+                    }
+                }, 3000);
+
+                // Refresh appointments to show updated rating status
+                fetchAppointments();
+            } else {
+                alert(`Error: ${result.message || 'Failed to submit rating'}`);
+            }
+        } catch (error) {
+            console.error('Error submitting rating:', error);
+            alert('An error occurred while submitting your rating. Please try again.');
+        }
+    };
+
     // --- Event Listeners for Action Buttons and Ratings ---
     const appointmentsContainer = document.querySelector('.appointments-management-section');
     appointmentsContainer.addEventListener('click', async (event) => {
         const rescheduleBtn = event.target.closest('.reschedule-btn');
         const cancelBtn = event.target.closest('.cancel-btn');
-        const ratingStar = event.target.closest('.rate-star');
+        const rateBtn = event.target.closest('.rate-appointment-btn');
+        const viewBtn = event.target.closest('.view-details-btn');
 
         if (rescheduleBtn) {
             const appointmentId = rescheduleBtn.dataset.appointmentId;
@@ -330,75 +843,50 @@ document.addEventListener('DOMContentLoaded', async () => {
                     alert('An error occurred. Please try again.');
                 }
             }
-        } else if (ratingStar) {
-            const rating = parseInt(ratingStar.dataset.rating);
-            const appointmentId = ratingStar.dataset.appointmentId;
-            
-            try {
-                // Find the appointment in our data
-                const appointment = lastData.past.find(app => app.appointment_id == appointmentId);
-                if (!appointment) return;
-                
-                // Update the UI immediately for better user experience
-                const ratingCell = ratingStar.closest('.rating-cell');
-                if (ratingCell) {
-                    ratingCell.innerHTML = createStarRating(rating, appointmentId);
-                }
-                
-                // Store the rating in our local data
-                appointment.rating = rating;
-                
-                // Send the rating to the server
-                // Note: This is a mock implementation as the API endpoint might not exist yet
-                // In a real implementation, you would send this to the server
-                console.log(`Rating appointment ${appointmentId} with ${rating} stars`);
-                
-                // Simulate API call (remove this in production and use a real API call)
-                /*
-                const response = await fetch(`/api/patient/appointments/${appointmentId}/rate`, {
-                    method: 'POST',
-                    headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}` 
-                    },
-                    body: JSON.stringify({ rating })
-                });
-                
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error('Error rating appointment:', errorData);
-                }
-                */
-            } catch (error) {
-                console.error('Error rating appointment:', error);
+        } else if (rateBtn) {
+            const appointmentId = rateBtn.dataset.appointmentId;
+            const appointment = lastData.past.find(app => app.appointment_id == appointmentId);
+            if (appointment) {
+                openRatingModal(appointment);
             }
+        } else if (viewBtn) {
+            const appointmentId = viewBtn.dataset.appointmentId;
+            openMedicalRecordsModal(appointmentId);
         }
     });
-    
-    // --- Event Listener for Search ---
-    if (searchEl) {
-        searchEl.addEventListener('input', () => {
-            renderAppointments(upcomingContent, filterApps(lastData.upcoming));
-            renderAppointments(pastContent, filterApps(lastData.past));
-            renderAppointments(cancelledContent, filterApps(lastData.cancelled));
-        });
-    }
 
-    // --- Event Listeners for Pagination Controls ---
-    // Page size selectors
-    upcomingPageSize.addEventListener('change', () => {
-        currentPage.upcoming = 1; // Reset to first page when changing page size
-        renderAppointments(upcomingContent, lastData.upcoming);
-    });
+    // Initialize rating modal functionality
+    document.getElementById('ratingModal').addEventListener('shown.bs.modal', initializeStarRatings);
+    fetchAppointments();
+    initializeStarRatings();
     
-    pastPageSize.addEventListener('change', () => {
-        currentPage.past = 1; // Reset to first page when changing page size
-        renderAppointments(pastContent, lastData.past);
-    });
+    // Add submit rating event listener
+    document.getElementById('submitRating')?.addEventListener('click', submitRating);
     
-    cancelledPageSize.addEventListener('change', () => {
-        currentPage.cancelled = 1; // Reset to first page when changing page size
-        renderAppointments(cancelledContent, lastData.cancelled);
+    // Search functionality
+    searchEl?.addEventListener('input', () => {
+        renderAppointments(upcomingContent, filterApps(lastData.upcoming));
+        renderAppointments(pastContent, filterApps(lastData.past));
+        renderAppointments(cancelledContent, filterApps(lastData.cancelled));
+    });
+
+    // Page size change handlers
+    upcomingPageSize?.addEventListener('change', (e) => {
+        pageSize.upcoming = parseInt(e.target.value);
+        currentPage.upcoming = 1;
+        renderAppointments(upcomingContent, filterApps(lastData.upcoming));
+    });
+
+    pastPageSize?.addEventListener('change', (e) => {
+        pageSize.past = parseInt(e.target.value);
+        currentPage.past = 1;
+        renderAppointments(pastContent, filterApps(lastData.past));
+    });
+
+    cancelledPageSize?.addEventListener('change', (e) => {
+        pageSize.cancelled = parseInt(e.target.value);
+        currentPage.cancelled = 1;
+        renderAppointments(cancelledContent, filterApps(lastData.cancelled));
     });
     
     // Initial fetch
