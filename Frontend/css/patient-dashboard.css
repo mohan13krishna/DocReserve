@@ -394,3 +394,123 @@
     background: linear-gradient(135deg, #007bff 0%, #0056b3 100%) !important;
 }
 
+/* Medical Records Page Specific Styles */
+.medical-record-item {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.medical-record-item:hover {
+    background-color: #f8f9fa !important;
+    transform: translateX(5px);
+}
+
+.doctor-avatar {
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.rating-display .stars i {
+    font-size: 0.9rem;
+    margin-right: 2px;
+}
+
+.rating-stars {
+    display: flex;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.rating-stars i {
+    font-size: 1.5rem;
+    color: #ddd;
+    transition: color 0.2s ease;
+}
+
+.rating-stars i:hover,
+.rating-stars i.bi-star-fill {
+    color: #ffc107;
+}
+
+.rating-stars i:hover ~ i {
+    color: #ddd;
+}
+
+/* Medical Record Modal Enhancements */
+.modal-xl .modal-content {
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+.modal-header .btn-close {
+    filter: invert(1);
+}
+
+/* Print styles */
+@media print {
+    .modal-header,
+    .modal-footer,
+    .btn {
+        display: none !important;
+    }
+    
+    .modal-body {
+        padding: 0 !important;
+    }
+    
+    .modal-content {
+        box-shadow: none !important;
+        border: none !important;
+    }
+}
+
+/* Search and filter enhancements */
+.input-group-text {
+    background-color: #f8f9fa;
+    border-color: #ced4da;
+}
+
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+/* Summary cards hover effects */
+.summary-card {
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+}
+
+.summary-card:hover {
+    border-color: #007bff;
+    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.15) !important;
+}
+
+/* Loading spinner */
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* No records state */
+#no-records i {
+    opacity: 0.5;
+}
+
+/* Button enhancements */
+.btn-outline-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.btn-warning:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+}
+
