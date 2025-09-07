@@ -72,7 +72,7 @@ exports.getPatientDashboardOverview = async (req, res) => {
       FROM Appointments
       WHERE patient_id = ? AND status = 'Completed';
     `, [patientId]);
-    const totalVisits = totalVisitsResult[0].count;
+    const totalVisits = totalVisitsResult[0].total_visits;
 
     // Placeholder for Favorite Doctors and Health Score (static for now, as per design)
     const favoriteDoctors = 5;
@@ -193,11 +193,13 @@ exports.getPatientAppointments = async (req, res) => {
                 a.status,
                 d.first_name AS doctor_first_name,
                 d.last_name AS doctor_last_name,
-                d.specialization
+                d.specialization,
+                camr.rating_status
             FROM Appointments a
             JOIN Doctors d ON a.doctor_id = d.doctor_id
+            LEFT JOIN completed_appointments_medical_records camr ON a.appointment_id = camr.appointment_id
             WHERE a.patient_id = ?
-            ORDER BY a.appointment_date ASC;
+            ORDER BY a.appointment_date DESC;
         `, [patientId]);
 
         const upcoming = [];
@@ -219,7 +221,8 @@ exports.getPatientAppointments = async (req, res) => {
                 specialization: app.specialization,
                 dateTime: appDate.toLocaleString('en-US', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true }),
                 reason: app.reason,
-                status: app.status
+                status: app.status,
+                rating_status: app.rating_status
             };
 
             if (app.status === 'Cancelled') {
@@ -232,6 +235,11 @@ exports.getPatientAppointments = async (req, res) => {
                 past.push(formattedApp);
             }
         });
+
+        // Sort arrays to ensure proper ordering
+        upcoming.sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime)); // Upcoming: earliest first
+        past.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime)); // Past: most recent first
+        cancelled.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime)); // Cancelled: most recent first
 
         res.status(200).json({ upcoming, past, cancelled });
 
@@ -420,10 +428,11 @@ exports.bookAppointment = async (req, res) => {
     }
 };
 
-// Cancel appointment
-exports.cancelAppointment = async (req, res) => {
+// Rate an appointment
+exports.rateAppointment = async (req, res) => {
     try {
-        const patientId = await getPatientIdFromReq(req);
+        const { appointmentId } = req.params;
+        const { rating } = req.body;
         const { id } = req.params;
         if (!patientId) return res.status(400).json({ message: 'Patient context not found.' });
         // Ensure appointment belongs to patient
@@ -489,4 +498,116 @@ exports.getAppointmentById = async (req, res) => {
         console.error('Error getting appointment:', e);
         res.status(500).json({ message: 'Internal server error.' });
     }
+};
+
+// Cancel appointment
+exports.cancelAppointment = async (req, res) => {
+    try {
+        const patientId = await getPatientIdFromReq(req);
+        const { id } = req.params;
+
+        if (!patientId) {
+            return res.status(400).json({ message: 'Patient context not found.' });
+        }
+
+        // Update appointment status to cancelled
+        const [result] = await db.execute(
+            'UPDATE appointments SET status = ? WHERE appointment_id = ? AND patient_id = ?',
+            ['Cancelled', id, patientId]
+        );
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Appointment not found or not authorized to cancel'
+            });
+        }
+
+        res.json({
+            success: true,
+            message: 'Appointment cancelled successfully'
+        });
+
+    } catch (error) {
+        console.error('Error cancelling appointment:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        });
+    }
+};
+
+// Rate an appointment
+exports.rateAppointment = async (req, res) => {
+    try {
+        const { appointmentId } = req.params;
+        const { rating } = req.body;
+        const patientId = req.user.patient_id;
+
+        // Validate rating
+        if (!rating || rating < 1 || rating > 5) {
+            return res.status(400).json({
+                success: false,
+                message: 'Rating must be between 1 and 5'
+            });
+        }
+
+        // Check if appointment belongs to patient and is completed
+        const checkQuery = `
+            SELECT appointment_id, status 
+            FROM appointments 
+            WHERE appointment_id = ? AND patient_id = ? AND status = 'Completed'
+        `;
+        
+        const [appointments] = await db.execute(checkQuery, [appointmentId, patientId]);
+        
+        if (appointments.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'Appointment not found or not completed'
+            });
+        }
+
+        // Update appointment with rating
+        const updateQuery = `
+            UPDATE appointments 
+            SET rating = ? 
+            WHERE appointment_id = ?
+        `;
+        
+        await db.execute(updateQuery, [rating, appointmentId]);
+
+        res.json({
+            success: true,
+            message: 'Rating submitted successfully',
+            data: {
+                appointment_id: appointmentId,
+                rating: rating
+            }
+        });
+
+    } catch (error) {
+        console.error('Error rating appointment:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        });
+    }
+};
+
+module.exports = {
+    getPatientDashboardOverview: exports.getPatientDashboardOverview,
+    getPatientProfile: exports.getPatientProfile,
+    updatePatientProfile: exports.updatePatientProfile,
+    getPatientAppointments: exports.getPatientAppointments,
+    bookAppointment: exports.bookAppointment,
+    cancelAppointment: exports.cancelAppointment,
+    rescheduleAppointment: exports.rescheduleAppointment,
+    getAppointmentById: exports.getAppointmentById,
+    getDoctorsList: exports.getDoctorsList,
+    getDoctorDetails: exports.getDoctorDetails,
+    getDoctorAvailability: exports.getDoctorAvailability,
+    rateAppointment: exports.rateAppointment
 };
