@@ -19,12 +19,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const doctorInitialsEl = document.getElementById('doctor-initials');
     const doctorAvailabilityToggle = document.getElementById('doctor-availability-toggle');
     const availabilityStatusEl = document.getElementById('availability-status');
-    const calendarCurrentDateEl = document.getElementById('calendar-current-date');
+    const calendarCurrentDateEl = document.getElementById('current-date');
     const currentAppointmentsDateEl = document.getElementById('current-date-appointments');
     const scheduleGridEl = document.getElementById('schedule-grid');
     const saveSettingsBtn = document.getElementById('save-settings-btn');
-    const prevDateBtn = document.getElementById('prev-date-btn');
-    const nextDateBtn = document.getElementById('next-date-btn');
+    const prevDateBtn = document.getElementById('prev-date');
+    const nextDateBtn = document.getElementById('next-date');
     const todayBtn = document.getElementById('today-btn');
     const viewToggles = document.querySelectorAll('.view-toggles .btn-check');
     const blockTimeForm = document.getElementById('block-time-form');
@@ -43,11 +43,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     initializePage();
 
     // Event listeners
-    doctorAvailabilityToggle.addEventListener('change', updateAvailability);
-    saveSettingsBtn.addEventListener('click', saveQuickSettings);
-    prevDateBtn.addEventListener('click', () => navigateDate('prev'));
-    nextDateBtn.addEventListener('click', () => navigateDate('next'));
-    todayBtn.addEventListener('click', () => navigateDate('today'));
+    if (doctorAvailabilityToggle) doctorAvailabilityToggle.addEventListener('change', updateAvailability);
+    if (saveSettingsBtn) saveSettingsBtn.addEventListener('click', saveQuickSettings);
+    if (prevDateBtn) prevDateBtn.addEventListener('click', () => navigateDate('prev'));
+    if (nextDateBtn) nextDateBtn.addEventListener('click', () => navigateDate('next'));
+    if (todayBtn) todayBtn.addEventListener('click', () => navigateDate('today'));
     viewToggles.forEach(toggle => {
         toggle.addEventListener('change', (e) => {
             if (e.target.checked) {
@@ -56,9 +56,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     });
-    saveBlockTimeBtn.addEventListener('click', handleBlockTime);
-    saveAvailabilityBtn.addEventListener('click', handleSetAvailability);
-    submitLeaveRequestBtn.addEventListener('click', handleLeaveRequest);
+    if (saveBlockTimeBtn) saveBlockTimeBtn.addEventListener('click', handleBlockTime);
+    if (saveAvailabilityBtn) saveAvailabilityBtn.addEventListener('click', handleSetAvailability);
+    if (submitLeaveRequestBtn) submitLeaveRequestBtn.addEventListener('click', handleLeaveRequest);
 
 
     // Table search and filter for appointments
@@ -83,26 +83,38 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (appointmentsPrint) appointmentsPrint.addEventListener('click', printAppointments);
 
     // Modal event listeners
-    document.getElementById('block-recurring').addEventListener('change', function() {
-        document.querySelector('.recurring-options').classList.toggle('d-none', !this.checked);
-    });
+    const blockRecurringEl = document.getElementById('block-recurring');
+    if (blockRecurringEl) {
+        blockRecurringEl.addEventListener('change', function() {
+            const recurringOptions = document.querySelector('.recurring-options');
+            if (recurringOptions) {
+                recurringOptions.classList.toggle('d-none', !this.checked);
+            }
+        });
+    }
 
     // Set minimum date for leave request to today
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('leave-start-date').min = today;
-    document.getElementById('leave-end-date').min = today;
+    const leaveStartDateEl = document.getElementById('leave-start-date');
+    const leaveEndDateEl = document.getElementById('leave-end-date');
+    
+    if (leaveStartDateEl) leaveStartDateEl.min = today;
+    if (leaveEndDateEl) leaveEndDateEl.min = today;
 
     // Update end date minimum when start date changes
-    document.getElementById('leave-start-date').addEventListener('change', function() {
-        const startDate = this.value;
-        const endDateInput = document.getElementById('leave-end-date');
-        endDateInput.min = startDate;
-        
-        // If end date is before new start date, clear it
-        if (endDateInput.value && endDateInput.value < startDate) {
-            endDateInput.value = '';
-        }
-    });
+    if (leaveStartDateEl) {
+        leaveStartDateEl.addEventListener('change', function() {
+            const startDate = this.value;
+            if (leaveEndDateEl) {
+                leaveEndDateEl.min = startDate;
+                
+                // If end date is before new start date, clear it
+                if (leaveEndDateEl.value && leaveEndDateEl.value < startDate) {
+                    leaveEndDateEl.value = '';
+                }
+            }
+        });
+    }
 
     // Add time slot buttons for each day in availability modal
     document.querySelectorAll('.add-time-slot').forEach(btn => {
@@ -210,11 +222,102 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
+    // Helper function to parse appointment date and time
+    function parseAppointmentDate(dateString) {
+        if (!dateString) return null;
+        
+        // Handle different date formats
+        let parsedDate;
+        if (dateString.includes('T')) {
+            // ISO format with time
+            parsedDate = new Date(dateString);
+        } else {
+            // Date only format - assume it's for today with current time or a specific time
+            parsedDate = new Date(dateString);
+        }
+        
+        return parsedDate;
+    }
+    
+    // Helper function to check if a time slot is in the past
+    function isTimeSlotPast(slotTime, slotDate = null) {
+        const now = new Date();
+        const targetDate = slotDate ? new Date(slotDate) : currentScheduleDate;
+        
+        // Parse the time (e.g., "09:00 AM" or "14:30")
+        const [time, period] = slotTime.split(' ');
+        const [hours, minutes] = time.split(':').map(Number);
+        
+        let adjustedHours = hours;
+        if (period) {
+            // Handle 12-hour format
+            if (period.toUpperCase() === 'PM' && hours !== 12) {
+                adjustedHours += 12;
+            } else if (period.toUpperCase() === 'AM' && hours === 12) {
+                adjustedHours = 0;
+            }
+        }
+        
+        // Create the full datetime for the slot
+        const slotDateTime = new Date(targetDate);
+        slotDateTime.setHours(adjustedHours, minutes, 0, 0);
+        
+        return now > slotDateTime;
+    }
+    
+    // Background function to update appointment status
+    async function updateAppointmentStatusInBackground(appointmentId, newStatus) {
+        try {
+            const response = await fetch(`/api/appointments/${appointmentId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+            
+            if (response.ok) {
+                console.log(`Appointment ${appointmentId} status updated to ${newStatus}`);
+            } else {
+                console.warn(`Failed to update appointment ${appointmentId} status:`, response.status);
+            }
+        } catch (error) {
+            console.error('Error updating appointment status in background:', error);
+        }
+    }
+    
+    // Periodic refresh to update appointment statuses
+    let refreshInterval;
+    function startPeriodicRefresh() {
+        // Refresh every 2 minutes to check for time-based status updates
+        refreshInterval = setInterval(() => {
+            console.log('Performing periodic refresh of appointments...');
+            renderAppointmentTabs(); // Re-render to apply time-based updates
+        }, 120000); // 2 minutes
+    }
+    
+    function stopPeriodicRefresh() {
+        if (refreshInterval) {
+            clearInterval(refreshInterval);
+            refreshInterval = null;
+        }
+    }
+
+    // Initialize pagination variables (moved to top to avoid reference errors)
+    let confirmedPage = 1;
+    let upcomingPage = 1;
+    let pastPage = 1;
+    let currentUpcomingPage = 1;
+    let currentCompletedPage = 1;
+    let currentPastPage = 1;
+
     // Functions
     async function initializePage() {
         updateDateDisplay();
         await fetchAndRenderSchedule();
         await fetchLeaveData();
+        startPeriodicRefresh(); // Start automatic refresh
     }
 
     async function fetchAndRenderSchedule() {
@@ -299,80 +402,115 @@ document.addEventListener('DOMContentLoaded', async () => {
         scheduleGridEl.innerHTML = '';
         
         if (currentView === 'daily') {
-            // Render daily view with improved styling
-            gridData.forEach(slot => {
+            // Render daily view with modern styling
+            gridData.forEach((slot, index) => {
+                // Check if this time slot is in the past
+                const isPast = isTimeSlotPast(slot.time, slot.date);
+                
+                // Normalize status to lowercase for CSS classes
+                let normalizedStatus = slot.status.toLowerCase();
+                
+                // Override status to 'past' if the time has passed and it's available or booked
+                if (isPast && ['available', 'booked'].includes(normalizedStatus)) {
+                    normalizedStatus = 'past';
+                }
+                
                 const slotEl = document.createElement('div');
-                slotEl.className = `time-slot schedule-card ${slot.status}`;
+                slotEl.className = `time-slot ${normalizedStatus}`;
+                slotEl.style.animationDelay = `${index * 0.1}s`;
+                
+                // Determine display status
+                let displayStatus = slot.status;
+                if (normalizedStatus === 'available') {
+                    displayStatus = 'Free';
+                } else if (normalizedStatus === 'booked') {
+                    displayStatus = 'Booked';
+                } else if (normalizedStatus === 'completed') {
+                    displayStatus = 'Completed';
+                } else if (normalizedStatus === 'blocked') {
+                    displayStatus = 'Blocked';
+                } else if (normalizedStatus === 'past') {
+                    displayStatus = 'Past';
+                }
                 
                 let slotContent = `
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <span class="time-slot-time fw-bold fs-5">${slot.time}</span>
-                        <span class="badge ${getStatusBadgeClass(slot.status)}">${slot.status}</span>
-                    </div>
-                `;
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <span class="time-slot-time">${slot.time}</span>
+                        <span class="time-slot-status ${normalizedStatus}">${displayStatus}</span>
+                    </div>`;
                 
-                if (slot.status === 'booked') {
+                if (normalizedStatus === 'booked') {
                     slotContent += `
-                        <div class="time-slot-patient mb-2">
-                            <strong>${slot.patientName}</strong>
-                            <br><small class="text-muted">${slot.reason || 'No reason specified'}</small>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-outline-primary view-appointment" data-id="${slot.id}">
-                                <i class="bi bi-eye me-1"></i>View
-                            </button>
-                            <button class="btn btn-sm btn-outline-success start-appointment" data-id="${slot.id}">
-                                <i class="bi bi-play-circle me-1"></i>Start
-                            </button>
+                        <div class="time-slot-patient">
+                            <div class="patient-name">${slot.patientName}</div>
+                            <div class="patient-reason">${slot.reason || 'No reason specified'}</div>
                         </div>
                     `;
-                } else if (slot.status === 'available') {
+                } else if (normalizedStatus === 'available') {
                     slotContent += `
-                        <div class="time-slot-patient mb-2">
-                            <small class="text-muted">Available for booking</small>
+                        <div class="time-slot-patient">
+                            <div class="patient-reason">Available for booking</div>
                         </div>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-outline-warning block-slot" data-time="${slot.time}">
+                        <div class="slot-actions">
+                            <button class="slot-btn warning block-slot" data-time="${slot.time}">
                                 <i class="bi bi-slash-circle me-1"></i>Block
                             </button>
-                            <button class="btn btn-sm btn-outline-success add-slot" data-time="${slot.time}">
-                                <i class="bi bi-plus-circle me-1"></i>Add Slot
-                            </button>
                         </div>
                     `;
-                } else if (slot.status === 'blocked') {
+                } else if (normalizedStatus === 'blocked') {
                     slotContent += `
-                        <div class="time-slot-patient mb-2">
-                            <small class="text-muted">${slot.reason || 'Blocked'}</small>
+                        <div class="time-slot-patient">
+                            <div class="patient-reason">${slot.reason || 'Blocked'}</div>
                         </div>
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-outline-danger unblock-slot" data-id="${slot.id}">
+                        <div class="slot-actions">
+                            <button class="slot-btn danger unblock-slot" data-id="${slot.id}">
                                 <i class="bi bi-unlock me-1"></i>Unblock
                             </button>
                         </div>
                     `;
-                } else if (slot.status === 'past') {
+                } else if (normalizedStatus === 'completed') {
                     slotContent += `
-                        <div class="time-slot-patient mb-2">
-                            <small class="text-muted">${slot.patientName || 'Past appointment'}</small>
+                        <div class="time-slot-patient">
+                            <div class="patient-name">${slot.patientName}</div>
+                            <div class="patient-reason">${slot.reason || 'Appointment completed'}</div>
+                        </div>
+                    `;
+                } else if (normalizedStatus === 'past') {
+                    slotContent += `
+                        <div class="time-slot-patient">
+                            <div class="patient-reason">${slot.patientName || 'Past time slot'}</div>
                         </div>
                     `;
                 }
                 
                 slotEl.innerHTML = slotContent;
                 scheduleGridEl.appendChild(slotEl);
-                
-                // Add event listeners to buttons
-                if (slot.status === 'booked') {
-                    slotEl.querySelector('.view-appointment')?.addEventListener('click', () => viewAppointment(slot.id));
-                    slotEl.querySelector('.start-appointment')?.addEventListener('click', () => startAppointment(slot.id));
-                } else if (slot.status === 'available') {
-                    slotEl.querySelector('.block-slot')?.addEventListener('click', () => openBlockModal(slot.time));
-                    slotEl.querySelector('.add-slot')?.addEventListener('click', () => openAddSlotModal(slot.time));
-                } else if (slot.status === 'blocked') {
-                    slotEl.querySelector('.unblock-slot')?.addEventListener('click', () => unblockSlot(slot.id));
-                }
             });
+            
+            // Add event listeners for add appointment buttons
+            document.querySelectorAll('.add-appointment').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const time = e.target.closest('.add-appointment').getAttribute('data-time');
+                    openAddAppointmentModal(time, 0);
+                });
+            });
+            
+            // Add event listeners for block slot buttons
+            document.querySelectorAll('.block-slot').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const time = e.target.closest('.block-slot').getAttribute('data-time');
+                    openBlockModal(time);
+                });
+            });
+            
+            // Add event listeners for unblock slot buttons
+            document.querySelectorAll('.unblock-slot').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const slotId = e.target.closest('.unblock-slot').getAttribute('data-id');
+                    unblockTimeSlot(slotId);
+                });
+            });
+            
         } else if (currentView === 'weekly') {
             renderWeeklyView(gridData);
         } else if (currentView === 'monthly') {
@@ -381,93 +519,88 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function renderWeeklyView(gridData) {
-        const weeklyContainer = document.createElement('div');
-        weeklyContainer.className = 'weekly-grid';
+        scheduleGridEl.innerHTML = '';
         
-        // Create header row with days
-        const headerRow = document.createElement('div');
-        headerRow.className = 'weekly-row header';
-        
-        // Add time column header
+        // Create time header
         const timeHeader = document.createElement('div');
-        timeHeader.className = 'weekly-cell time-header';
+        timeHeader.className = 'weekly-time-header';
         timeHeader.textContent = 'Time';
-        headerRow.appendChild(timeHeader);
+        scheduleGridEl.appendChild(timeHeader);
         
-        // Add day column headers
-        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-        days.forEach(day => {
-            const dayHeader = document.createElement('div');
-            dayHeader.className = 'weekly-cell day-header';
-            dayHeader.textContent = day;
-            headerRow.appendChild(dayHeader);
-        });
-        
-        weeklyContainer.appendChild(headerRow);
-        
-        // Create time rows
-        const timeSlots = ['9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00'];
-        timeSlots.forEach(time => {
-            const timeRow = document.createElement('div');
-            timeRow.className = 'weekly-row';
-            
-            // Add time cell
-            const timeCell = document.createElement('div');
-            timeCell.className = 'weekly-cell time-cell';
-            timeCell.textContent = time;
-            timeRow.appendChild(timeCell);
-            
-            // Add day cells
-            days.forEach(day => {
-                const dayCell = document.createElement('div');
-                dayCell.className = 'weekly-cell day-cell';
-                
-                // Find slot for this day and time if it exists
-                const slot = gridData.find(s => s.day === day && s.time === time);
-                if (slot) {
-                    dayCell.classList.add(slot.status);
-                    if (slot.status === 'booked') {
-                        dayCell.innerHTML = `<small>${slot.patientName}</small>`;
-                        dayCell.addEventListener('click', () => viewAppointment(slot.id));
-                    } else if (slot.status === 'blocked') {
-                        dayCell.innerHTML = `<small>${slot.reason || 'Blocked'}</small>`;
-                    }
-                } else {
-                    dayCell.classList.add('no-slot');
-                    // Add add-slot button for available slots
-                    const addBtn = document.createElement('button');
-                    addBtn.className = 'add-slot-btn';
-                    addBtn.innerHTML = '<i class="bi bi-plus"></i>';
-                    addBtn.addEventListener('click', () => openAddSlotModal(time, day));
-                    dayCell.appendChild(addBtn);
-                }
-                
-                timeRow.appendChild(dayCell);
-            });
-            
-            weeklyContainer.appendChild(timeRow);
-        });
-        
-        scheduleGridEl.appendChild(weeklyContainer);
-    }
-
-    function renderMonthlyView(gridData) {
-        const monthlyContainer = document.createElement('div');
-        monthlyContainer.className = 'monthly-grid';
-        
-        // Create header row with days of week
-        const headerRow = document.createElement('div');
-        headerRow.className = 'monthly-row header';
-        
+        // Create day headers
         const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         daysOfWeek.forEach(day => {
             const dayHeader = document.createElement('div');
-            dayHeader.className = 'monthly-cell day-header';
+            dayHeader.className = 'weekly-day-header';
             dayHeader.textContent = day;
-            headerRow.appendChild(dayHeader);
+            scheduleGridEl.appendChild(dayHeader);
         });
         
-        monthlyContainer.appendChild(headerRow);
+        // Create time slots
+        const timeSlots = ['9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'];
+        
+        timeSlots.forEach(time => {
+            // Time label
+            const timeLabel = document.createElement('div');
+            timeLabel.className = 'weekly-time-header';
+            timeLabel.textContent = time;
+            scheduleGridEl.appendChild(timeLabel);
+            
+            // Day slots
+            daysOfWeek.forEach((day, dayIndex) => {
+                const daySlot = document.createElement('div');
+                daySlot.className = 'weekly-time-slot available';
+                
+                // Find appointments for this day/time
+                const dayAppointments = gridData.filter(slot => 
+                    slot.time === time && slot.dayOfWeek === dayIndex && slot.status !== 'Available'
+                );
+                
+                if (dayAppointments.length > 0) {
+                    // Count appointments by status
+                    const statusCounts = {
+                        confirmed: dayAppointments.filter(apt => apt.status.toLowerCase() === 'confirmed').length,
+                        pending: dayAppointments.filter(apt => apt.status.toLowerCase() === 'pending').length,
+                        booked: dayAppointments.filter(apt => apt.status.toLowerCase() === 'booked').length,
+                        cancelled: dayAppointments.filter(apt => apt.status.toLowerCase() === 'cancelled').length,
+                        completed: dayAppointments.filter(apt => apt.status.toLowerCase() === 'completed').length
+                    };
+                    
+                    // Use the primary appointment status for styling
+                    const primaryAppointment = dayAppointments[0];
+                    const normalizedStatus = primaryAppointment.status.toLowerCase();
+                    daySlot.className = `weekly-time-slot ${normalizedStatus}`;
+                    
+                    // Create simple count display
+                    let statusDisplay = '';
+                    if (statusCounts.booked > 0) statusDisplay += `${statusCounts.booked} Booked `;
+                    if (statusCounts.cancelled > 0) statusDisplay += `${statusCounts.cancelled} Cancelled `;
+                    if (statusCounts.confirmed > 0) statusDisplay += `${statusCounts.confirmed} Confirmed `;
+                    if (statusCounts.pending > 0) statusDisplay += `${statusCounts.pending} Pending `;
+                    if (statusCounts.completed > 0) statusDisplay += `${statusCounts.completed} Completed `;
+                    
+                    daySlot.innerHTML = `<small>${statusDisplay.trim()}</small>`;
+                } else {
+                    daySlot.innerHTML = '<small>Available</small>';
+                    // Removed add appointment functionality from weekly view
+                }
+                
+                scheduleGridEl.appendChild(daySlot);
+            });
+        });
+    }
+
+    function renderMonthlyView(gridData) {
+        scheduleGridEl.innerHTML = '';
+        
+        // Create day headers
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        daysOfWeek.forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'monthly-day-header';
+            dayHeader.textContent = day;
+            scheduleGridEl.appendChild(dayHeader);
+        });
         
         // Get first day of month and total days in month
         const year = currentScheduleDate.getFullYear();
@@ -475,9 +608,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         
-        // Create calendar grid
-        let dayCount = 1;
-        for (let i = 0; i < 6; i++) { // 6 rows max in a month view
+        // Add empty cells for days before month starts
+        for (let i = 0; i < firstDay; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'monthly-day-cell other-month';
+            scheduleGridEl.appendChild(emptyCell);
+        }
+        
+        // Create calendar days
+        for (let day = 1; day <= daysInMonth; day++) {
             const weekRow = document.createElement('div');
             weekRow.className = 'monthly-row';
             
@@ -496,51 +635,321 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const dayString = dayDate.toISOString().split('T')[0];
                     
                     // Find appointments for this day
-                    const dayAppointments = gridData.filter(s => s.date === dayString && s.status === 'booked');
-                    const dayBlocked = gridData.filter(s => s.date === dayString && s.status === 'blocked');
+                    const dayAppointments = gridData.filter(slot => 
+                        slot.date === dayString
+                    );
                     
                     if (dayAppointments.length > 0) {
                         dayCell.classList.add('has-appointments');
-                        const appointmentCount = document.createElement('div');
-                        appointmentCount.className = 'appointment-count';
-                        appointmentCount.textContent = dayAppointments.length;
-                        dayCell.appendChild(appointmentCount);
+                        dayCell.innerHTML = `
+                            <div class="day-number">${dayCount}</div>
+                            <div class="appointment-count">${dayAppointments.length} apt${dayAppointments.length > 1 ? 's' : ''}</div>
+                        `;
+                        dayCell.addEventListener('click', () => {
+                            // Navigate to daily view for this date
+                            currentScheduleDate = dayDate;
+                            currentView = 'daily';
+                            document.getElementById('view-daily').classList.add('active');
+                            document.getElementById('view-weekly').classList.remove('active');
+                            document.getElementById('view-monthly').classList.remove('active');
+                            scheduleGridEl.className = 'daily-schedule-grid';
+                            updateDateDisplay();
+                            fetchAndRenderSchedule();
+                        });
+                    } else {
+                        dayCell.innerHTML = `<div class="day-number">${dayCount}</div>`;
                     }
-                    
-                    if (dayBlocked.length > 0) {
-                        dayCell.classList.add('has-blocked');
-                    }
-                    
-                    // Highlight current day
-                    const today = new Date();
-                    if (dayDate.getDate() === today.getDate() && 
-                        dayDate.getMonth() === today.getMonth() && 
-                        dayDate.getFullYear() === today.getFullYear()) {
-                        dayCell.classList.add('today');
-                    }
-                    
-                    // Add click event to view day
-                    dayCell.addEventListener('click', () => {
-                        currentScheduleDate = new Date(year, month, dayCount);
-                        currentView = 'daily';
-                        document.getElementById('view-daily').checked = true;
-                        updateDateDisplay();
-                        fetchAndRenderSchedule();
-                    });
                     
                     dayCount++;
                 }
                 
-                weekRow.appendChild(dayCell);
+                monthGrid.appendChild(dayCell);
             }
-            
-            monthlyContainer.appendChild(weekRow);
-            
-            // Break if we've displayed all days
-            if (dayCount > daysInMonth) break;
         }
         
-        scheduleGridEl.appendChild(monthlyContainer);
+        scheduleGridEl.appendChild(monthGrid);
+    }
+
+    function renderWeeklyView(gridData) {
+        scheduleGridEl.innerHTML = '';
+        
+        // Create time header
+        const timeHeader = document.createElement('div');
+        timeHeader.className = 'weekly-time-header';
+        timeHeader.textContent = 'Time';
+        scheduleGridEl.appendChild(timeHeader);
+        
+        // Create day headers
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        daysOfWeek.forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'weekly-day-header';
+            dayHeader.textContent = day;
+            scheduleGridEl.appendChild(dayHeader);
+        });
+        
+        // Create time slots
+        const timeSlots = ['9:00 AM', '10:00 AM', '11:00 AM', '12:00 PM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'];
+        
+        timeSlots.forEach(time => {
+            // Time label
+            const timeLabel = document.createElement('div');
+            timeLabel.className = 'weekly-time-header';
+            timeLabel.textContent = time;
+            scheduleGridEl.appendChild(timeLabel);
+            
+            // Day slots
+            daysOfWeek.forEach((day, dayIndex) => {
+                const daySlot = document.createElement('div');
+                daySlot.className = 'weekly-time-slot available';
+                
+                // Find appointments for this day/time
+                const dayAppointments = gridData.filter(slot => 
+                    slot.time === time && slot.dayOfWeek === dayIndex && slot.status !== 'Available'
+                );
+                
+                if (dayAppointments.length > 0) {
+                    // Count appointments by status
+                    const statusCounts = {
+                        confirmed: dayAppointments.filter(apt => apt.status.toLowerCase() === 'confirmed').length,
+                        pending: dayAppointments.filter(apt => apt.status.toLowerCase() === 'pending').length,
+                        booked: dayAppointments.filter(apt => apt.status.toLowerCase() === 'booked').length,
+                        cancelled: dayAppointments.filter(apt => apt.status.toLowerCase() === 'cancelled').length,
+                        completed: dayAppointments.filter(apt => apt.status.toLowerCase() === 'completed').length
+                    };
+                    
+                    // Use the primary appointment status for styling
+                    const primaryAppointment = dayAppointments[0];
+                    const normalizedStatus = primaryAppointment.status.toLowerCase();
+                    daySlot.className = `weekly-time-slot ${normalizedStatus}`;
+                    
+                    // Create simple count display
+                    let statusDisplay = '';
+                    if (statusCounts.booked > 0) statusDisplay += `${statusCounts.booked} Booked `;
+                    if (statusCounts.cancelled > 0) statusDisplay += `${statusCounts.cancelled} Cancelled `;
+                    if (statusCounts.confirmed > 0) statusDisplay += `${statusCounts.confirmed} Confirmed `;
+                    if (statusCounts.pending > 0) statusDisplay += `${statusCounts.pending} Pending `;
+                    if (statusCounts.completed > 0) statusDisplay += `${statusCounts.completed} Completed `;
+                    
+                    daySlot.innerHTML = `<small>${statusDisplay.trim()}</small>`;
+                } else {
+                    daySlot.innerHTML = '<small>Available</small>';
+                    daySlot.addEventListener('click', () => openAddAppointmentModal(time, dayIndex));
+                }
+                
+                scheduleGridEl.appendChild(daySlot);
+            });
+        });
+    }
+    
+    function renderMonthlyView(gridData) {
+        scheduleGridEl.innerHTML = '';
+        
+        // Create day headers
+        const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        daysOfWeek.forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'monthly-day-header';
+            dayHeader.textContent = day;
+            scheduleGridEl.appendChild(dayHeader);
+        });
+        
+        // Get first day of month and total days in month
+        const year = currentScheduleDate.getFullYear();
+        const month = currentScheduleDate.getMonth();
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        // Add empty cells for days before month starts
+        for (let i = 0; i < firstDay; i++) {
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'monthly-day-cell empty';
+            scheduleGridEl.appendChild(emptyCell);
+        }
+        
+        // Create calendar days
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dayCell = document.createElement('div');
+            dayCell.className = 'monthly-day-cell';
+            
+            // Check if this day has appointments
+            const dayDate = new Date(year, month, day);
+            const dayString = dayDate.toISOString().split('T')[0];
+            
+            // Find appointments for this day and count by status
+            const dayAppointments = gridData.filter(slot => 
+                slot.date === dayString && slot.status !== 'Available'
+            );
+            
+            // Check if this day is in the past
+            const currentTime = new Date();
+            const isPastDay = dayDate < currentTime.setHours(0, 0, 0, 0);
+            
+            // Filter appointments - exclude completed ones from display if day is past
+            let filteredAppointments = dayAppointments;
+            if (isPastDay) {
+                // For past days, don't show completed appointments in the count
+                filteredAppointments = dayAppointments.filter(apt => 
+                    apt.status.toLowerCase() !== 'completed'
+                );
+            }
+            
+            // Count appointments by status (excluding completed for past days)
+            const statusCounts = {
+                confirmed: filteredAppointments.filter(apt => apt.status.toLowerCase() === 'confirmed').length,
+                pending: filteredAppointments.filter(apt => apt.status.toLowerCase() === 'pending').length,
+                booked: filteredAppointments.filter(apt => apt.status.toLowerCase() === 'booked').length,
+                cancelled: filteredAppointments.filter(apt => apt.status.toLowerCase() === 'cancelled').length,
+                blocked: isPastDay ? dayAppointments.filter(apt => apt.status.toLowerCase() === 'completed').length : 0
+            };
+            
+            const totalAppointments = Object.values(statusCounts).reduce((sum, count) => sum + count, 0);
+            
+            if (totalAppointments > 0) {
+                // Add appropriate class based on day status
+                if (isPastDay && statusCounts.blocked > 0) {
+                    dayCell.classList.add('has-blocked');
+                } else {
+                    dayCell.classList.add('has-appointments');
+                }
+                
+                // Create simple count display for monthly view
+                let statusDisplay = '';
+                if (statusCounts.booked > 0) statusDisplay += `${statusCounts.booked} Booked<br>`;
+                if (statusCounts.cancelled > 0) statusDisplay += `${statusCounts.cancelled} Cancelled<br>`;
+                if (statusCounts.confirmed > 0) statusDisplay += `${statusCounts.confirmed} Confirmed<br>`;
+                if (statusCounts.pending > 0) statusDisplay += `${statusCounts.pending} Pending<br>`;
+                if (statusCounts.blocked > 0) statusDisplay += `${statusCounts.blocked} Blocked<br>`;
+                
+                dayCell.innerHTML = `
+                    <div class="day-number">${day}</div>
+                    <div class="appointment-count-text">${statusDisplay}</div>
+                `;
+                dayCell.addEventListener('click', () => {
+                    // Navigate to daily view for this date
+                    currentScheduleDate = dayDate;
+                    currentView = 'daily';
+                    document.getElementById('view-daily').classList.add('active');
+                    document.getElementById('view-weekly').classList.remove('active');
+                    document.getElementById('view-monthly').classList.remove('active');
+                    scheduleGridEl.className = 'daily-schedule-grid';
+                    updateDateDisplay();
+                    fetchAndRenderSchedule();
+                });
+            } else {
+                dayCell.innerHTML = `<div class="day-number">${day}</div>`;
+            }
+            
+            scheduleGridEl.appendChild(dayCell);
+        }
+    }
+    
+    // Function to open add appointment modal
+    function openAddAppointmentModal(time, dayIndex) {
+        // Create a simple modal for adding appointments
+        const modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.innerHTML = `
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Add Appointment</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="add-appointment-form">
+                            <div class="mb-3">
+                                <label class="form-label">Time</label>
+                                <input type="text" class="form-control" value="${time}" readonly>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Patient Name</label>
+                                <input type="text" class="form-control" id="patient-name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Reason</label>
+                                <textarea class="form-control" id="appointment-reason" rows="3"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary" onclick="saveNewAppointment('${time}', ${dayIndex})">Save Appointment</button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        const bootstrapModal = new bootstrap.Modal(modal);
+        bootstrapModal.show();
+        
+        // Remove modal from DOM when closed
+        modal.addEventListener('hidden.bs.modal', () => {
+            modal.remove();
+        });
+    }
+    
+    // Function to save new appointment
+    window.saveNewAppointment = async function(time, dayIndex) {
+        const patientNameEl = document.getElementById('patient-name');
+        const reasonEl = document.getElementById('appointment-reason');
+        
+        if (!patientNameEl || !reasonEl) {
+            alert('Form elements not found');
+            return;
+        }
+        
+        const patientName = patientNameEl.value;
+        const reason = reasonEl.value;
+        
+        if (!patientName || !patientName.trim()) {
+            alert('Please enter patient name');
+            return;
+        }
+        
+        try {
+            // Calculate the date based on current view and dayIndex
+            let appointmentDate = new Date(currentScheduleDate);
+            if (currentView === 'weekly') {
+                // Adjust date based on day of week
+                const currentDay = appointmentDate.getDay();
+                const targetDay = dayIndex;
+                const dayDiff = targetDay - currentDay;
+                appointmentDate.setDate(appointmentDate.getDate() + dayDiff);
+            }
+            
+            const appointmentData = {
+                date: appointmentDate.toISOString().split('T')[0],
+                time: time,
+                patientName: patientName,
+                reason: reason,
+                status: 'booked'
+            };
+            
+            const response = await fetch('/api/doctor/appointments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(appointmentData)
+            });
+            
+            if (response.ok) {
+                alert('Appointment created successfully!');
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.querySelector('.modal'));
+                modal.hide();
+                // Refresh schedule
+                fetchAndRenderSchedule();
+            } else {
+                throw new Error('Failed to create appointment');
+            }
+        } catch (error) {
+            console.error('Error creating appointment:', error);
+            alert('Failed to create appointment. Please try again.');
+        }
     }
 
     function renderLeaveManagement() {
@@ -626,16 +1035,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    let confirmedPage = 1;
-    let upcomingPage = 1;
-    let pastPage = 1;
+    const appointmentsPerPage = 10;
     const pageSize = 10;
 
-    function renderAppointmentTabs() {
-        if (!scheduleData) return;
+    // Helper function to get status badge HTML
+    function getStatusBadge(status) {
+        const statusClasses = {
+            'Confirmed': 'bg-primary',
+            'Pending': 'bg-warning text-dark',
+            'In Progress': 'bg-info',
+            'Completed': 'bg-success',
+            'Cancelled': 'bg-danger'
+        };
         
+        const badgeClass = statusClasses[status] || 'bg-secondary';
+        return `<span class="badge ${badgeClass}">${status}</span>`;
+    }
+
+    function renderAppointmentTabs() {
+        console.log('=== DEBUG: renderAppointmentTabs called ===');
+        console.log('scheduleData:', scheduleData);
+        
+        if (!scheduleData) {
+            console.log('No scheduleData available');
+            return;
+        }
+        
+        console.log('Rendering appointment tabs...');
         renderConfirmedAppointments();
         renderUpcomingAppointments();
+        renderCompletedAppointments();
         renderPastAppointments();
         
         // Update current date display
@@ -657,10 +1086,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Use appointments from API response
         const appointmentsSource = scheduleData.todayAppointments || [];
+        console.log('DEBUG: appointmentsSource for confirmed:', appointmentsSource);
         
         // Filter for visible (non-cancelled/non-completed) appointments for the selected date
         const confirmedAppointments = appointmentsSource.filter(a => {
-            const matchesQ = !q || a.patientName.toLowerCase().includes(q) || (a.reason || '').toLowerCase().includes(q);
+            const patientName = a.patientName || a.patient_name || a.first_name + ' ' + a.last_name || 'Unknown Patient';
+            const matchesQ = !q || patientName.toLowerCase().includes(q) || (a.reason || '').toLowerCase().includes(q);
             const statusNorm = (a.status || '').toLowerCase();
             const isVisible = !['cancelled', 'completed'].includes(statusNorm);
             return matchesQ && isVisible;
@@ -681,10 +1112,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const tr = document.createElement('tr');
                 tr.dataset.id = a.id;
                 
-                            // Add action buttons based on appointment status
-            let actionButtons = '';
-            const status = a.status || 'Unknown';
-            if (status === 'Confirmed') {
+                // Add action buttons based on appointment status
+                let actionButtons = '';
+                const status = a.status || 'Unknown';
+                if (status === 'Confirmed') {
                     actionButtons = `
                         <button class="btn btn-sm btn-outline-primary me-1 appt-start">
                             <i class="bi bi-play-circle"></i> Start
@@ -713,19 +1144,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 year: 'numeric'
             }) : '-';
             
+            const patientName = a.patientName || a.patient_name || (a.first_name && a.last_name ? `${a.first_name} ${a.last_name}` : 'Unknown Patient');
+            
             tr.innerHTML = `
                 <td>${formattedDate}</td>
-                    <td>${a.time || '-'}</td>
-                    <td>${a.patientName || 'Unknown Patient'}</td>
-                    <td>${a.reason || 'No reason specified'}</td>
-                    <td><span class="badge ${getStatusBadgeClass(a.status || 'Unknown')}">${a.status || 'Unknown'}</span></td>
-                    <td>${actionButtons}</td>
-                `;
+                <td>${a.time || '-'}</td>
+                <td>${patientName}</td>
+                <td>${a.reason || 'No reason specified'}</td>
+                <td><span class="badge ${getStatusBadgeClass(a.status || 'Unknown')}">${a.status || 'Unknown'}</span></td>
+                <td>${actionButtons}</td>
+            `;
                 
                             // Add event listeners for action buttons
             const apptId = a.appointment_id || a.id;
                 tr.querySelector('.appt-start')?.addEventListener('click', () => {
-                    startAppointment(apptId);
+                    window.startAppointmentModal(apptId);
                 });
                 tr.querySelector('.appt-complete')?.addEventListener('click', () => {
                     completeAppointment(apptId);
@@ -741,6 +1174,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Update pagination info
         if (countEl) countEl.textContent = `Showing ${Math.min(start + 1, total)} to ${Math.min(start + pageSize, total)} of ${total} confirmed appointments`;
         if (pageEl) pageEl.textContent = `Page ${confirmedPage}`;
+        
+        // Update tab count badge
+        const confirmedTabCount = document.getElementById('confirmed-tab-count');
+        if (confirmedTabCount) confirmedTabCount.textContent = total;
         
         // Update pagination buttons
         if (document.getElementById('confirmed-prev')) {
@@ -760,11 +1197,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         const countEl = document.getElementById('upcoming-count');
         
         const q = (searchEl?.value || '').toLowerCase();
+        const currentTime = new Date();
         
-        // Use upcoming appointments from API response
-        const upcomingAppointments = (scheduleData.upcomingAppointments || []).filter(a => {
+        // Process upcoming appointments and check for time-based status updates
+        let upcomingAppointments = (scheduleData.upcomingAppointments || []).map(a => {
+            const appointmentDateTime = parseAppointmentDate(a.date || a.appointment_date);
+            
+            // Check if appointment time has passed
+            if (appointmentDateTime && !isNaN(appointmentDateTime.getTime()) && currentTime > appointmentDateTime) {
+                // Only mark as past if status is not already completed or cancelled
+                if (!['Completed', 'Cancelled', 'In Progress'].includes(a.status)) {
+                    // Mark as past due to time expiration
+                    a.status = 'Past';
+                    a.isPastDue = true; // Flag to indicate this is past due to time
+                    
+                    // Optionally call API to update status in backend
+                    updateAppointmentStatusInBackground(a.appointment_id || a.id, 'Past');
+                }
+            }
+            
+            return a;
+        });
+        
+        // Filter out completed and past appointments (they should go to past appointments)
+        upcomingAppointments = upcomingAppointments.filter(a => {
             const matchesQ = !q || a.patientName.toLowerCase().includes(q) || (a.reason || '').toLowerCase().includes(q);
-            return matchesQ;
+            const isNotCompleted = !['Completed', 'Cancelled', 'Past'].includes(a.status);
+            return matchesQ && isNotCompleted;
         });
         
         const total = upcomingAppointments.length;
@@ -796,12 +1255,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                     hour12: true
                 }) : (a.time || '-');
                 
+                // Add visual indicator for appointments that are overdue
+                let rowClass = '';
+                let statusDisplay = a.status;
+                if (isValid && currentTime > appointmentDate && !['Completed', 'Cancelled', 'Past', 'In Progress'].includes(a.status)) {
+                    rowClass = 'table-warning';
+                    statusDisplay = 'Overdue';
+                } else if (a.isPastDue) {
+                    rowClass = 'table-secondary';
+                    statusDisplay = 'Past';
+                }
+                
+                tr.className = rowClass;
                 tr.innerHTML = `
                     <td>${formattedDate}</td>
                     <td>${formattedTime}</td>
                     <td>${a.patientName}</td>
                     <td>${a.reason || 'No reason specified'}</td>
-                    <td><span class="badge ${getStatusBadgeClass(a.status)}">${a.status}</span></td>
+                    <td><span class="badge ${getStatusBadgeClass(statusDisplay)}">${statusDisplay}</span></td>
                 `;
                 
                 upcomingTbody.appendChild(tr);
@@ -811,6 +1282,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Update pagination info
         if (countEl) countEl.textContent = `Showing ${Math.min(start + 1, total)} to ${Math.min(start + pageSize, total)} of ${total} upcoming appointments`;
         if (pageEl) pageEl.textContent = `Page ${upcomingPage}`;
+        
+        // Update tab count badge
+        const upcomingTabCount = document.getElementById('upcoming-tab-count');
+        if (upcomingTabCount) upcomingTabCount.textContent = total;
         
         // Update pagination buttons
         if (document.getElementById('upcoming-prev')) {
@@ -845,17 +1320,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         const countEl = document.getElementById('past-count');
         
         const q = (searchEl?.value || '').toLowerCase();
+        const currentTime = new Date();
         
-        // Get all appointments and filter for past ones (completed or cancelled)
+        // Get all appointments and filter for past ones (completed, cancelled, or auto-completed)
         const basePast = scheduleData.pastAppointments || [];
-        const pastAppointments = basePast.filter(a => {
+        
+        // Also include past appointments from upcoming that have passed their time
+        const pastFromUpcoming = (scheduleData.upcomingAppointments || []).filter(a => {
+            const appointmentDateTime = parseAppointmentDate(a.date || a.appointment_date);
+            return appointmentDateTime && !isNaN(appointmentDateTime.getTime()) && 
+                   (currentTime > appointmentDateTime || ['Completed', 'Cancelled', 'Past'].includes(a.status));
+        });
+        
+        // Combine past appointments with past ones from upcoming
+        const allPastAppointments = [...basePast, ...pastFromUpcoming];
+        
+        const pastAppointments = allPastAppointments.filter(a => {
             const matchesQ = !q || a.patientName.toLowerCase().includes(q) || (a.reason || '').toLowerCase().includes(q);
             return matchesQ;
         });
         
-        const total = pastAppointments.length;
+        // Remove duplicates based on appointment ID
+        const uniquePastAppointments = pastAppointments.filter((appointment, index, self) => 
+            index === self.findIndex(a => (a.appointment_id || a.id) === (appointment.appointment_id || appointment.id))
+        );
+        
+        const total = uniquePastAppointments.length;
         const start = (pastPage - 1) * pageSize;
-        const pageItems = pastAppointments.slice(start, start + pageSize);
+        const pageItems = uniquePastAppointments.slice(start, start + pageSize);
         
         pastTbody.innerHTML = '';
         
@@ -882,12 +1374,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                     hour12: true
                 }) : (a.time || '-');
                 
+                // Show appropriate past status
+                let displayStatus = a.status;
+                if (a.status === 'Completed') {
+                    displayStatus = 'Past+Completed';
+                } else if (a.isPastDue) {
+                    displayStatus = 'Past';
+                } else if (a.autoCompleted) {
+                    displayStatus = 'Auto-Completed';
+                }
+                
                 tr.innerHTML = `
                     <td>${formattedDate}</td>
                     <td>${formattedTime}</td>
                     <td>${a.patientName}</td>
                     <td>${a.reason || 'No reason specified'}</td>
-                    <td><span class="badge ${getStatusBadgeClass(a.status)}">${a.status}</span></td>
+                    <td><span class="badge ${getStatusBadgeClass(displayStatus)}">${displayStatus}</span></td>
                 `;
                 
                 pastTbody.appendChild(tr);
@@ -897,6 +1399,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Update pagination info
         if (countEl) countEl.textContent = `Showing ${Math.min(start + 1, total)} to ${Math.min(start + pageSize, total)} of ${total} past appointments`;
         if (pageEl) pageEl.textContent = `Page ${pastPage}`;
+        
+        // Update tab count badge
+        const pastTabCount = document.getElementById('past-tab-count');
+        if (pastTabCount) pastTabCount.textContent = total;
         
         // Update pagination buttons
         if (document.getElementById('past-prev')) {
@@ -915,7 +1421,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             case 'confirmed': return 'bg-info text-dark';
             case 'in progress': return 'bg-primary';
             case 'completed': return 'bg-success';
+            case 'auto-completed': return 'bg-success';
+            case 'past+completed': return 'bg-success';
             case 'cancelled': return 'bg-secondary';
+            case 'overdue': return 'bg-danger';
+            case 'past': return 'bg-secondary text-white';
             default: return 'bg-light text-dark';
         }
     }
@@ -959,10 +1469,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else if (direction === 'today') {
             currentScheduleDate = new Date();
         }
-        // Initial load
-        console.log('Initializing schedule management...');
+        
         updateDateDisplay();
         fetchAndRenderSchedule();
+        
+        // Clean up interval when page is unloaded
+        window.addEventListener('beforeunload', stopPeriodicRefresh);
     }
 
     async function updateAvailability() {
@@ -976,7 +1488,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ isAvailable })
+                body: JSON.stringify({ is_available: isAvailable })
             });
             
             if (!response.ok) {
@@ -1302,7 +1814,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    async function unblockSlot(blockId) {
+    async function unblockTimeSlot(blockId) {
         try {
             const response = await fetch(`/api/doctor/block-time/${blockId}`, {
                 method: 'DELETE',
@@ -1349,13 +1861,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const slotRows = slotsContainer.querySelectorAll('.time-slot-row');
                     
                     slotRows.forEach(row => {
-                        const startTime = row.querySelector('input[type="time"]:nth-child(1)').value;
-                        const endTime = row.querySelector('input[type="time"]:nth-child(2)').value;
-                        
-                        availability[day].slots.push({
-                            startTime,
-                            endTime
-                        });
+                        const timeInputs = row.querySelectorAll('input[type="time"]');
+                        if (timeInputs.length >= 2) {
+                            const startTime = timeInputs[0].value;
+                            const endTime = timeInputs[1].value;
+                            
+                            if (startTime && endTime) {
+                                availability[day].slots.push({
+                                    startTime,
+                                    endTime
+                                });
+                            }
+                        }
                     });
                 }
             });
@@ -1553,112 +2070,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Error adding slot:', error);
             alert('Failed to add slot. Please try again.');
-        }
-    }
-
-    async function viewAppointment(appointmentId) {
-        try {
-            const modalBody = document.getElementById('appointment-modal-body');
-            modalBody.innerHTML = '<div class="text-center"><i class="bi bi-hourglass-split"></i> Loading appointment details...</div>';
-            
-            const response = await fetch(`/api/appointments/${appointmentId}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            
-            const appointment = await response.json();
-            console.log('Appointment details:', appointment);
-            
-            // Format appointment details for display
-            const appointmentDate = new Date(appointment.appointment_date || appointment.date);
-            const formattedDate = appointmentDate.toLocaleDateString(undefined, {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            
-            let notesSection = '';
-            if (appointment.notes) {
-                notesSection = `
-                    <div class="appointment-notes">
-                        <h6 class="text-primary mb-2"><i class="bi bi-chat-text me-2"></i>Patient Notes</h6>
-                        <p class="mb-0">${appointment.notes}</p>
-                    </div>
-                `;
-            }
-            
-            modalBody.innerHTML = `
-                <div class="appointment-details">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-1">Patient</h6>
-                            <p class="mb-0 fw-bold">${appointment.patientName}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-1">Status</h6>
-                            <p class="mb-0"><span class="badge ${getStatusBadgeClass(appointment.status)}">${appointment.status}</span></p>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-1">Date</h6>
-                            <p class="mb-0">${formattedDate}</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h6 class="text-muted mb-1">Time</h6>
-                            <p class="mb-0">${appointment.time}</p>
-                        </div>
-                    </div>
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <h6 class="text-muted mb-1">Reason</h6>
-                            <p class="mb-0">${appointment.reason || 'No reason provided'}</p>
-                        </div>
-                    </div>
-                    ${notesSection}
-                    ${appointment.status === 'Completed' ? '' : `
-                    <div class="row mb-3">
-                        <div class="col-12">
-                            <h6 class="text-muted mb-1">Add/Edit Notes</h6>
-                            <textarea class="form-control" id="appointment-notes" rows="3" placeholder="Add your notes here...">${appointment.notes || ''}</textarea>
-                            <button class="btn btn-primary mt-2" id="save-notes-btn">
-                                <i class="bi bi-save me-1"></i>Save Notes
-                            </button>
-                        </div>
-                    </div>
-                    `}
-                </div>
-            `;
-            
-            // Add event listener to save notes button if present
-            const saveNotesBtn = document.getElementById('save-notes-btn');
-            if (saveNotesBtn) {
-                saveNotesBtn.addEventListener('click', () => saveAppointmentNotes(appointmentId));
-            }
-            
-            // Show/hide reschedule button based on appointment status
-            const rescheduleBtn = document.getElementById('appt-reschedule-btn');
-            if (rescheduleBtn) {
-                rescheduleBtn.style.display = ['Completed', 'Cancelled'].includes(appointment.status) ? 'none' : 'block';
-                rescheduleBtn.onclick = () => prepareReschedule(appointmentId);
-            }
-            
-            // Show the modal
-            const appointmentModal = new bootstrap.Modal(document.getElementById('appointmentModal'));
-            appointmentModal.show();
-            
-        } catch (error) {
-            console.error('Error fetching appointment details:', error);
-            document.getElementById('appointment-modal-body').innerHTML = 
-                '<div class="text-center text-danger"><i class="bi bi-exclamation-triangle me-2"></i>Failed to load appointment details. Please try again.</div>';
         }
     }
 
@@ -2004,7 +2415,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    async function unblockSlot(blockId) {
+    async function unblockTimeSlot(blockId) {
         try {
             const response = await fetch(`/api/doctor/block-time/${blockId}`, {
                 method: 'DELETE',
@@ -2051,13 +2462,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const slotRows = slotsContainer.querySelectorAll('.time-slot-row');
                     
                     slotRows.forEach(row => {
-                        const startTime = row.querySelector('input[type="time"]:nth-child(1)').value;
-                        const endTime = row.querySelector('input[type="time"]:nth-child(2)').value;
-                        
-                        availability[day].slots.push({
-                            startTime,
-                            endTime
-                        });
+                        const timeInputs = row.querySelectorAll('input[type="time"]');
+                        if (timeInputs.length >= 2) {
+                            const startTime = timeInputs[0].value;
+                            const endTime = timeInputs[1].value;
+                            
+                            if (startTime && endTime) {
+                                availability[day].slots.push({
+                                    startTime,
+                                    endTime
+                                });
+                            }
+                        }
                     });
                 }
             });
@@ -2108,7 +2524,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ isAvailable })
+                body: JSON.stringify({ is_available: isAvailable })
             });
             
             if (!response.ok) {
@@ -2181,30 +2597,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    function navigateDate(direction) {
-        if (direction === 'prev') {
-            if (currentView === 'daily') {
-                currentScheduleDate.setDate(currentScheduleDate.getDate() - 1);
-            } else if (currentView === 'weekly') {
-                currentScheduleDate.setDate(currentScheduleDate.getDate() - 7);
-            } else if (currentView === 'monthly') {
-                currentScheduleDate.setMonth(currentScheduleDate.getMonth() - 1);
-            }
-        } else if (direction === 'next') {
-            if (currentView === 'daily') {
-                currentScheduleDate.setDate(currentScheduleDate.getDate() + 1);
-            } else if (currentView === 'weekly') {
-                currentScheduleDate.setDate(currentScheduleDate.getDate() + 7);
-            } else if (currentView === 'monthly') {
-                currentScheduleDate.setMonth(currentScheduleDate.getMonth() + 1);
-            }
-        } else if (direction === 'today') {
-            currentScheduleDate = new Date();
-        }
-        
-        updateDateDisplay();
-        fetchAndRenderSchedule();
-    }
 
     // Initial load
     console.log('Initializing schedule management...');
@@ -2397,6 +2789,658 @@ document.addEventListener('DOMContentLoaded', async () => {
             alert('Failed to load leave request details. Please try again.');
         }
     };
+
+    // Timer variables
+    let appointmentTimer = null;
+    let timerStartTime = null;
+    let timerPausedTime = 0;
+    let currentAppointmentId = null;
+
+    // Enhanced startAppointment function to open modal with patient details
+    window.startAppointmentModal = async function(appointmentId) {
+        try {
+            console.log('Starting appointment modal for ID:', appointmentId);
+            currentAppointmentId = appointmentId;
+            
+            // For now, let's use mock data to test the modal functionality
+            const mockData = {
+                appointment: {
+                    appointment_id: appointmentId,
+                    appointment_date: new Date().toISOString(),
+                    reason: 'General consultation',
+                    status: 'Confirmed',
+                    notes: ''
+                },
+                patient: {
+                    patient_id: 1,
+                    first_name: 'John',
+                    last_name: 'Doe',
+                    date_of_birth: '1990-01-01',
+                    phone_number: '+1234567890',
+                    gender: 'Male',
+                    blood_type: 'O+',
+                    allergies: 'None reported',
+                    current_medications: 'None',
+                    medical_conditions: 'None',
+                    address: '123 Main St'
+                }
+            };
+            
+            // Try to fetch real data, but fall back to mock data if it fails
+            try {
+                const appointmentResponse = await fetch(`/api/appointments/${appointmentId}/details`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (appointmentResponse.ok) {
+                    const realData = await appointmentResponse.json();
+                    if (realData.success) {
+                        populateAppointmentModal(realData.data);
+                    } else {
+                        populateAppointmentModal(mockData);
+                    }
+                } else {
+                    console.log('API not available, using mock data');
+                    populateAppointmentModal(mockData);
+                }
+            } catch (apiError) {
+                console.log('API error, using mock data:', apiError);
+                populateAppointmentModal(mockData);
+            }
+            
+            // Show the appointment management modal
+            const modal = new bootstrap.Modal(document.getElementById('appointmentManagementModal'));
+            modal.show();
+            
+            // Attach event listeners after modal is shown
+            setTimeout(() => {
+                attachTimerEventListeners();
+            }, 100);
+            
+        } catch (error) {
+            console.error('Error starting appointment:', error);
+            alert('Failed to start appointment. Please try again.');
+        }
+    };
+
+    function populateAppointmentModal(data) {
+        // Patient Information
+        document.getElementById('patient-name').textContent = `${data.patient.first_name} ${data.patient.last_name}`;
+        document.getElementById('patient-age').textContent = calculateAge(data.patient.date_of_birth);
+        document.getElementById('patient-gender').textContent = data.patient.gender || 'Not specified';
+        document.getElementById('patient-phone').textContent = data.patient.phone_number || 'Not provided';
+        document.getElementById('patient-blood-type').textContent = data.patient.blood_type || 'Not specified';
+        document.getElementById('patient-allergies').textContent = data.patient.allergies || 'None reported';
+        document.getElementById('patient-medications').textContent = data.patient.current_medications || 'None reported';
+        
+        // Appointment Details
+        document.getElementById('appointment-reason').textContent = data.appointment.reason || 'General consultation';
+        
+        // Reset timer
+        resetTimer();
+    }
+
+    function calculateAge(birthDate) {
+        if (!birthDate) return 'Not specified';
+        const today = new Date();
+        const birth = new Date(birthDate);
+        let age = today.getFullYear() - birth.getFullYear();
+        const monthDiff = today.getMonth() - birth.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+            age--;
+        }
+        return `${age} years`;
+    }
+
+    function resetTimer() {
+        if (appointmentTimer) {
+            clearInterval(appointmentTimer);
+        }
+        appointmentTimer = null;
+        timerStartTime = null;
+        timerPausedTime = 0;
+        
+        document.getElementById('appointment-timer').textContent = '00:00:00';
+        document.getElementById('session-start-time').textContent = '-';
+        document.getElementById('session-status').textContent = 'Not Started';
+        document.getElementById('session-status').className = 'badge bg-secondary';
+        
+        // Show/hide timer buttons
+        document.getElementById('start-timer-btn').style.display = 'block';
+        document.getElementById('pause-timer-btn').style.display = 'none';
+        document.getElementById('resume-timer-btn').style.display = 'none';
+    }
+
+    function startTimerFunction() {
+        console.log('Starting timer function...');
+        
+        timerStartTime = new Date();
+        const startTimeStr = timerStartTime.toLocaleTimeString();
+        
+        const sessionStartEl = document.getElementById('session-start-time');
+        const sessionStatusEl = document.getElementById('session-status');
+        const startBtnEl = document.getElementById('start-timer-btn');
+        const pauseBtnEl = document.getElementById('pause-timer-btn');
+        const resumeBtnEl = document.getElementById('resume-timer-btn');
+        
+        if (sessionStartEl) sessionStartEl.textContent = startTimeStr;
+        if (sessionStatusEl) {
+            sessionStatusEl.textContent = 'In Progress';
+            sessionStatusEl.className = 'badge bg-success';
+        }
+        
+        // Show/hide timer buttons
+        if (startBtnEl) startBtnEl.style.display = 'none';
+        if (pauseBtnEl) pauseBtnEl.style.display = 'block';
+        if (resumeBtnEl) resumeBtnEl.style.display = 'none';
+        
+        appointmentTimer = setInterval(updateTimer, 1000);
+        
+        console.log('Timer started successfully');
+        
+        // Update appointment status to "In Progress" in backend
+        updateAppointmentStatusInBackground(currentAppointmentId, 'In Progress');
+    }
+
+    function pauseTimer() {
+        if (appointmentTimer) {
+            clearInterval(appointmentTimer);
+            appointmentTimer = null;
+        }
+        
+        document.getElementById('session-status').textContent = 'Paused';
+        document.getElementById('session-status').className = 'badge bg-warning';
+        
+        // Show/hide timer buttons
+        document.getElementById('pause-timer-btn').style.display = 'none';
+        document.getElementById('resume-timer-btn').style.display = 'block';
+    }
+
+    function resumeTimer() {
+        document.getElementById('session-status').textContent = 'In Progress';
+        document.getElementById('session-status').className = 'badge bg-success';
+        
+        // Show/hide timer buttons
+        document.getElementById('pause-timer-btn').style.display = 'block';
+        document.getElementById('resume-timer-btn').style.display = 'none';
+        
+        appointmentTimer = setInterval(updateTimer, 1000);
+    }
+
+    function updateTimer() {
+        if (!timerStartTime) return;
+        
+        const now = new Date();
+        const elapsed = Math.floor((now - timerStartTime - timerPausedTime) / 1000);
+        
+        const hours = Math.floor(elapsed / 3600);
+        const minutes = Math.floor((elapsed % 3600) / 60);
+        const seconds = elapsed % 60;
+        
+        const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        document.getElementById('appointment-timer').textContent = timeStr;
+    }
+
+    async function completeAppointmentWithRecords() {
+        try {
+            console.log('=== COMPLETE APPOINTMENT BUTTON CLICKED ===');
+            console.log('Completing appointment with records...');
+            console.log('Current appointment ID:', currentAppointmentId);
+            
+            if (!currentAppointmentId) {
+                alert('No appointment selected. Please try again.');
+                return;
+            }
+            
+            // Get medical records data from form with validation
+            const symptomsEl = document.getElementById('symptoms');
+            const diagnosisEl = document.getElementById('diagnosis');
+            const treatmentEl = document.getElementById('treatment');
+            const prescribedMedicinesEl = document.getElementById('prescribed-medicines');
+            const followUpEl = document.getElementById('follow-up');
+            const doctorNotesEl = document.getElementById('doctor-notes');
+            const timerEl = document.getElementById('appointment-timer');
+            const startTimeEl = document.getElementById('session-start-time');
+            
+            console.log('Form elements found:', {
+                symptoms: !!symptomsEl,
+                diagnosis: !!diagnosisEl,
+                treatment: !!treatmentEl,
+                prescribed_medicines: !!prescribedMedicinesEl,
+                follow_up: !!followUpEl,
+                doctor_notes: !!doctorNotesEl,
+                timer: !!timerEl,
+                startTime: !!startTimeEl
+            });
+            
+            const medicalRecords = {
+                symptoms: symptomsEl?.value || '',
+                diagnosis: diagnosisEl?.value || '',
+                treatment: treatmentEl?.value || '',
+                prescribed_medicines: prescribedMedicinesEl?.value || '',
+                follow_up: followUpEl?.value || '',
+                doctor_notes: doctorNotesEl?.value || '',
+                session_duration: timerEl?.textContent || '00:00:00',
+                session_start_time: startTimeEl?.textContent || '-'
+            };
+
+            console.log('Medical records data:', medicalRecords);
+
+            // Try to complete appointment with medical records via API
+            try {
+                console.log(`Making API call to: /api/appointments/${currentAppointmentId}/complete-with-records`);
+                console.log('Request body:', JSON.stringify(medicalRecords, null, 2));
+                
+                const response = await fetch(`/api/appointments/${currentAppointmentId}/complete-with-records`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(medicalRecords)
+                });
+
+                console.log('API Response status:', response.status);
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Appointment completed with records:', result);
+                    
+                    // Show success message
+                    alert('Appointment completed successfully with medical records!\n\nRecorded:\n' + 
+                          `- Duration: ${medicalRecords.session_duration}\n` +
+                          `- Symptoms: ${medicalRecords.symptoms || 'None recorded'}\n` +
+                          `- Diagnosis: ${medicalRecords.diagnosis || 'None recorded'}`);
+                } else {
+                    const errorText = await response.text();
+                    console.error('API Error Response:', response.status, errorText);
+                    
+                    // Still complete locally but show warning
+                    alert(`API Error (${response.status}): ${errorText}\n\nAppointment will be marked as completed locally.`);
+                }
+            } catch (apiError) {
+                console.error('API Network Error:', apiError);
+                alert(`Network Error: ${apiError.message}\n\nAppointment will be marked as completed locally.`);
+            }
+            
+            // Stop timer
+            if (appointmentTimer) {
+                clearInterval(appointmentTimer);
+                appointmentTimer = null;
+            }
+            
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('appointmentManagementModal'));
+            if (modal) {
+                modal.hide();
+                fetchAndRenderSchedule();
+            }
+            
+        } catch (error) {
+            console.error('Error completing appointment:', error);
+            alert('Failed to complete appointment. Please try again.');
+        }
+    }
+
+    // Add event listeners for timer buttons - moved to after modal is shown
+    function attachTimerEventListeners() {
+        console.log('Attaching timer event listeners...');
+        
+        const startBtn = document.getElementById('start-timer-btn');
+        const pauseBtn = document.getElementById('pause-timer-btn');
+        const resumeBtn = document.getElementById('resume-timer-btn');
+        const completeBtn = document.getElementById('complete-appointment-btn');
+        const completeBtn2 = document.getElementById('complete-appointment-btn-2');
+        
+        if (startBtn) {
+            startBtn.addEventListener('click', startTimerFunction);
+            console.log('Start timer button listener attached');
+        } else {
+            console.error('Start timer button not found!');
+        }
+        
+        if (pauseBtn) {
+            pauseBtn.addEventListener('click', pauseTimer);
+            console.log('Pause timer button listener attached');
+        } else {
+            console.error('Pause timer button not found!');
+        }
+        
+        if (resumeBtn) {
+            resumeBtn.addEventListener('click', resumeTimer);
+            console.log('Resume timer button listener attached');
+        } else {
+            console.error('Resume timer button not found!');
+        }
+        
+        // Attach event listeners to both complete buttons
+        if (completeBtn) {
+            completeBtn.removeEventListener('click', completeAppointmentWithRecords);
+            completeBtn.addEventListener('click', completeAppointmentWithRecords);
+            console.log('Complete appointment button 1 listener attached');
+        } else {
+            console.error('Complete appointment button 1 not found!');
+        }
+        
+        if (completeBtn2) {
+            completeBtn2.removeEventListener('click', completeAppointmentWithRecords);
+            completeBtn2.addEventListener('click', completeAppointmentWithRecords);
+            console.log('Complete appointment button 2 listener attached');
+        } else {
+            console.error('Complete appointment button 2 not found!');
+        }
+    }
+
+    // Test function to verify modal exists
+    window.testModal = function() {
+        const modal = document.getElementById('appointmentManagementModal');
+        if (modal) {
+            console.log('Modal found!');
+            const bootstrapModal = new bootstrap.Modal(modal);
+            bootstrapModal.show();
+        } else {
+            console.error('Modal not found!');
+        }
+    };
+
+    // Test function for complete appointment button
+    window.testCompleteButton = function() {
+        console.log('=== TESTING COMPLETE APPOINTMENT BUTTON ===');
+        const completeBtn = document.getElementById('complete-appointment-btn');
+        if (completeBtn) {
+            console.log('Complete button found:', completeBtn);
+            console.log('Button text:', completeBtn.textContent);
+            console.log('Button disabled:', completeBtn.disabled);
+            console.log('Button visible:', completeBtn.offsetParent !== null);
+            
+            // Try to trigger the function directly
+            console.log('Triggering complete appointment function...');
+            completeAppointmentWithRecords();
+        } else {
+            console.error('Complete appointment button not found!');
+        }
+    };
+
+    // Function to view medical records - make it globally available
+    window.viewMedicalRecords = async function(appointmentId) {
+        try {
+            console.log('Fetching medical records for appointment:', appointmentId);
+            
+            const token = localStorage.getItem('token');
+            const response = await fetch(`/api/appointments/${appointmentId}/medical-records`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+            
+            if (result.success) {
+                displayMedicalRecords(result.data);
+                const modal = new bootstrap.Modal(document.getElementById('medicalRecordsViewModal'));
+                modal.show();
+            } else {
+                alert('Medical records not found for this appointment.');
+            }
+        } catch (error) {
+            console.error('Error fetching medical records:', error);
+            alert('Error loading medical records. Please try again.');
+        }
+    };
+
+    // Function to display medical records in modal
+    function displayMedicalRecords(data) {
+        const content = document.getElementById('medical-records-content');
+        
+        // Calculate age
+        const birthDate = new Date(data.date_of_birth);
+        const today = new Date();
+        const age = today.getFullYear() - birthDate.getFullYear();
+        
+        content.innerHTML = `
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header bg-primary text-white">
+                            <h6 class="mb-0"><i class="bi bi-person-fill me-2"></i>Patient Information</h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Name:</strong> ${data.patient_name}</p>
+                            <p><strong>Age:</strong> ${age} years</p>
+                            <p><strong>Gender:</strong> ${data.gender || 'N/A'}</p>
+                            <p><strong>Blood Type:</strong> ${data.blood_type || 'N/A'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0"><i class="bi bi-exclamation-triangle-fill me-2"></i>Medical History</h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Allergies:</strong> ${data.allergies || 'None reported'}</p>
+                            <p><strong>Current Medications:</strong> ${data.current_medications || 'None reported'}</p>
+                            <p><strong>Medical Conditions:</strong> ${data.medical_conditions || 'None reported'}</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card mb-3">
+                        <div class="card-header bg-info text-white">
+                            <h6 class="mb-0"><i class="bi bi-calendar-event me-2"></i>Appointment Details</h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Date:</strong> ${new Date(data.appointment_date).toLocaleDateString()}</p>
+                            <p><strong>Reason:</strong> ${data.appointment_reason}</p>
+                            <p><strong>Session Duration:</strong> ${data.session_duration || 'N/A'}</p>
+                            <p><strong>Session Start:</strong> ${data.session_start_time || 'N/A'}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card mb-3">
+                        <div class="card-header bg-success text-white">
+                            <h6 class="mb-0"><i class="bi bi-clipboard2-pulse me-2"></i>Medical Records</h6>
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Symptoms:</strong> ${data.symptoms || 'N/A'}</p>
+                            <p><strong>Diagnosis:</strong> ${data.diagnosis || 'N/A'}</p>
+                            <p><strong>Treatment:</strong> ${data.treatment || 'N/A'}</p>
+                            <p><strong>Prescribed Medicines:</strong> ${data.prescribed_medicines || 'N/A'}</p>
+                            <p><strong>Follow-up Instructions:</strong> ${data.follow_up || 'N/A'}</p>
+                            <p><strong>Doctor Notes:</strong> ${data.doctor_notes || 'N/A'}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Make viewMedicalRecords globally accessible
+    window.viewMedicalRecords = viewMedicalRecords;
+
+    function renderCompletedAppointments() {
+        console.log('=== DEBUG: renderCompletedAppointments called ===');
+        console.log('scheduleData.pastAppointments:', scheduleData?.pastAppointments);
+        
+        if (!scheduleData) {
+            console.log('No scheduleData available for completed appointments');
+            return;
+        }
+        
+        const tbody = document.getElementById('completed-appointments-tbody');
+        const countEl = document.getElementById('completed-count');
+        const pageEl = document.getElementById('completed-page');
+        
+        if (!tbody) {
+            console.log('completed-appointments-tbody element not found');
+            return;
+        }
+        
+        // Get all appointments and filter for completed ones
+        const allAppointments = [
+            ...(scheduleData.todayAppointments || []),
+            ...(scheduleData.upcomingAppointments || []),
+            ...(scheduleData.pastAppointments || [])
+        ];
+        
+        // Filter only completed appointments and sort by date (most recent first)
+        const completedAppointments = allAppointments
+            .filter(apt => apt.status === 'Completed')
+            .sort((a, b) => {
+                const dateA = new Date(a.appointment_date || a.date);
+                const dateB = new Date(b.appointment_date || b.date);
+                return dateB - dateA; // Most recent first
+            });
+        console.log('Completed appointments:', completedAppointments);
+        
+        const totalPages = Math.ceil(completedAppointments.length / appointmentsPerPage);
+        const startIndex = (currentCompletedPage - 1) * appointmentsPerPage;
+        const endIndex = startIndex + appointmentsPerPage;
+        const pageAppointments = completedAppointments.slice(startIndex, endIndex);
+        
+        // Update tab count
+        const tabCount = document.getElementById('completed-tab-count');
+        if (tabCount) {
+            tabCount.textContent = completedAppointments.length;
+        }
+        
+        if (pageAppointments.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-4">No completed appointments found</td></tr>';
+            if (countEl) countEl.textContent = '';
+            if (pageEl) pageEl.textContent = '';
+            return;
+        }
+
+        tbody.innerHTML = pageAppointments.map(appointment => {
+            // Handle different date field names and formats
+            const appointmentDate = appointment.appointment_date || appointment.date;
+            const date = new Date(appointmentDate);
+            
+            // Check if date is valid
+            const dateStr = !isNaN(date.getTime()) ? date.toLocaleDateString() : 'Invalid Date';
+            const timeStr = !isNaN(date.getTime()) ? date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Invalid Time';
+            
+            // Handle different patient name field names
+            const patientName = appointment.patient_name || appointment.patientName || appointment.name || 'Unknown Patient';
+            
+            const statusBadge = getStatusBadge(appointment.status);
+            
+            const actionButtons = `<button class="btn btn-success btn-sm" onclick="viewMedicalRecords(${appointment.appointment_id})" title="View Medical Records">
+                <i class="bi bi-clipboard2-pulse"></i> View Records
+            </button>`;
+
+            return `
+                <tr>
+                    <td>${dateStr}</td>
+                    <td>${timeStr}</td>
+                    <td>${patientName}</td>
+                    <td>${appointment.reason || 'No reason specified'}</td>
+                    <td>${statusBadge}</td>
+                    <td>${actionButtons}</td>
+                </tr>
+            `;
+        }).join('');
+        
+        // Update pagination info
+        if (countEl) {
+            countEl.textContent = `Showing ${startIndex + 1}-${Math.min(endIndex, completedAppointments.length)} of ${completedAppointments.length} appointments`;
+        }
+        if (pageEl) {
+            pageEl.textContent = `Page ${currentCompletedPage} of ${totalPages}`;
+        }
+        
+        // Update pagination buttons
+        const prevBtn = document.getElementById('completed-prev');
+        const nextBtn = document.getElementById('completed-next');
+        if (prevBtn) prevBtn.disabled = currentCompletedPage === 1;
+        if (nextBtn) nextBtn.disabled = currentCompletedPage === totalPages;
+    }
+
+    // Add pagination event handlers for completed appointments
+    document.addEventListener('DOMContentLoaded', function() {
+        const completedPrevBtn = document.getElementById('completed-prev');
+        const completedNextBtn = document.getElementById('completed-next');
+        
+        if (completedPrevBtn) {
+            completedPrevBtn.onclick = () => {
+                if (currentCompletedPage > 1) {
+                    currentCompletedPage--;
+                    renderCompletedAppointments();
+                }
+            };
+        }
+        
+        if (completedNextBtn) {
+            completedNextBtn.onclick = () => {
+                const allAppointments = [
+                    ...(scheduleData?.todayAppointments || []),
+                    ...(scheduleData?.upcomingAppointments || []),
+                    ...(scheduleData?.pastAppointments || [])
+                ];
+                const completedAppointments = allAppointments.filter(apt => apt.status === 'Completed');
+                const totalPages = Math.ceil(completedAppointments.length / appointmentsPerPage);
+                if (currentCompletedPage < totalPages) {
+                    currentCompletedPage++;
+                    renderCompletedAppointments();
+                }
+            };
+        }
+        
+        // Add pagination event handlers for past appointments
+        const pastPrevBtn = document.getElementById('past-prev');
+        const pastNextBtn = document.getElementById('past-next');
+        
+        if (pastPrevBtn) {
+            pastPrevBtn.onclick = () => {
+                if (currentPastPage > 1) {
+                    currentPastPage--;
+                    renderPastAppointments();
+                }
+            };
+        }
+        
+        if (pastNextBtn) {
+            pastNextBtn.onclick = () => {
+                const pastAppointments = scheduleData?.pastAppointments?.filter(apt => apt.status !== 'Completed') || [];
+                const totalPages = Math.ceil(pastAppointments.length / appointmentsPerPage);
+                if (currentPastPage < totalPages) {
+                    currentPastPage++;
+                    renderPastAppointments();
+                }
+            };
+        }
+    });
+
+    // Update view toggle buttons
+    document.addEventListener('change', function(e) {
+        if (e.target.name === 'view') {
+            // Remove active class from all buttons
+            document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // Add active class to selected button
+            document.querySelector(`label[for="${e.target.id}"]`).classList.add('active');
+            
+            // Update current view and re-render
+            if (e.target.id === 'view-daily') {
+                currentView = 'daily';
+                scheduleGridEl.className = 'daily-schedule-grid';
+            } else if (e.target.id === 'view-weekly') {
+                currentView = 'weekly';
+                scheduleGridEl.className = 'weekly-schedule-grid';
+            } else if (e.target.id === 'view-monthly') {
+                currentView = 'monthly';
+                scheduleGridEl.className = 'monthly-calendar';
+            }
+            
+            // Re-fetch and render schedule for new view
+            fetchAndRenderSchedule();
+        }
+    });
 
     // Logout function
     window.logout = function() {
