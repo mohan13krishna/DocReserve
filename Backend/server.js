@@ -65,6 +65,21 @@ app.use('/api/super-admin', superAdminRoutes);
 // Appointment routes (for approve/cancel actions)
 app.put('/api/appointments/:appointmentId/approve', require('./middleware/authMiddleware').authenticateToken, require('./middleware/authMiddleware').authorizeRole(['doctor']), require('./controllers/doctorController').approveAppointment);
 app.put('/api/appointments/:appointmentId/cancel', require('./middleware/authMiddleware').authenticateToken, require('./middleware/authMiddleware').authorizeRole(['doctor']), require('./controllers/doctorController').cancelAppointment);
+app.put('/api/appointments/:appointmentId/status', require('./middleware/authMiddleware').authenticateToken, require('./middleware/authMiddleware').authorizeRole(['doctor']), require('./controllers/doctorController').updateAppointmentStatus);
+
+// Enhanced appointment management routes
+const appointmentMedicalController = require('./controllers/appointmentMedicalController');
+app.get('/api/appointments/:appointmentId/details', require('./middleware/authMiddleware').authenticateToken, require('./middleware/authMiddleware').authorizeRole(['doctor']), appointmentMedicalController.getAppointmentDetails);
+app.put('/api/appointments/:appointmentId/complete-with-records', require('./middleware/authMiddleware').authenticateToken, require('./middleware/authMiddleware').authorizeRole(['doctor']), appointmentMedicalController.completeAppointmentWithRecords);
+app.get('/api/patients/:patientId/medical-records', require('./middleware/authMiddleware').authenticateToken, require('./middleware/authMiddleware').authorizeRole(['doctor']), appointmentMedicalController.getPatientMedicalRecords);
+app.get('/api/appointments/:appointmentId/medical-record', require('./middleware/authMiddleware').authenticateToken, require('./middleware/authMiddleware').authorizeRole(['doctor']), appointmentMedicalController.getAppointmentMedicalRecord);
+app.get('/api/appointments/:appointmentId/medical-records', require('./middleware/authMiddleware').authenticateToken, require('./middleware/authMiddleware').authorizeRole(['doctor', 'user']), appointmentMedicalController.getMedicalRecords);
+app.get('/api/doctor/past-appointments', require('./middleware/authMiddleware').authenticateToken, require('./middleware/authMiddleware').authorizeRole(['doctor']), require('./controllers/doctorController').getPastAppointments);
+
+// Patient rating endpoints
+app.put('/api/appointments/:appointmentId/rate', require('./middleware/authMiddleware').authenticateToken, require('./middleware/authMiddleware').authorizeRole(['user']), appointmentMedicalController.submitAppointmentRating);
+app.get('/api/patients/:patientId/appointments-for-rating', require('./middleware/authMiddleware').authenticateToken, require('./middleware/authMiddleware').authorizeRole(['user']), appointmentMedicalController.getAppointmentsForRating);
+app.get('/api/doctors/:doctorId/ratings', require('./middleware/authMiddleware').authenticateToken, appointmentMedicalController.getDoctorRatings);
 
 // Catch-all for SPA-like routing: serves the appropriate HTML file or defaults to index.html
 app.get('*', (req, res) => {
