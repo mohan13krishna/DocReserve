@@ -4,41 +4,129 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doctor - Schedule Management - DocReserve</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/doctor-dashboard.css">
+    <link rel="stylesheet" href="css/schedule-management.css">
     <style>
         .schedule-card {
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
+            border-radius: 16px;
+            overflow: hidden;
         }
         .schedule-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
         }
         .time-slot {
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .time-slot::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--slot-color);
+        }
+        .time-slot.available {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            --slot-color: linear-gradient(135deg, #10b981, #059669);
+            border-left: 4px solid #10b981;
+        }
+        .time-slot.booked {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            --slot-color: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            border-left: 4px solid #3b82f6;
+        }
+        .time-slot.blocked {
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            --slot-color: linear-gradient(135deg, #f59e0b, #d97706);
+            border-left: 4px solid #f59e0b;
+        }
+        .time-slot.past {
+            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+            --slot-color: linear-gradient(135deg, #6b7280, #4b5563);
+            border-left: 4px solid #6b7280;
+            opacity: 0.7;
+        }
+        .time-slot-time {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+        .time-slot-patient {
+            color: #374151;
+            font-weight: 500;
+        }
+        .time-slot .btn {
             border-radius: 12px;
-            padding: 15px;
-            margin-bottom: 10px;
+            font-weight: 600;
+            padding: 8px 16px;
+            font-size: 0.875rem;
+            transition: all 0.2s ease;
+        }
+        .time-slot .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
             border: 2px solid transparent;
             transition: all 0.3s ease;
         }
-        .time-slot.available {
-            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        .status-confirmed { 
+            background: linear-gradient(135deg, #d4edda, #c3e6cb); 
+            color: #155724; 
             border-color: #28a745;
         }
-        .time-slot.booked {
-            background: linear-gradient(135deg, #cce5ff, #b3d9ff);
-            border-color: #007bff;
-        }
-        .time-slot.blocked {
-            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        .status-pending { 
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7); 
+            color: #856404; 
             border-color: #ffc107;
         }
-        .time-slot.past {
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            border-color: #6c757d;
+        .status-cancelled { 
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb); 
+            color: #721c24; 
+            border-color: #dc3545;
+        }
+        .status-completed { 
+            background: linear-gradient(135deg, #cce5ff, #b3d7ff); 
+            color: #004085; 
+            border-color: #007bff;
+        }
+        .status-overdue {
+            background: linear-gradient(135deg, #ffebee, #ffcdd2);
+            color: #c62828;
+            border-color: #f44336;
+            animation: pulse 2s infinite;
+        }
+        .status-auto-completed {
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+            color: #2e7d32;
+            border-color: #4caf50;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+            50% { box-shadow: 0 4px 12px rgba(244, 67, 54, 0.3); }
+            100% { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         }
         .leave-status-pending { color: #ffc107; }
         .leave-status-approved { color: #28a745; }
@@ -52,74 +140,116 @@
         }
         .weekly-grid {
             display: grid;
-            grid-template-columns: 80px repeat(7, 1fr);
-            gap: 5px;
+            grid-template-columns: 100px repeat(7, 1fr);
+            gap: 12px;
             margin: 20px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
         .weekly-cell {
-            padding: 10px;
+            padding: 16px 12px;
             text-align: center;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            min-height: 60px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            min-height: 70px;
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
         }
         .weekly-cell.time-header, .weekly-cell.day-header {
-            background: #f8f9fa;
-            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
         }
         .weekly-cell.booked {
-            background: #cce5ff;
-            color: #007bff;
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border-color: #3b82f6;
+            color: #1e40af;
+            font-weight: 600;
         }
         .weekly-cell.blocked {
-            background: #fff3cd;
-            color: #856404;
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border-color: #f59e0b;
+            color: #92400e;
+            font-weight: 600;
+        }
+        .weekly-cell.available {
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-color: #10b981;
+            color: #065f46;
+        }
+        .weekly-cell:hover:not(.time-header):not(.day-header) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
         .monthly-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
+            gap: 12px;
             margin: 20px 0;
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
         .monthly-cell {
-            padding: 15px 10px;
+            padding: 20px 12px;
             text-align: center;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            min-height: 80px;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            min-height: 90px;
             position: relative;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: #fafbfc;
+            font-weight: 600;
+            color: #374151;
         }
-        .monthly-cell:hover {
-            background: #f8f9fa;
+        .monthly-cell:hover:not(.empty) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: white;
         }
         .monthly-cell.today {
-            background: #007bff;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
         }
         .monthly-cell.has-appointments {
-            background: #d4edda;
+            background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+            border-color: #10b981;
         }
         .monthly-cell.has-blocked {
-            background: #fff3cd;
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border-color: #f59e0b;
+        }
+        .monthly-cell.empty {
+            opacity: 0.3;
+            cursor: default;
         }
         .appointment-count {
             position: absolute;
-            top: 5px;
-            right: 5px;
-            background: #007bff;
+            top: 8px;
+            right: 8px;
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
             color: white;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 12px;
+            width: 24px;
+            height: 24px;
+            font-size: 11px;
+            font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+            border: 2px solid white;
         }
         .add-slot-btn {
             position: absolute;
@@ -186,91 +316,140 @@
 
 
         <!-- Schedule Management Section -->
-        <section class="schedule-management-section card shadow-sm p-4 border-0 rounded-4 mb-4">
-            <div class="schedule-header-controls d-flex flex-wrap align-items-center justify-content-between mb-4">
-                <div class="view-toggles btn-group" role="group" aria-label="View toggles">
-                    <input type="radio" class="btn-check" name="view-options" id="view-daily" autocomplete="off" checked data-view="daily">
-                    <label class="btn btn-outline-primary" for="view-daily">Daily</label>
-                    
-                    <input type="radio" class="btn-check" name="view-options" id="view-weekly" autocomplete="off" data-view="weekly">
-                    <label class="btn btn-outline-primary" for="view-weekly">Weekly</label>
-                    
-                    <input type="radio" class="btn-check" name="view-options" id="view-monthly" autocomplete="off" data-view="monthly">
-                    <label class="btn btn-outline-primary" for="view-monthly">Monthly</label>
+        <section class="schedule-management-section card shadow-sm border-0 rounded-4 mb-4" style="overflow: hidden;">
+            <!-- Modern Header -->
+            <div class="schedule-header p-4 mb-0" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+                <div class="schedule-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h1 class="schedule-title"><i class="bi bi-calendar3 me-3"></i>Schedule Management</h1>
+                            <p class="schedule-subtitle">Manage your appointments with style and efficiency</p>
+                        </div>
+                        <div class="view-toggle-group">
+                            <input type="radio" class="btn-check" name="view" id="view-daily" autocomplete="off" checked>
+                            <label class="view-toggle-btn active" for="view-daily"><i class="bi bi-calendar-day me-2"></i>Daily</label>
+                            
+                            <input type="radio" class="btn-check" name="view" id="view-weekly" autocomplete="off">
+                            <label class="view-toggle-btn" for="view-weekly"><i class="bi bi-calendar-week me-2"></i>Weekly</label>
+                            
+                            <input type="radio" class="btn-check" name="view" id="view-monthly" autocomplete="off">
+                            <label class="view-toggle-btn" for="view-monthly"><i class="bi bi-calendar-month me-2"></i>Monthly</label>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="date-navigator d-flex align-items-center gap-2">
-                    <button class="btn btn-outline-primary btn-sm rounded-pill" type="button" id="prev-date-btn">
+                <!-- Date Navigation -->
+                <div class="date-navigation">
+                    <button class="date-nav-btn" id="prev-date">
                         <i class="bi bi-chevron-left"></i>
                     </button>
-                    <span id="calendar-current-date" class="fw-bold text-dark fs-6 px-3"></span>
-                    <button class="btn btn-outline-primary btn-sm rounded-pill" type="button" id="next-date-btn">
+                    <div class="text-center">
+                        <h5 class="current-date mb-0" id="current-date">Sunday, September 7, 2025</h5>
+                        <button class="btn btn-sm btn-outline-primary mt-2" id="today-btn">
+                            <i class="bi bi-calendar-check me-1"></i>Today
+                        </button>
+                    </div>
+                    <button class="date-nav-btn" id="next-date">
                         <i class="bi bi-chevron-right"></i>
-                    </button>
-                    <button class="btn btn-primary btn-sm rounded-pill" id="today-btn">
-                        <i class="bi bi-calendar-event me-1"></i>Today
                     </button>
                 </div>
                 
-                <div class="actions d-flex gap-2">
-                    <button class="btn btn-warning btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#blockTimeModal">
-                        <i class="bi bi-slash-circle-fill me-1"></i>Block Time
-                    </button>
-                    <button class="btn btn-primary btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#setAvailabilityModal">
-                        <i class="bi bi-calendar-plus-fill me-1"></i>Set Availability
-                    </button>
-                    <button class="btn btn-info btn-sm rounded-pill" data-bs-toggle="modal" data-bs-target="#leaveRequestModal">
-                        <i class="bi bi-calendar-x-fill me-1"></i>Leave Request
-                    </button>
+                <!-- Schedule Content -->
+                <div class="schedule-content p-4" style="background: #f8f9ff;">
+                    <!-- Legend -->
+                    <div class="schedule-legend">
+                        <div class="legend-item">
+                            <div class="legend-dot available"></div>
+                            <span>Available</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot booked"></div>
+                            <span>Booked</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot blocked"></div>
+                            <span>Blocked</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-dot past"></div>
+                            <span>Past</span>
+                        </div>
+                    </div>
+                    <!-- Schedule Grid -->
+                    <div class="schedule-grid-container">
+                        <div id="schedule-grid" class="daily-schedule-grid">
+                            <!-- Schedule slots will be rendered here -->
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="schedule-grid-container bg-white rounded-4 border shadow-sm">
-                <div class="legend d-flex gap-3 p-3 border-bottom bg-light">
-                    <span class="legend-item available"><i class="bi bi-circle-fill text-success me-2"></i>Available</span>
-                    <span class="legend-item booked"><i class="bi bi-circle-fill text-primary me-2"></i>Booked</span>
-                    <span class="legend-item blocked"><i class="bi bi-circle-fill text-warning me-2"></i>Blocked</span>
-                    <span class="legend-item past"><i class="bi bi-circle-fill text-secondary me-2"></i>Past</span>
-                </div>
-                <div class="schedule-grid p-3" id="schedule-grid"></div>
             </div>
         </section>
 
         <!-- Appointments Section -->
-        <section class="appointments-list-section card shadow-sm p-4 border-0 rounded-4 mb-4" style="background: linear-gradient(135deg, #e3f2fd, #bbdefb); border: 2px solid #2196f3 !important;">
-            <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
-              <h3 class="card-title fw-bold mb-0" style="color: #0d47a1; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
-                <i class="bi bi-calendar-check-fill me-2" style="color: #2196f3;"></i>
-                Appointments <span id="current-date-appointments" class="text-muted fw-normal fs-6"></span>
-              </h3>
-              <div class="d-flex gap-2">
-                <div class="input-group">
-                  <span class="input-group-text" style="background: linear-gradient(135deg, #2196f3, #1976d2); border-color: #2196f3; color: white;"><i class="bi bi-search"></i></span>
-                  <input type="text" class="form-control" placeholder="Search by patient or reason" id="appointments-search" style="border-color: #2196f3;">
+        <section class="appointments-list-section card shadow-sm border-0 rounded-4 mb-4" style="overflow: hidden;">
+            <!-- Colored Header Section -->
+            <div class="appointments-header p-4 mb-0" style="background: linear-gradient(135deg, #2196f3, #1976d2); color: white;">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2">
+                  <h3 class="card-title fw-bold mb-0" style="color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">
+                    <i class="bi bi-calendar-check-fill me-2"></i>
+                    Appointments <span id="current-date-appointments" class="fw-normal fs-6" style="color: rgba(255,255,255,0.8);"></span>
+                  </h3>
+                  <div class="d-flex gap-2">
+                    <div class="input-group">
+                      <span class="input-group-text" style="background: white; border: 1px solid #dee2e6; color: #2196f3;"><i class="bi bi-search"></i></span>
+                      <input type="text" class="form-control" placeholder="Search by patient or reason" id="appointments-search" style="background: white; border: 1px solid #dee2e6; color: #333;">
+                    </div>
+                    <button class="btn btn-light rounded-pill" id="appointments-export" style="background: white; border: 1px solid #dee2e6; color: #2196f3; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><i class="bi bi-download me-1"></i>Export CSV</button>
+                    <button class="btn btn-light rounded-pill" id="appointments-print" style="background: white; border: 1px solid #dee2e6; color: #2196f3; font-weight: 600; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"><i class="bi bi-printer me-1"></i>Print</button>
+                  </div>
                 </div>
-                <button class="btn rounded-pill" id="appointments-export" style="background: linear-gradient(135deg, #2196f3, #1976d2); border-color: #2196f3; color: white; box-shadow: 0 2px 4px rgba(33,150,243,0.3);"><i class="bi bi-download me-1"></i>Export CSV</button>
-                <button class="btn rounded-pill" id="appointments-print" style="background: linear-gradient(135deg, #1565c0, #0d47a1); border-color: #1565c0; color: white; box-shadow: 0 2px 4px rgba(21,101,192,0.3);"><i class="bi bi-printer me-1"></i>Print</button>
-              </div>
             </div>
+            
+            <!-- Content Section -->
+            <div class="appointments-content p-4" style="background: white;">
             
             <!-- Appointment Tabs -->
             <ul class="nav nav-tabs mb-3" id="appointmentTabs" role="tablist" style="border-bottom: 2px solid #2196f3;">
               <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="confirmed-tab" data-bs-toggle="tab" data-bs-target="#confirmed-appointments" type="button" role="tab" aria-controls="confirmed-appointments" aria-selected="true" style="background: linear-gradient(135deg, #2196f3, #1976d2); border-color: #2196f3; color: white; border-radius: 8px 8px 0 0; font-weight: 600;">
-                  <i class="bi bi-check-circle me-2"></i>Confirmed Today
+                <button class="nav-link active" id="confirmed-tab" data-bs-toggle="tab" data-bs-target="#confirmed-appointments" type="button" role="tab" aria-controls="confirmed-appointments" aria-selected="true">
+                  <i class="bi bi-check-circle me-2"></i>Confirmed Today <span id="confirmed-tab-count" class="badge bg-light text-primary ms-2">0</span>
                 </button>
               </li>
               <li class="nav-item" role="presentation">
-                <button class="nav-link" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming-appointments" type="button" role="tab" aria-controls="upcoming-appointments" aria-selected="false" style="color: #0d47a1; font-weight: 600; border-color: #2196f3;">
-                  <i class="bi bi-calendar-event me-2"></i>Upcoming
+                <button class="nav-link" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming-appointments" type="button" role="tab" aria-controls="upcoming-appointments" aria-selected="false">
+                  <i class="bi bi-calendar-event me-2"></i>Upcoming <span id="upcoming-tab-count" class="badge bg-primary text-white ms-2">0</span>
                 </button>
               </li>
               <li class="nav-item" role="presentation">
-                <button class="nav-link" id="past-tab" data-bs-toggle="tab" data-bs-target="#past-appointments" type="button" role="tab" aria-controls="past-appointments" aria-selected="false" style="color: #0d47a1; font-weight: 600; border-color: #2196f3;">
-                  <i class="bi bi-clock-history me-2"></i>Past
+                <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed-appointments" type="button" role="tab" aria-controls="completed-appointments" aria-selected="false">
+                  <i class="bi bi-check-circle-fill me-2"></i>Completed <span id="completed-tab-count" class="badge bg-success text-white ms-2">0</span>
+                </button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="past-tab" data-bs-toggle="tab" data-bs-target="#past-appointments" type="button" role="tab" aria-controls="past-appointments" aria-selected="false">
+                  <i class="bi bi-clock-history me-2"></i>Past <span id="past-tab-count" class="badge bg-secondary text-white ms-2">0</span>
                 </button>
               </li>
             </ul>
+
+            <style>
+            .nav-tabs .nav-link.active {
+                background: linear-gradient(135deg, #2196f3, #1976d2) !important;
+                border-color: #2196f3 !important;
+                color: white !important;
+                border-radius: 8px 8px 0 0 !important;
+                font-weight: 600 !important;
+            }
+            .nav-tabs .nav-link:not(.active) {
+                color: #0d47a1 !important;
+                font-weight: 600 !important;
+                border-color: #2196f3 !important;
+            }
+            .nav-tabs .nav-link:not(.active):hover {
+                background: rgba(33, 150, 243, 0.1) !important;
+                border-color: #2196f3 !important;
+            }
+            </style>
             
             <!-- Tab Content -->
             <div class="tab-content" id="appointmentTabContent">
@@ -327,17 +506,44 @@
                 </div>
               </div>
               
+              <!-- Completed Appointments Tab -->
+              <div class="tab-pane fade" id="completed-appointments" role="tabpanel" aria-labelledby="completed-tab">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle">
+                    <thead style="background: linear-gradient(135deg, #28a745, #20c997); color: white;">
+                      <tr>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Patient</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="completed-appointments-tbody" style="background: rgba(232,245,233,0.3);"></tbody>
+                  </table>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                  <div class="small" id="completed-count" style="color: #155724; font-weight: 600;"></div>
+                  <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-sm rounded-pill" id="completed-prev" style="background: linear-gradient(135deg, #28a745, #20c997); border-color: #28a745; color: white; box-shadow: 0 2px 4px rgba(40,167,69,0.3);"><i class="bi bi-chevron-left"></i></button>
+                    <span id="completed-page" class="small" style="color: #155724; font-weight: 600;"></span>
+                    <button class="btn btn-sm rounded-pill" id="completed-next" style="background: linear-gradient(135deg, #28a745, #20c997); border-color: #28a745; color: white; box-shadow: 0 2px 4px rgba(40,167,69,0.3);"><i class="bi bi-chevron-right"></i></button>
+                  </div>
+                </div>
+              </div>
+              
               <!-- Past Appointments Tab -->
               <div class="tab-pane fade" id="past-appointments" role="tabpanel" aria-labelledby="past-tab">
                 <div class="table-responsive">
                   <table class="table align-middle" style="border: 2px solid #ffc107; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 8px rgba(255,193,7,0.2);">
                     <thead style="background: linear-gradient(135deg, #ffc107, #ffb300); color: white;">
                       <tr>
-                        <th style="width:120px; border-color: #ffb300; font-weight: 600; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Date</th>
-                        <th style="width:100px; border-color: #ffb300; font-weight: 600; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Time</th>
-                        <th style="border-color: #ffb300; font-weight: 600; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Patient</th>
-                        <th style="border-color: #ffb300; font-weight: 600; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Reason</th>
-                        <th style="border-color: #ffb300; font-weight: 600; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Status</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Patient</th>
+                        <th>Reason</th>
+                        <th>Status</th>
                       </tr>
                     </thead>
                     <tbody id="past-appointments-tbody" style="background: rgba(255,249,230,0.3);"></tbody>
@@ -353,6 +559,7 @@
                 </div>
               </div>
             </div>
+            </div> <!-- Close appointments-content -->
         </section>
 
         <!-- Leave Management Section -->
@@ -518,55 +725,22 @@
                                     <h6 class="mb-0"><i class="bi bi-stopwatch me-2"></i>Session Timer</h6>
                                 </div>
                                 <div class="card-body text-center">
-                                    <div class="display-4 text-success mb-2" id="appointment-timer">00:00:00</div>
+                                    <div class="display-4 text-success mb-2">00:00:00</div>
                                     <div class="d-flex gap-2 justify-content-center">
-                                        <button class="btn btn-success btn-sm" id="start-timer-btn">
-                                            <i class="bi bi-play-fill"></i> Start
-                                        </button>
-                                        <button class="btn btn-warning btn-sm" id="pause-timer-btn" disabled>
-                                            <i class="bi bi-pause-fill"></i> Pause
-                                        </button>
-                                        <button class="btn btn-danger btn-sm" id="stop-timer-btn" disabled>
-                                            <i class="bi bi-stop-fill"></i> Stop
-                                        </button>
+                                        <small class="text-muted">Timer controls moved to Timer panel →</small>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Medicine Notes Section -->
+                    <!-- Medicine Notes Section - Removed duplicate form fields -->
                     <div class="card border-info mb-4">
                         <div class="card-header bg-light">
                             <h6 class="mb-0"><i class="bi bi-clipboard2-pulse me-2"></i>Treatment Notes & Prescriptions</h6>
                         </div>
                         <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <label for="diagnosis" class="form-label">Diagnosis</label>
-                                    <textarea class="form-control" id="diagnosis" rows="3" placeholder="Enter diagnosis..."></textarea>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="symptoms" class="form-label">Symptoms Observed</label>
-                                    <textarea class="form-control" id="symptoms" rows="3" placeholder="Enter symptoms..."></textarea>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-12">
-                                    <label for="prescription" class="form-label">Prescription & Medicine</label>
-                                    <textarea class="form-control" id="prescription" rows="4" placeholder="Enter prescribed medicines, dosage, and instructions..."></textarea>
-                                </div>
-                            </div>
-                            <div class="row mt-3">
-                                <div class="col-md-6">
-                                    <label for="follow-up" class="form-label">Follow-up Instructions</label>
-                                    <textarea class="form-control" id="follow-up" rows="2" placeholder="Next visit, care instructions..."></textarea>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="additional-notes" class="form-label">Additional Notes</label>
-                                    <textarea class="form-control" id="additional-notes" rows="2" placeholder="Any other observations..."></textarea>
-                                </div>
-                            </div>
+                            <p class="text-muted">Medical records form is available in the Medical Records panel →</p>
                         </div>
                     </div>
 
@@ -880,6 +1054,174 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary" id="save-availability">Save Availability</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appointment Management Modal -->
+    <div class="modal fade" id="appointmentManagementModal" tabindex="-1" aria-labelledby="appointmentManagementModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="appointmentManagementModalLabel">
+                        <i class="bi bi-person-check me-2"></i>Appointment in Progress
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <div class="row">
+                        <!-- Patient Information Panel -->
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="bi bi-person-circle me-2"></i>Patient Information</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div id="patient-info">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Name:</label>
+                                            <p id="patient-name" class="mb-2">-</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Age:</label>
+                                            <p id="patient-age" class="mb-2">-</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Gender:</label>
+                                            <p id="patient-gender" class="mb-2">-</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Phone:</label>
+                                            <p id="patient-phone" class="mb-2">-</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Blood Type:</label>
+                                            <p id="patient-blood-type" class="mb-2">-</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Allergies:</label>
+                                            <p id="patient-allergies" class="mb-2">-</p>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Current Medications:</label>
+                                            <p id="patient-medications" class="mb-2">-</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Appointment Details & Timer Panel -->
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="bi bi-clock me-2"></i>Appointment Details</h6>
+                                </div>
+                                <div class="card-body text-center">
+                                    <div class="mb-4">
+                                        <label class="form-label fw-bold">Reason for Visit:</label>
+                                        <p id="appointment-reason" class="mb-3 p-2 bg-light rounded">-</p>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <h4 class="text-primary mb-2">Session Timer</h4>
+                                        <div id="appointment-timer" class="display-4 text-success mb-3">00:00:00</div>
+                                        <div class="d-grid gap-2">
+                                            <button id="start-timer-btn" class="btn btn-success btn-lg">
+                                                <i class="bi bi-play-circle me-2"></i>Start Session
+                                            </button>
+                                            <button id="pause-timer-btn" class="btn btn-warning btn-lg" style="display: none;">
+                                                <i class="bi bi-pause-circle me-2"></i>Pause Session
+                                            </button>
+                                            <button id="resume-timer-btn" class="btn btn-info btn-lg" style="display: none;">
+                                                <i class="bi bi-play-circle me-2"></i>Resume Session
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <small class="text-muted">
+                                            Started: <span id="session-start-time">-</span><br>
+                                            Status: <span id="session-status" class="badge bg-secondary">Not Started</span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Medical Records Panel -->
+                        <div class="col-md-4">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0"><i class="bi bi-clipboard-pulse me-2"></i>Medical Records</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form id="medical-records-form">
+                                        <div class="mb-3">
+                                            <label for="symptoms" class="form-label">Symptoms</label>
+                                            <textarea class="form-control" id="symptoms" rows="2" placeholder="Patient's symptoms..."></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="diagnosis" class="form-label">Diagnosis</label>
+                                            <textarea class="form-control" id="diagnosis" rows="2" placeholder="Medical diagnosis..."></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="treatment" class="form-label">Treatment Plan</label>
+                                            <textarea class="form-control" id="treatment" rows="2" placeholder="Treatment recommendations..."></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="prescribed-medicines" class="form-label">Prescribed Medicines</label>
+                                            <textarea class="form-control" id="prescribed-medicines" rows="3" placeholder="Medicine name, dosage, frequency..."></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="follow-up" class="form-label">Follow-up Instructions</label>
+                                            <textarea class="form-control" id="follow-up" rows="2" placeholder="Next visit, precautions..."></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="doctor-notes" class="form-label">Doctor's Notes</label>
+                                            <textarea class="form-control" id="doctor-notes" rows="2" placeholder="Additional notes..."></textarea>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i>Cancel
+                    </button>
+                    <button type="button" class="btn btn-success" id="complete-appointment-btn-2">
+                        <i class="bi bi-check-circle me-1"></i>Complete Appointment
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Medical Records View Modal -->
+    <div class="modal fade" id="medicalRecordsViewModal" tabindex="-1" aria-labelledby="medicalRecordsViewModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title" id="medicalRecordsViewModalLabel">
+                        <i class="bi bi-clipboard2-pulse me-2"></i>Medical Records
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="medical-records-content">
+                        <!-- Content will be loaded dynamically -->
+                        <div class="text-center">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
