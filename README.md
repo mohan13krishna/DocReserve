@@ -11,7 +11,7 @@ DocReserve is a full-stack web application designed to streamline hospital opera
 ### For Patients
 - **User Registration & Authentication** - Secure account creation and login
 - **Doctor Discovery** - Browse and search for doctors by specialization
-- **Appointment Booking** - Schedule appointments with preferred doctors
+- **Appointment Booking** - Schedule appointments with preferred doctors 
 - **Medical Records Access** - View complete medical history and records
 - **Appointment Management** - Track and manage upcoming appointments
 - **Rating System** - Rate doctors and provide feedback after appointments
