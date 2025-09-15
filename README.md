@@ -4,7 +4,7 @@ A comprehensive web-based doctor appointment booking system that facilitates app
 
 ## 🏥 Project Overview 
 
-DocReserve is a full-stack web application designed to streamline hospital operations by providing separate interfaces for patients, doctors, hospital administrators, and super administrators. The system enables efficient appointment management, medical record keeping, and hospital resource management.
+DocReserve is a full-stack web application designed to streamline hospital operations by providing separate interfaces for patients, doctors, hospital administrators, and super administrators. The system enables efficient appointment management, medical record keeping, and hospital resource management. 
  
 ## ✨ Key Features
 
